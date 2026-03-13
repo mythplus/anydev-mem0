@@ -1,30 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { SaveIcon, RotateCcw } from "lucide-react"
-import { FormView } from "@/components/form-view"
-import { JsonEditor } from "@/components/json-editor"
-import { useConfig } from "@/hooks/useConfig"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/store"
-import { useToast } from "@/components/ui/use-toast"
+import { FormView } from "@/components/form-view";
+import { JsonEditor } from "@/components/json-editor";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { useConfig } from "@/hooks/useConfig";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Locale } from "@/lib/i18n";
+import { RootState } from "@/store/store";
+import { RotateCcw, SaveIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function SettingsPage() {
   const { toast } = useToast()
+  const { t, locale, setLocale } = useLanguage()
   const configState = useSelector((state: RootState) => state.config)
   const [settings, setSettings] = useState({
     openmemory: configState.openmemory || {
@@ -42,8 +53,8 @@ export default function SettingsPage() {
         await fetchConfig()
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to load configuration",
+          title: t("settings.error"),
+          description: t("settings.loadError"),
           variant: "destructive",
         })
       }
@@ -68,13 +79,13 @@ export default function SettingsPage() {
         mem0: settings.mem0 
       })
       toast({
-        title: "Settings saved",
-        description: "Your configuration has been updated successfully.",
+        title: t("settings.saved"),
+        description: t("settings.savedDesc"),
       })
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save configuration",
+        title: t("settings.error"),
+        description: t("settings.saveError"),
         variant: "destructive",
       })
     }
@@ -84,14 +95,14 @@ export default function SettingsPage() {
     try {
       await resetConfig()
       toast({
-        title: "Settings reset",
-        description: "Configuration has been reset to default values.",
+        title: t("settings.resetDone"),
+        description: t("settings.resetDoneDesc"),
       })
       await fetchConfig()
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to reset configuration",
+        title: t("settings.error"),
+        description: t("settings.resetError"),
         variant: "destructive",
       })
     }
@@ -102,29 +113,28 @@ export default function SettingsPage() {
       <div className="container mx-auto py-10 max-w-4xl">
         <div className="flex justify-between items-center mb-8">
           <div className="animate-fade-slide-down">
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground mt-1">Manage your OpenMemory and Mem0 configuration</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t("settings.title")}</h1>
+            <p className="text-muted-foreground mt-1">{t("settings.description")}</p>
           </div>
           <div className="flex space-x-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="border-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-zinc-50 animate-fade-slide-down" disabled={isLoading}>
                   <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset Defaults
+                  {t("settings.resetDefaults")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Reset Configuration?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("settings.resetConfirm")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will reset all settings to the system defaults. Any custom configuration will be lost.
-                    API keys will be set to use environment variables.
+                    {t("settings.resetDescription")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("settings.cancel")}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
-                    Reset
+                    {t("settings.reset")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -132,15 +142,37 @@ export default function SettingsPage() {
             
             <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 animate-fade-slide-down" disabled={isLoading}>
               <SaveIcon className="mr-2 h-4 w-4" />
-              {isLoading ? "Saving..." : "Save Configuration"}
+              {isLoading ? t("settings.saving") : t("settings.saveConfig")}
             </Button>
           </div>
         </div>
 
+        {/* 语言设置卡片 */}
+        <Card className="mb-8 animate-fade-slide-down">
+          <CardHeader>
+            <CardTitle>{t("settings.language")}</CardTitle>
+            <CardDescription>{t("settings.languageDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="language-select">{t("settings.languageLabel")}</Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as Locale)}>
+                <SelectTrigger id="language-select" className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="zh">中文</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
         <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "form" | "json")} className="w-full animate-fade-slide-down delay-1">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="form">Form View</TabsTrigger>
-            <TabsTrigger value="json">JSON Editor</TabsTrigger>
+            <TabsTrigger value="form">{t("settings.formView")}</TabsTrigger>
+            <TabsTrigger value="json">{t("settings.jsonEditor")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="form">
@@ -150,8 +182,8 @@ export default function SettingsPage() {
           <TabsContent value="json">
             <Card>
               <CardHeader>
-                <CardTitle>JSON Configuration</CardTitle>
-                <CardDescription>Edit the entire configuration directly as JSON</CardDescription>
+                <CardTitle>{t("settings.jsonConfig")}</CardTitle>
+                <CardDescription>{t("settings.jsonDescription")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <JsonEditor value={settings} onChange={setSettings} />

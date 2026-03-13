@@ -1,6 +1,9 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/LanguageContext";
 import "@/styles/notfound.scss";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 interface NotFoundProps {
   statusCode?: number;
@@ -22,6 +25,7 @@ export default function NotFound({
   title,
 }: NotFoundProps) {
   const potentialStatusCode = getStatusCode(message);
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col items-center justify-center h-[calc(100vh-100px)]">
@@ -45,7 +49,7 @@ export default function NotFound({
           variant="outline"
           className="bg-primary text-white hover:bg-primary/80"
         >
-          <Link href="/">Go Home</Link>
+          <Link href="/">{t("notFound.goHome")}</Link>
         </Button>
       </div>
     </div>

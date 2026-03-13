@@ -52,7 +52,7 @@ user_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("user_id")
 client_name_var: contextvars.ContextVar[str] = contextvars.ContextVar("client_name")
 
 # Create a router for MCP endpoints
-mcp_router = APIRouter(prefix="/mcp")
+mcp_router = APIRouter(prefix="/mcp", tags=["MCP服务 MCP"])
 
 # Initialize SSE transport
 sse = SseServerTransport("/mcp/messages/")
@@ -121,7 +121,7 @@ async def add_memories(text: str) -> str:
                     elif result['event'] == 'DELETE':
                         if memory:
                             memory.state = MemoryState.deleted
-                            memory.deleted_at = datetime.datetime.now(datetime.UTC)
+                            memory.deleted_at = datetime.datetime.now(datetime.timezone.utc)
                             # Create history entry
                             history = MemoryStatusHistory(
                                 memory_id=memory_id,
@@ -327,7 +327,7 @@ async def delete_memories(memory_ids: list[str]) -> str:
                     logging.warning(f"Failed to delete memory {memory_id} from vector store: {delete_error}")
 
             # Update each memory's state and create history entries
-            now = datetime.datetime.now(datetime.UTC)
+            now = datetime.datetime.now(datetime.timezone.utc)
             for memory_id in ids_to_delete:
                 memory = db.query(Memory).filter(Memory.id == memory_id).first()
                 if memory:
@@ -393,7 +393,7 @@ async def delete_all_memories() -> str:
                     logging.warning(f"Failed to delete memory {memory_id} from vector store: {delete_error}")
 
             # Update each memory's state and create history entries
-            now = datetime.datetime.now(datetime.UTC)
+            now = datetime.datetime.now(datetime.timezone.utc)
             for memory_id in accessible_memory_ids:
                 memory = db.query(Memory).filter(Memory.id == memory_id).first()
                 # Update memory state
@@ -427,7 +427,7 @@ async def delete_all_memories() -> str:
         return f"Error deleting memories: {e}"
 
 
-@mcp_router.get("/{client_name}/sse/{user_id}")
+@mcp_router.get("/{client_name}/sse/{user_id}", summary="SSE连接", description="为指定用户和客户端建立SSE（Server-Sent Events）长连接，用于实时消息推送")
 async def handle_sse(request: Request):
     """Handle SSE connections for a specific user and client"""
     # Extract user_id and client_name from path parameters
@@ -454,12 +454,12 @@ async def handle_sse(request: Request):
         client_name_var.reset(client_token)
 
 
-@mcp_router.post("/messages/")
+@mcp_router.post("/messages/", summary="处理消息（通用）", description="通用消息处理接口，接收并转发MCP协议消息")
 async def handle_get_message(request: Request):
     return await handle_post_message(request)
 
 
-@mcp_router.post("/{client_name}/sse/{user_id}/messages/")
+@mcp_router.post("/{client_name}/sse/{user_id}/messages/", summary="发送消息（指定用户）", description="向指定用户和客户端的SSE连接发送MCP协议消息")
 async def handle_post_message(request: Request):
     return await handle_post_message(request)
 

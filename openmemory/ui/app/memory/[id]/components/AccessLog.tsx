@@ -1,10 +1,11 @@
+import { constants } from "@/components/shared/source-app";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { RootState } from "@/store/store";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { constants } from "@/components/shared/source-app";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AccessLogEntry {
   id: string;
@@ -22,6 +23,7 @@ export function AccessLog({ memoryId }: AccessLogProps) {
     (state: RootState) => state.memories.accessLogs
   );
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const loadAccessLogs = async () => {
@@ -40,7 +42,7 @@ export function AccessLog({ memoryId }: AccessLogProps) {
   if (isLoading) {
     return (
       <div className="w-full max-w-md mx-auto rounded-3xl overflow-hidden bg-[#1c1c1c] text-white p-6">
-        <p className="text-center text-zinc-500">Loading access logs...</p>
+        <p className="text-center text-zinc-500">{t("memoryDetail.loadingAccessLogs")}</p>
       </div>
     );
   }
@@ -48,7 +50,7 @@ export function AccessLog({ memoryId }: AccessLogProps) {
   return (
     <div className="w-full max-w-md mx-auto rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 text-white pb-1">
       <div className="px-6 py-4 flex justify-between items-center bg-zinc-800 border-b border-zinc-800">
-        <h2 className="font-semibold">Access Log</h2>
+        <h2 className="font-semibold">{t("memoryDetail.accessLog")}</h2>
         {/* <button className="px-3 py-1 text-sm rounded-lg border border-[#ff5533] text-[#ff5533] flex items-center gap-2 hover:bg-[#ff5533]/10 transition-colors">
           <PauseIcon size={18} />
           <span>Pause Access</span>
@@ -59,7 +61,7 @@ export function AccessLog({ memoryId }: AccessLogProps) {
         {accessEntries.length === 0 && (
           <div className="w-full max-w-md mx-auto rounded-3xl overflow-hidden min-h-[110px] flex items-center justify-center text-white p-6">
             <p className="text-center text-zinc-500">
-              No access logs available
+              {t("memoryDetail.noAccessLogs")}
             </p>
           </div>
         )}

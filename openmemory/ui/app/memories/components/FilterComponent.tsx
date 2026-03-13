@@ -1,60 +1,65 @@
 "use client";
 
+import { ChevronDown, Filter, SortAsc, SortDesc } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Filter, X, ChevronDown, SortAsc, SortDesc } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
-import { RootState } from "@/store/store";
 import { useAppsApi } from "@/hooks/useAppsApi";
 import { useFiltersApi } from "@/hooks/useFiltersApi";
-import {
-  setSelectedApps,
-  setSelectedCategories,
-  clearFilters,
-} from "@/store/filtersSlice";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import {
+    clearFilters,
+    setSelectedApps,
+    setSelectedCategories,
+} from "@/store/filtersSlice";
+import { RootState } from "@/store/store";
 
-const columns = [
-  {
-    label: "Memory",
-    value: "memory",
-  },
-  {
-    label: "App Name",
-    value: "app_name",
-  },
-  {
-    label: "Created On",
-    value: "created_at",
-  },
-];
+function getColumns(t: (key: string) => string) {
+  return [
+    {
+      label: t("filter.columnMemory"),
+      value: "memory",
+    },
+    {
+      label: t("filter.columnAppName"),
+      value: "app_name",
+    },
+    {
+      label: t("filter.columnCreatedOn"),
+      value: "created_at",
+    },
+  ];
+}
 
 export default function FilterComponent() {
   const dispatch = useDispatch();
   const { fetchApps } = useAppsApi();
   const { fetchCategories, updateSort } = useFiltersApi();
   const { fetchMemories } = useMemoriesApi();
+  const { t } = useLanguage();
+  const columns = getColumns(t);
   const [isOpen, setIsOpen] = useState(false);
   const [tempSelectedApps, setTempSelectedApps] = useState<string[]>([]);
   const [tempSelectedCategories, setTempSelectedCategories] = useState<
@@ -208,7 +213,7 @@ export default function FilterComponent() {
             <Filter
               className={`h-4 w-4 ${hasActiveFilters ? "text-primary" : ""}`}
             />
-            Filter
+            {t("filter.button")}
             {hasActiveFilters && (
               <Badge className="ml-2 bg-primary hover:bg-primary/80 text-xs">
                 {filters.selectedApps.length +
@@ -221,7 +226,7 @@ export default function FilterComponent() {
         <DialogContent className="sm:max-w-[425px] bg-zinc-900 border-zinc-800 text-zinc-100">
           <DialogHeader>
             <DialogTitle className="text-zinc-100 flex justify-between items-center">
-              <span>Filters</span>
+              <span>{t("filter.title")}</span>
             </DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="apps" className="w-full">
@@ -230,19 +235,19 @@ export default function FilterComponent() {
                 value="apps"
                 className="data-[state=active]:bg-zinc-700"
               >
-                Apps
+                {t("filter.apps")}
               </TabsTrigger>
               <TabsTrigger
                 value="categories"
                 className="data-[state=active]:bg-zinc-700"
               >
-                Categories
+                {t("filter.categories")}
               </TabsTrigger>
               <TabsTrigger
                 value="archived"
                 className="data-[state=active]:bg-zinc-700"
               >
-                Archived
+                {t("filter.archivedTab")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="apps" className="mt-4">
@@ -262,7 +267,7 @@ export default function FilterComponent() {
                     htmlFor="select-all-apps"
                     className="text-sm font-normal text-zinc-300 cursor-pointer"
                   >
-                    Select All
+                    {t("filter.selectAll")}
                   </Label>
                 </div>
                 {apps.map((app) => (
@@ -301,7 +306,7 @@ export default function FilterComponent() {
                     htmlFor="select-all-categories"
                     className="text-sm font-normal text-zinc-300 cursor-pointer"
                   >
-                    Select All
+                    {t("filter.selectAll")}
                   </Label>
                 </div>
                 {categories.map((category) => (
@@ -342,7 +347,7 @@ export default function FilterComponent() {
                     htmlFor="show-archived"
                     className="text-sm font-normal text-zinc-300 cursor-pointer"
                   >
-                    Show Archived Memories
+                    {t("filter.showArchived")}
                   </Label>
                 </div>
               </div>
@@ -355,7 +360,7 @@ export default function FilterComponent() {
                 onClick={handleClearFilters}
                 className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
               >
-                Clear All
+                {t("filter.clearAll")}
               </Button>
             )}
             {/* Apply filters button */}
@@ -363,7 +368,7 @@ export default function FilterComponent() {
               onClick={handleApplyFilters}
               className="bg-primary hover:bg-primary/80 text-white"
             >
-              Apply Filters
+              {t("filter.apply")}
             </Button>
           </div>
         </DialogContent>
@@ -380,12 +385,12 @@ export default function FilterComponent() {
             ) : (
               <SortDesc className="h-4 w-4" />
             )}
-            Sort: {columns.find((c) => c.value === filters.sortColumn)?.label}
+            {t("filter.sort")}: {columns.find((c) => c.value === filters.sortColumn)?.label}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100">
-          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("filter.sortBy")}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-800" />
           <DropdownMenuGroup>
             {columns.map((column) => (

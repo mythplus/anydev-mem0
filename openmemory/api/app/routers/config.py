@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/api/v1/config", tags=["config"])
+router = APIRouter(prefix="/api/v1/config", tags=["配置管理 Config"])
 
 class LLMConfig(BaseModel):
     model: str = Field(..., description="LLM model name")
@@ -132,13 +132,13 @@ def save_config_to_db(db: Session, config: Dict[str, Any], key: str = "main"):
     db.refresh(db_config)
     return db_config.value
 
-@router.get("/", response_model=ConfigSchema)
+@router.get("/", response_model=ConfigSchema, summary="获取当前配置", description="获取当前系统的完整配置信息，包括LLM、Embedder、向量存储等配置")
 async def get_configuration(db: Session = Depends(get_db)):
     """Get the current configuration."""
     config = get_config_from_db(db)
     return config
 
-@router.put("/", response_model=ConfigSchema)
+@router.put("/", response_model=ConfigSchema, summary="更新完整配置", description="更新系统的完整配置，包括OpenMemory和Mem0的所有设置")
 async def update_configuration(config: ConfigSchema, db: Session = Depends(get_db)):
     """Update the configuration."""
     current_config = get_config_from_db(db)
@@ -156,7 +156,7 @@ async def update_configuration(config: ConfigSchema, db: Session = Depends(get_d
     updated_config["mem0"] = config.mem0.dict(exclude_none=True)
     
 
-@router.patch("/", response_model=ConfigSchema)
+@router.patch("/", response_model=ConfigSchema, summary="部分更新配置", description="局部更新配置，仅修改传入的字段，未传入的字段保持不变")
 async def patch_configuration(config_update: ConfigSchema, db: Session = Depends(get_db)):
     """Update parts of the configuration."""
     current_config = get_config_from_db(db)
@@ -177,7 +177,7 @@ async def patch_configuration(config_update: ConfigSchema, db: Session = Depends
     return updated_config
 
 
-@router.post("/reset", response_model=ConfigSchema)
+@router.post("/reset", response_model=ConfigSchema, summary="重置配置", description="将所有配置重置为默认值")
 async def reset_configuration(db: Session = Depends(get_db)):
     """Reset the configuration to default values."""
     try:
@@ -194,14 +194,14 @@ async def reset_configuration(db: Session = Depends(get_db)):
             detail=f"Failed to reset configuration: {str(e)}"
         )
 
-@router.get("/mem0/llm", response_model=LLMProvider)
+@router.get("/mem0/llm", response_model=LLMProvider, summary="获取LLM配置", description="获取当前的LLM大语言模型配置")
 async def get_llm_configuration(db: Session = Depends(get_db)):
     """Get only the LLM configuration."""
     config = get_config_from_db(db)
     llm_config = config.get("mem0", {}).get("llm", {})
     return llm_config
 
-@router.put("/mem0/llm", response_model=LLMProvider)
+@router.put("/mem0/llm", response_model=LLMProvider, summary="更新LLM配置", description="更新LLM大语言模型配置，包括模型名称、温度、最大token数等")
 async def update_llm_configuration(llm_config: LLMProvider, db: Session = Depends(get_db)):
     """Update only the LLM configuration."""
     current_config = get_config_from_db(db)
@@ -218,14 +218,14 @@ async def update_llm_configuration(llm_config: LLMProvider, db: Session = Depend
     reset_memory_client()
     return current_config["mem0"]["llm"]
 
-@router.get("/mem0/embedder", response_model=EmbedderProvider)
+@router.get("/mem0/embedder", response_model=EmbedderProvider, summary="获取Embedder配置", description="获取当前的嵌入模型配置")
 async def get_embedder_configuration(db: Session = Depends(get_db)):
     """Get only the Embedder configuration."""
     config = get_config_from_db(db)
     embedder_config = config.get("mem0", {}).get("embedder", {})
     return embedder_config
 
-@router.put("/mem0/embedder", response_model=EmbedderProvider)
+@router.put("/mem0/embedder", response_model=EmbedderProvider, summary="更新Embedder配置", description="更新嵌入模型配置，包括模型名称、API密钥等")
 async def update_embedder_configuration(embedder_config: EmbedderProvider, db: Session = Depends(get_db)):
     """Update only the Embedder configuration."""
     current_config = get_config_from_db(db)
@@ -242,14 +242,14 @@ async def update_embedder_configuration(embedder_config: EmbedderProvider, db: S
     reset_memory_client()
     return current_config["mem0"]["embedder"]
 
-@router.get("/mem0/vector_store", response_model=Optional[VectorStoreProvider])
+@router.get("/mem0/vector_store", response_model=Optional[VectorStoreProvider], summary="获取向量存储配置", description="获取当前的向量存储配置")
 async def get_vector_store_configuration(db: Session = Depends(get_db)):
     """Get only the Vector Store configuration."""
     config = get_config_from_db(db)
     vector_store_config = config.get("mem0", {}).get("vector_store", None)
     return vector_store_config
 
-@router.put("/mem0/vector_store", response_model=VectorStoreProvider)
+@router.put("/mem0/vector_store", response_model=VectorStoreProvider, summary="更新向量存储配置", description="更新向量存储配置，支持多种向量数据库")
 async def update_vector_store_configuration(vector_store_config: VectorStoreProvider, db: Session = Depends(get_db)):
     """Update only the Vector Store configuration."""
     current_config = get_config_from_db(db)
@@ -266,14 +266,14 @@ async def update_vector_store_configuration(vector_store_config: VectorStoreProv
     reset_memory_client()
     return current_config["mem0"]["vector_store"]
 
-@router.get("/openmemory", response_model=OpenMemoryConfig)
+@router.get("/openmemory", response_model=OpenMemoryConfig, summary="获取OpenMemory配置", description="获取OpenMemory平台的专属配置，包括自定义指令等")
 async def get_openmemory_configuration(db: Session = Depends(get_db)):
     """Get only the OpenMemory configuration."""
     config = get_config_from_db(db)
     openmemory_config = config.get("openmemory", {})
     return openmemory_config
 
-@router.put("/openmemory", response_model=OpenMemoryConfig)
+@router.put("/openmemory", response_model=OpenMemoryConfig, summary="更新OpenMemory配置", description="更新OpenMemory平台的专属配置")
 async def update_openmemory_configuration(openmemory_config: OpenMemoryConfig, db: Session = Depends(get_db)):
     """Update only the OpenMemory configuration."""
     current_config = get_config_from_db(db)

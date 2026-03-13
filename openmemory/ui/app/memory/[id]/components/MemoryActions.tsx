@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Archive, Trash, Pause, Play, ChevronDown } from "lucide-react";
-import { useUI } from "@/hooks/useUI";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useUI } from "@/hooks/useUI";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Archive, ChevronDown, Pause, Pencil, Play } from "lucide-react";
 
 interface MemoryActionsProps {
   memoryId: string;
@@ -24,6 +25,7 @@ export function MemoryActions({
 }: MemoryActionsProps) {
   const { handleOpenUpdateMemoryDialog } = useUI();
   const { updateMemoryState, isLoading } = useMemoriesApi();
+  const { t } = useLanguage();
 
   const handleEdit = () => {
     handleOpenUpdateMemoryDialog(memoryId, memoryContent);
@@ -36,11 +38,11 @@ export function MemoryActions({
   const getStateLabel = () => {
     switch (memoryState) {
       case "archived":
-        return "Archived";
+        return t("state.archived");
       case "paused":
-        return "Paused";
+        return t("state.paused");
       default:
-        return "Active";
+        return t("state.active");
     }
   };
 
@@ -70,7 +72,7 @@ export function MemoryActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40 bg-zinc-900 border-zinc-800 text-zinc-100">
-          <DropdownMenuLabel>Change State</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("memoryDetail.changeState")}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-800" />
           <DropdownMenuItem
             onClick={() => handleStateChange("active")}
@@ -78,7 +80,7 @@ export function MemoryActions({
             disabled={memoryState === "active"}
           >
             <Play className="h-3 w-3 mr-2" />
-            <span className="font-semibold">Active</span>
+            <span className="font-semibold">{t("memoryDetail.active")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => handleStateChange("paused")}
@@ -86,7 +88,7 @@ export function MemoryActions({
             disabled={memoryState === "paused"}
           >
             <Pause className="h-3 w-3 mr-2" />
-            <span className="font-semibold">Pause</span>
+            <span className="font-semibold">{t("memoryDetail.pause")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => handleStateChange("archived")}
@@ -94,7 +96,7 @@ export function MemoryActions({
             disabled={memoryState === "archived"}
           >
             <Archive className="h-3 w-3 mr-2" />
-            <span className="font-semibold">Archive</span>
+            <span className="font-semibold">{t("memoryDetail.archive")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -107,7 +109,7 @@ export function MemoryActions({
         className="shadow-md bg-zinc-900 border border-zinc-700/50 hover:bg-zinc-950 text-zinc-400"
       >
         <Pencil className="h-3 w-3 -mr-1" />
-        <span className="font-semibold">Edit</span>
+        <span className="font-semibold">{t("table.edit")}</span>
       </Button>
     </div>
   );

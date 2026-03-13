@@ -1,10 +1,11 @@
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface PageSizeSelectorProps {
   pageSize: number;
@@ -16,10 +17,11 @@ export function PageSizeSelector({
   onPageSizeChange,
 }: PageSizeSelectorProps) {
   const pageSizeOptions = [10, 20, 50, 100];
+  const { t } = useLanguage();
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-zinc-500">Show</span>
+      <span className="text-sm text-zinc-500">{t("memories.show")}</span>
       <Select
         value={pageSize.toString()}
         onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -35,7 +37,7 @@ export function PageSizeSelector({
           ))}
         </SelectContent>
       </Select>
-      <span className="text-sm text-zinc-500">items</span>
+      <span className="text-sm text-zinc-500">{t("memories.items")}</span>
     </div>
   );
 }

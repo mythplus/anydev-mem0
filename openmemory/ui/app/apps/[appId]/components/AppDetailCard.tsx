@@ -1,13 +1,14 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PauseIcon, Loader2, PlayIcon } from "lucide-react";
-import { useAppsApi } from "@/hooks/useAppsApi";
-import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
-import { setAppDetails } from "@/store/appsSlice";
-import { BiEdit } from "react-icons/bi";
 import { constants } from "@/components/shared/source-app";
+import { Button } from "@/components/ui/button";
+import { useAppsApi } from "@/hooks/useAppsApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { setAppDetails } from "@/store/appsSlice";
 import { RootState } from "@/store/store";
+import { Loader2, PauseIcon, PlayIcon } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { BiEdit } from "react-icons/bi";
+import { useDispatch, useSelector } from "react-redux";
 
 const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -23,6 +24,7 @@ const AppDetailCard = ({
   const { updateAppDetails } = useAppsApi();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const { t } = useLanguage();
   const apps = useSelector((state: RootState) => state.apps.apps);
   const currentApp = apps.find((app: any) => app.id === appId);
   const appConfig = currentApp
@@ -46,8 +48,8 @@ const AppDetailCard = ({
   };
 
   const buttonText = selectedApp.details.is_active
-    ? "Pause Access"
-    : "Unpause Access";
+    ? t("appDetail.pauseAccess")
+    : t("appDetail.unpauseAccess");
 
   return (
     <div>
@@ -76,7 +78,7 @@ const AppDetailCard = ({
 
         <div className="space-y-4 p-3">
           <div>
-            <p className="text-xs text-zinc-400">Access Status</p>
+            <p className="text-xs text-zinc-400">{t("appDetail.accessStatus")}</p>
             <p
               className={`font-medium ${
                 selectedApp.details.is_active
@@ -91,21 +93,21 @@ const AppDetailCard = ({
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">Total Memories Created</p>
+            <p className="text-xs text-zinc-400">{t("appDetail.totalCreated")}</p>
             <p className="font-medium">
-              {selectedApp.details.total_memories_created} Memories
+              {selectedApp.details.total_memories_created} {t("stats.memories")}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">Total Memories Accessed</p>
+            <p className="text-xs text-zinc-400">{t("appDetail.totalAccessed")}</p>
             <p className="font-medium">
-              {selectedApp.details.total_memories_accessed} Memories
+              {selectedApp.details.total_memories_accessed} {t("stats.memories")}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">First Accessed</p>
+            <p className="text-xs text-zinc-400">{t("appDetail.firstAccessed")}</p>
             <p className="font-medium">
               {selectedApp.details.first_accessed
                 ? new Date(
@@ -117,12 +119,12 @@ const AppDetailCard = ({
                     hour: "numeric",
                     minute: "numeric",
                   })
-                : "Never"}
+                : t("appDetail.never")}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">Last Accessed</p>
+            <p className="text-xs text-zinc-400">{t("appDetail.lastAccessed")}</p>
             <p className="font-medium">
               {selectedApp.details.last_accessed
                 ? new Date(
@@ -134,7 +136,7 @@ const AppDetailCard = ({
                     hour: "numeric",
                     minute: "numeric",
                   })
-                : "Never"}
+                : t("appDetail.never")}
             </p>
           </div>
 

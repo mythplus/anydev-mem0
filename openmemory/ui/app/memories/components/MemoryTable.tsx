@@ -1,58 +1,60 @@
-import {
-  Edit,
-  MoreHorizontal,
-  Trash2,
-  Pause,
-  Archive,
-  Play,
-} from "lucide-react";
+import Categories from "@/components/shared/categories";
+import SourceApp from "@/components/shared/source-app";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { useDispatch, useSelector } from "react-redux";
+import { useUI } from "@/hooks/useUI";
+import { formatDate } from "@/lib/helpers";
+import { useLanguage } from "@/lib/LanguageContext";
+import {
+    clearSelection,
+    deselectMemory,
+    selectAllMemories,
+    selectMemory,
+} from "@/store/memoriesSlice";
 import { RootState } from "@/store/store";
 import {
-  selectMemory,
-  deselectMemory,
-  selectAllMemories,
-  clearSelection,
-} from "@/store/memoriesSlice";
-import SourceApp from "@/components/shared/source-app";
+    Archive,
+    Edit,
+    MoreHorizontal,
+    Pause,
+    Play,
+    Trash2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CiCalendar } from "react-icons/ci";
+import { GoPackage } from "react-icons/go";
 import { HiMiniRectangleStack } from "react-icons/hi2";
 import { PiSwatches } from "react-icons/pi";
-import { GoPackage } from "react-icons/go";
-import { CiCalendar } from "react-icons/ci";
-import { useRouter } from "next/navigation";
-import Categories from "@/components/shared/categories";
-import { useUI } from "@/hooks/useUI";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { formatDate } from "@/lib/helpers";
+import { useDispatch, useSelector } from "react-redux";
 
 export function MemoryTable() {
   const { toast } = useToast();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useLanguage();
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
@@ -128,25 +130,25 @@ export function MemoryTable() {
             <TableHead className="border-zinc-700">
               <div className="flex items-center min-w-[600px]">
                 <HiMiniRectangleStack className="mr-1" />
-                Memory
+                {t("table.memory")}
               </div>
             </TableHead>
             <TableHead className="border-zinc-700">
               <div className="flex items-center">
                 <PiSwatches className="mr-1" size={15} />
-                Categories
+                {t("table.categories")}
               </div>
             </TableHead>
             <TableHead className="w-[140px] border-zinc-700">
               <div className="flex items-center">
                 <GoPackage className="mr-1" />
-                Source App
+                {t("table.sourceApp")}
               </div>
             </TableHead>
             <TableHead className="w-[140px] border-zinc-700">
               <div className="flex items-center w-full justify-center">
                 <CiCalendar className="mr-1" size={16} />
-                Created On
+                {t("table.createdOn")}
               </div>
             </TableHead>
             <TableHead className="text-right border-zinc-700 flex justify-center">
@@ -194,11 +196,11 @@ export function MemoryTable() {
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
-                          This memory is{" "}
+                          {t("table.memoryIsPaused")}
                           <span className="font-bold">
-                            {memory.state === "paused" ? "paused" : "archived"}
-                          </span>{" "}
-                          and <span className="font-bold">disabled</span>.
+                            {memory.state === "paused" ? t("table.paused") : t("table.archived")}
+                          </span>
+                          {t("table.andDisabled")}<span className="font-bold">{t("table.disabled")}</span>
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -250,13 +252,13 @@ export function MemoryTable() {
                     >
                       {memory?.state === "active" ? (
                         <>
-                          <Pause className="mr-2 h-4 w-4" />
-                          Pause
+                      <Pause className="mr-2 h-4 w-4" />
+                          {t("table.pause")}
                         </>
                       ) : (
                         <>
                           <Play className="mr-2 h-4 w-4" />
-                          Resume
+                          {t("table.resume")}
                         </>
                       )}
                     </DropdownMenuItem>
@@ -270,9 +272,9 @@ export function MemoryTable() {
                     >
                       <Archive className="mr-2 h-4 w-4" />
                       {memory?.state !== "archived" ? (
-                        <>Archive</>
+                        <>{t("table.archive")}</>
                       ) : (
-                        <>Unarchive</>
+                        <>{t("table.unarchive")}</>
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -280,7 +282,7 @@ export function MemoryTable() {
                       onClick={() => handleEditMemory(memory.id, memory.memory)}
                     >
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      {t("table.edit")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -288,7 +290,7 @@ export function MemoryTable() {
                       onClick={() => handleDeleteMemory(memory.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      {t("table.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

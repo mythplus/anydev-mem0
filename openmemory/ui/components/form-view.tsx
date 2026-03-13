@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { Eye, EyeOff, Download, Upload } from "lucide-react"
+import { useLanguage } from "@/lib/LanguageContext"
+import { RootState } from "@/store/store"
+import { Download, Eye, EyeOff, Upload } from "lucide-react"
+import { useState as useReactState, useRef, useState } from "react"
+import { useSelector } from "react-redux"
+import { Button } from "./ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Slider } from "./ui/slider"
 import { Switch } from "./ui/switch"
-import { Button } from "./ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Textarea } from "./ui/textarea"
-import { useRef, useState as useReactState } from "react"
-import { useSelector } from "react-redux"
-import { RootState } from "@/store/store"
 
 interface FormViewProps {
   settings: any
@@ -28,6 +28,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765"
   const userId = useSelector((state: RootState) => state.profile.userId)
+  const { t } = useLanguage()
 
   const handleOpenMemoryChange = (key: string, value: any) => {
     onChange({
@@ -138,21 +139,21 @@ export function FormView({ settings, onChange }: FormViewProps) {
       {/* OpenMemory Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>OpenMemory Settings</CardTitle>
-          <CardDescription>Configure your OpenMemory instance settings</CardDescription>
+          <CardTitle>{t("form.openMemorySettings")}</CardTitle>
+          <CardDescription>{t("form.openMemoryDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="custom-instructions">Custom Instructions</Label>
+            <Label htmlFor="custom-instructions">{t("form.customInstructions")}</Label>
             <Textarea
               id="custom-instructions"
-              placeholder="Enter custom instructions for memory management..."
+              placeholder={t("form.customInstructionsPlaceholder")}
               value={settings.openmemory?.custom_instructions || ""}
               onChange={(e) => handleOpenMemoryChange("custom_instructions", e.target.value)}
               className="min-h-[100px]"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Custom instructions that will be used to guide memory processing and fact extraction.
+              {t("form.customInstructionsDesc")}
             </p>
           </div>
         </CardContent>
@@ -161,18 +162,18 @@ export function FormView({ settings, onChange }: FormViewProps) {
       {/* LLM Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>LLM Settings</CardTitle>
-          <CardDescription>Configure your Large Language Model provider and settings</CardDescription>
+          <CardTitle>{t("form.llmSettings")}</CardTitle>
+          <CardDescription>{t("form.llmDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="llm-provider">LLM Provider</Label>
+            <Label htmlFor="llm-provider">{t("form.llmProvider")}</Label>
             <Select 
               value={settings.mem0?.llm?.provider || ""}
               onValueChange={handleLlmProviderChange}
             >
               <SelectTrigger id="llm-provider">
-                <SelectValue placeholder="Select a provider" />
+                <SelectValue placeholder={t("form.selectProvider")} />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(LLM_PROVIDERS).map(([provider, value]) => (
@@ -185,10 +186,10 @@ export function FormView({ settings, onChange }: FormViewProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="llm-model">Model</Label>
+            <Label htmlFor="llm-model">{t("form.model")}</Label>
             <Input
               id="llm-model"
-              placeholder="Enter model name"
+              placeholder={t("form.modelPlaceholder")}
               value={settings.mem0?.llm?.config?.model || ""}
               onChange={(e) => handleLlmConfigChange("model", e.target.value)}
             />
@@ -196,7 +197,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
 
           {isLlmOllama && (
             <div className="space-y-2">
-              <Label htmlFor="llm-ollama-url">Ollama Base URL</Label>
+              <Label htmlFor="llm-ollama-url">{t("form.ollamaBaseUrl")}</Label>
               <Input
                 id="llm-ollama-url"
                 placeholder="http://host.docker.internal:11434"
@@ -204,14 +205,14 @@ export function FormView({ settings, onChange }: FormViewProps) {
                 onChange={(e) => handleLlmConfigChange("ollama_base_url", e.target.value)}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Leave empty to use default: http://host.docker.internal:11434
+                {t("form.ollamaDesc")}
               </p>
             </div>
           )}
 
           {needsLlmApiKey && (
             <div className="space-y-2">
-              <Label htmlFor="llm-api-key">API Key</Label>
+              <Label htmlFor="llm-api-key">{t("form.apiKey")}</Label>
               <div className="relative">
                 <Input
                   id="llm-api-key"
@@ -231,21 +232,21 @@ export function FormView({ settings, onChange }: FormViewProps) {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Use "env:API_KEY" to load from environment variable, or enter directly
+                {t("form.apiKeyDesc")}
               </p>
             </div>
           )}
 
           <div className="flex items-center space-x-2 pt-2">
             <Switch id="llm-advanced-settings" checked={showLlmAdvanced} onCheckedChange={setShowLlmAdvanced} />
-            <Label htmlFor="llm-advanced-settings">Show advanced settings</Label>
+            <Label htmlFor="llm-advanced-settings">{t("form.showAdvanced")}</Label>
           </div>
 
           {showLlmAdvanced && (
             <div className="space-y-6 pt-2">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="temperature">Temperature: {settings.mem0?.llm?.config?.temperature}</Label>
+                  <Label htmlFor="temperature">{t("form.temperature")}: {settings.mem0?.llm?.config?.temperature}</Label>
                 </div>
                 <Slider
                   id="temperature"
@@ -258,7 +259,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="max-tokens">Max Tokens</Label>
+                <Label htmlFor="max-tokens">{t("form.maxTokens")}</Label>
                 <Input
                   id="max-tokens"
                   type="number"
@@ -275,18 +276,18 @@ export function FormView({ settings, onChange }: FormViewProps) {
       {/* Embedder Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Embedder Settings</CardTitle>
-          <CardDescription>Configure your Embedding Model provider and settings</CardDescription>
+          <CardTitle>{t("form.embedderSettings")}</CardTitle>
+          <CardDescription>{t("form.embedderDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="embedder-provider">Embedder Provider</Label>
+            <Label htmlFor="embedder-provider">{t("form.embedderProvider")}</Label>
             <Select 
               value={settings.mem0?.embedder?.provider || ""} 
               onValueChange={handleEmbedderProviderChange}
             >
               <SelectTrigger id="embedder-provider">
-                <SelectValue placeholder="Select a provider" />
+                <SelectValue placeholder={t("form.selectProvider")} />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(EMBEDDER_PROVIDERS).map(([provider, value]) => (
@@ -299,10 +300,10 @@ export function FormView({ settings, onChange }: FormViewProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="embedder-model">Model</Label>
+            <Label htmlFor="embedder-model">{t("form.model")}</Label>
             <Input
               id="embedder-model"
-              placeholder="Enter model name"
+              placeholder={t("form.modelPlaceholder")}
               value={settings.mem0?.embedder?.config?.model || ""}
               onChange={(e) => handleEmbedderConfigChange("model", e.target.value)}
             />
@@ -310,22 +311,22 @@ export function FormView({ settings, onChange }: FormViewProps) {
 
           {isEmbedderOllama && (
             <div className="space-y-2">
-              <Label htmlFor="embedder-ollama-url">Ollama Base URL</Label>
+              <Label htmlFor="embedder-ollama-url">{t("form.ollamaBaseUrl")}</Label>
               <Input
                 id="embedder-ollama-url"
-                placeholder="http://host.docker.internal:11434"
+                placeholder={t("form.ollamaPlaceholder")}
                 value={settings.mem0?.embedder?.config?.ollama_base_url || ""}
                 onChange={(e) => handleEmbedderConfigChange("ollama_base_url", e.target.value)}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Leave empty to use default: http://host.docker.internal:11434
+                {t("form.ollamaDesc")}
               </p>
             </div>
           )}
 
           {needsEmbedderApiKey && (
             <div className="space-y-2">
-              <Label htmlFor="embedder-api-key">API Key</Label>
+              <Label htmlFor="embedder-api-key">{t("form.apiKey")}</Label>
               <div className="relative">
                 <Input
                   id="embedder-api-key"
@@ -345,7 +346,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Use "env:API_KEY" to load from environment variable, or enter directly
+                {t("form.apiKeyDesc")}
               </p>
             </div>
           )}
@@ -355,14 +356,14 @@ export function FormView({ settings, onChange }: FormViewProps) {
       {/* Backup (Export / Import) */}
       <Card>
         <CardHeader>
-          <CardTitle>Backup</CardTitle>
-          <CardDescription>Export or import your memories</CardDescription>
+          <CardTitle>{t("form.backup")}</CardTitle>
+          <CardDescription>{t("form.backupDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Export Section */}
           <div className="p-4 border border-zinc-800 rounded-lg space-y-2">
-            <div className="text-sm font-medium">Export</div>
-            <p className="text-xs text-muted-foreground">Download a ZIP containing your memories.</p>
+            <div className="text-sm font-medium">{t("form.export")}</div>
+            <p className="text-xs text-muted-foreground">{t("form.exportDesc")}</p>
             <div>
               <Button
                 type="button"
@@ -390,15 +391,15 @@ export function FormView({ settings, onChange }: FormViewProps) {
                   }
                 }}
               >
-                <Download className="h-4 w-4 mr-2" /> Export Memories
+                <Download className="h-4 w-4 mr-2" /> {t("form.exportBtn")}
               </Button>
             </div>
           </div>
 
           {/* Import Section */}
           <div className="p-4 border border-zinc-800 rounded-lg space-y-2">
-            <div className="text-sm font-medium">Import</div>
-            <p className="text-xs text-muted-foreground">Upload a ZIP exported by OpenMemory. Default settings will be used.</p>
+            <div className="text-sm font-medium">{t("form.import")}</div>
+            <p className="text-xs text-muted-foreground">{t("form.importDesc")}</p>
             <div className="flex items-center gap-3 flex-wrap">
               <input
                 ref={fileInputRef}
@@ -418,10 +419,10 @@ export function FormView({ settings, onChange }: FormViewProps) {
                   if (fileInputRef.current) fileInputRef.current.click()
                 }}
               >
-                <Upload className="h-4 w-4 mr-2" /> Choose ZIP
+                <Upload className="h-4 w-4 mr-2" /> {t("form.chooseZip")}
               </Button>
               <span className="text-xs text-muted-foreground truncate max-w-[220px]">
-                {selectedImportFileName || "No file selected"}
+                {selectedImportFileName || t("form.noFile")}
               </span>
               <div className="ml-auto">
                 <Button
@@ -449,7 +450,7 @@ export function FormView({ settings, onChange }: FormViewProps) {
                     }
                   }}
                 >
-                  {isUploading ? "Uploading..." : "Import"}
+                  {isUploading ? t("form.uploading") : t("form.importBtn")}
                 </Button>
               </div>
             </div>

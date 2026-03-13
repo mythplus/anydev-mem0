@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { useAppsApi } from "@/hooks/useAppsApi";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MemoryCard } from "./components/MemoryCard";
-import AppDetailCard from "./components/AppDetailCard";
-import "@/styles/animation.css";
 import NotFound from "@/app/not-found";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAppsApi } from "@/hooks/useAppsApi";
+import { useLanguage } from "@/lib/LanguageContext";
 import { AppDetailCardSkeleton } from "@/skeleton/AppDetailCardSkeleton";
 import { MemoryCardSkeleton } from "@/skeleton/MemoryCardSkeleton";
+import { RootState } from "@/store/store";
+import "@/styles/animation.css";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import AppDetailCard from "./components/AppDetailCard";
+import { MemoryCard } from "./components/MemoryCard";
 
 export default function AppDetailsPage() {
   const params = useParams();
   const appId = params.appId as string;
   const [activeTab, setActiveTab] = useState("created");
+  const { t } = useLanguage();
 
   const {
     fetchAppDetails,
@@ -98,7 +100,7 @@ export default function AppDetailsPage() {
 
     if (memories.items.length === 0) {
       return (
-        <div className="text-zinc-400 text-center py-8">No memories found</div>
+        <div className="text-zinc-400 text-center py-8">{t("appDetail.noMemories")}</div>
       );
     }
 
@@ -140,7 +142,7 @@ export default function AppDetailsPage() {
     if (memories.items.length === 0) {
       return (
         <div className="text-zinc-400 text-center py-8">
-          No accessed memories found
+          {t("appDetail.noAccessedMemories")}
         </div>
       );
     }
@@ -181,7 +183,7 @@ export default function AppDetailsPage() {
                   activeTab === "created" ? "text-white" : "text-zinc-400"
                 }`}
               >
-                Created ({selectedApp.memories.created.total})
+                {t("appDetail.created")} ({selectedApp.memories.created.total})
               </TabsTrigger>
               <TabsTrigger
                 value="accessed"
@@ -189,7 +191,7 @@ export default function AppDetailsPage() {
                   activeTab === "accessed" ? "text-white" : "text-zinc-400"
                 }`}
               >
-                Accessed ({selectedApp.memories.accessed.total})
+                {t("appDetail.accessed")} ({selectedApp.memories.accessed.total})
               </TabsTrigger>
             </TabsList>
 

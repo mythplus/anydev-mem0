@@ -1,13 +1,15 @@
 "use client";
+import { useAppsApi } from "@/hooks/useAppsApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { AppCardSkeleton } from "@/skeleton/AppCardSkeleton";
+import { RootState } from "@/store/store";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { useAppsApi } from "@/hooks/useAppsApi";
 import { AppCard } from "./AppCard";
-import { AppCardSkeleton } from "@/skeleton/AppCardSkeleton";
 
 export function AppGrid() {
   const { fetchApps, isLoading } = useAppsApi();
+  const { t } = useLanguage();
   const apps = useSelector((state: RootState) => state.apps.apps);
   const filters = useSelector((state: RootState) => state.apps.filters);
 
@@ -33,7 +35,7 @@ export function AppGrid() {
   if (apps.length === 0) {
     return (
       <div className="text-center text-zinc-500 py-8">
-        No apps found matching your filters
+        {t("apps.noApps")}
       </div>
     );
   }
