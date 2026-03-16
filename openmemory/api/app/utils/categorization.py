@@ -18,8 +18,8 @@ ollama_client = OpenAI(
     api_key="ollama",  # Ollama 不需要真实的 API Key，但 OpenAI 客户端要求非空
 )
 
-# 从环境变量获取模型名称，默认使用 qwen3:8b
-CATEGORIZATION_MODEL = os.getenv("CATEGORIZATION_MODEL", "qwen3:8b")
+# 从环境变量获取模型名称，默认使用 qwen3:0.6b
+CATEGORIZATION_MODEL = os.getenv("CATEGORIZATION_MODEL", "qwen3:0.6b")
 
 
 class MemoryCategories(BaseModel):

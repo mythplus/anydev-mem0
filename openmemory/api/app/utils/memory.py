@@ -20,7 +20,7 @@ Example configuration that will be automatically adjusted:
     "llm": {
         "provider": "ollama",
         "config": {
-            "model": "qwen3:8b",
+"model": "qwen3:0.6b",
             "ollama_base_url": "http://localhost:11434"  # Auto-adjusted in Docker
         }
     }
@@ -250,7 +250,7 @@ def get_default_memory_config():
         "llm": {
             "provider": "ollama",
             "config": {
-                "model": "qwen3:8b",
+"model": "qwen3:0.6b",
                 "temperature": 0.1,
                 "max_tokens": 2000,
                 "ollama_base_url": ollama_base_url
