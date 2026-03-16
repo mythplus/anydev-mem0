@@ -4,6 +4,8 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { MemoryTableSkeleton } from "@/skeleton/MemoryTableSkeleton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { Category, Client } from "../../../components/types";
 import { CreateMemoryDialog } from "./CreateMemoryDialog";
 import { MemoryPagination } from "./MemoryPagination";
@@ -27,6 +29,9 @@ export function MemoriesSection() {
   );
   const [selectedClient, setSelectedClient] = useState<Client | "all">("all");
 
+  // 监听 Redux store 中的刷新触发器，当创建/删除/更新记忆后自动重新加载列表
+  const refreshTrigger = useSelector((state: RootState) => state.memories.refreshTrigger);
+
   useEffect(() => {
     const loadMemories = async () => {
       setIsLoading(true);
@@ -47,7 +52,7 @@ export function MemoriesSection() {
     };
 
     loadMemories();
-  }, [currentPage, itemsPerPage, fetchMemories, searchParams]);
+  }, [currentPage, itemsPerPage, fetchMemories, searchParams, refreshTrigger]);
 
   const setCurrentPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());

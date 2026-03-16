@@ -17,6 +17,8 @@ interface MemoriesState {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   selectedMemoryIds: string[];
+  // 刷新触发器：每次创建/删除/更新记忆后递增，通知列表组件重新加载
+  refreshTrigger: number;
 }
 
 const initialState: MemoriesState = {
@@ -27,6 +29,7 @@ const initialState: MemoriesState = {
   status: 'idle',
   error: null,
   selectedMemoryIds: [],
+  refreshTrigger: 0,
 };
 
 const memoriesSlice = createSlice({
@@ -79,6 +82,10 @@ const memoriesSlice = createSlice({
     setRelatedMemories: (state, action: PayloadAction<Memory[]>) => {
       state.relatedMemories = action.payload;
     },
+    // 触发列表刷新（跨组件通信）
+    triggerRefresh: (state) => {
+      state.refreshTrigger += 1;
+    },
   },
   // extraReducers section is removed as API calls are handled by the hook
 });
@@ -94,7 +101,8 @@ export const {
   clearSelection,
   setSelectedMemory,
   setAccessLogs,
-  setRelatedMemories
+  setRelatedMemories,
+  triggerRefresh
 } = memoriesSlice.actions;
 
 export default memoriesSlice.reducer; 

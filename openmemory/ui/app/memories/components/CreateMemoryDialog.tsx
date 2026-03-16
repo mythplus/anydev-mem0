@@ -20,22 +20,28 @@ import { GoPlus } from "react-icons/go";
 import { toast } from "sonner";
 
 export function CreateMemoryDialog() {
-  const { createMemory, isLoading, fetchMemories } = useMemoriesApi();
+  const { createMemory, isLoading } = useMemoriesApi();
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   const handleCreateMemory = async (text: string) => {
+    if (!text.trim()) {
+      toast.error(t("createMemory.emptyError") || "请输入记忆内容");
+      return;
+    }
     try {
       await createMemory(text);
-      toast.success("Memory created successfully");
-      // close the dialog
+      toast.success(t("createMemory.successToast") || "记忆创建成功");
+      // 清空输入框
+      if (textRef.current) {
+        textRef.current.value = "";
+      }
+      // 关闭对话框（createMemory 内部已经通过 Redux triggerRefresh 通知列表刷新）
       setOpen(false);
-      // refetch memories
-      await fetchMemories();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create memory");
+      toast.error(t("createMemory.errorToast") || "记忆创建失败");
     }
   };
 

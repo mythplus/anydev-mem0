@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Memory, Client, Category } from '@/components/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { setAccessLogs, setMemoriesSuccess, setSelectedMemory, setRelatedMemories } from '@/store/memoriesSlice';
+import { setAccessLogs, setMemoriesSuccess, setSelectedMemory, setRelatedMemories, triggerRefresh } from '@/store/memoriesSlice';
 
 // Define the new simplified memory type
 export interface SimpleMemory {
@@ -170,6 +170,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
    * POST /api/v1/memories/
    */
   const createMemory = async (text: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
     try {
       const memoryData = {
         user_id: user_id,
@@ -178,6 +180,9 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         app: "openmemory",
       }
       await axios.post<ApiMemoryItem>(`${URL}/api/v1/memories/`, memoryData);
+      setIsLoading(false);
+      // 触发更新信号，通知其他组件刷新
+      dispatch(triggerRefresh());
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to create memory';
       setError(errorMessage);

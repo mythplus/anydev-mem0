@@ -63,6 +63,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "createMemory.placeholder": "e.g., Lives in San Francisco",
     "createMemory.cancel": "Cancel",
     "createMemory.save": "Save Memory",
+    "createMemory.emptyError": "Please enter memory content",
+    "createMemory.successToast": "Memory created successfully",
+    "createMemory.errorToast": "Failed to create memory",
 
     // Update Memory Dialog
     "updateMemory.title": "Update Memory",
@@ -268,6 +271,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "createMemory.placeholder": "例如：住在旧金山",
     "createMemory.cancel": "取消",
     "createMemory.save": "保存记忆",
+    "createMemory.emptyError": "请输入记忆内容",
+    "createMemory.successToast": "记忆创建成功",
+    "createMemory.errorToast": "记忆创建失败",
 
     // 更新记忆对话框
     "updateMemory.title": "更新记忆",
