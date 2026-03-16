@@ -106,6 +106,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
 
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
 
+  /**
+   * 获取记忆列表（支持分页、搜索、过滤和排序）
+   * POST /api/v1/memories/filter
+   */
   const fetchMemories = useCallback(async (
     query?: string,
     page: number = 1,
@@ -161,6 +165,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   }, [user_id, dispatch]);
 
+  /**
+   * 创建新记忆
+   * POST /api/v1/memories/
+   */
   const createMemory = async (text: string): Promise<void> => {
     try {
       const memoryData = {
@@ -178,6 +186,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 批量删除记忆
+   * DELETE /api/v1/memories/
+   */
   const deleteMemories = async (memory_ids: string[]) => {
     try {
       await axios.delete(`${URL}/api/v1/memories/`, {
@@ -192,6 +204,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 根据 ID 获取单条记忆详情
+   * GET /api/v1/memories/:memoryId
+   */
   const fetchMemoryById = async (memoryId: string): Promise<void> => {
     if (memoryId === "") {
       return;
@@ -212,6 +228,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 获取记忆的访问日志
+   * GET /api/v1/memories/:memoryId/access-log
+   */
   const fetchAccessLogs = async (memoryId: string, page: number = 1, pageSize: number = 10): Promise<void> => {
     if (memoryId === "") {
       return;
@@ -232,6 +252,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 获取与指定记忆相关的记忆列表
+   * GET /api/v1/memories/:memoryId/related
+   */
   const fetchRelatedMemories = async (memoryId: string): Promise<void> => {
     if (memoryId === "") {
       return;
@@ -264,6 +288,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 更新记忆内容
+   * PUT /api/v1/memories/:memoryId
+   */
   const updateMemory = async (memoryId: string, content: string): Promise<void> => {
     if (memoryId === "") {
       return;
@@ -286,6 +314,10 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     }
   };
 
+  /**
+   * 批量更新记忆状态（暂停/激活/归档）
+   * POST /api/v1/memories/actions/pause
+   */
   const updateMemoryState = async (memoryIds: string[], state: string): Promise<void> => {
     if (memoryIds.length === 0) {
       return;

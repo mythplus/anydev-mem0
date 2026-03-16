@@ -34,6 +34,10 @@ export const useFiltersApi = (): UseFiltersApiReturn => {
 
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
 
+  /**
+   * 获取记忆分类列表
+   * GET /api/v1/memories/categories
+   */
   const fetchCategories = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     dispatch(setCategoriesLoading());
@@ -56,14 +60,17 @@ export const useFiltersApi = (): UseFiltersApiReturn => {
     }
   }, [dispatch, user_id]);
 
+  /** 更新当前选中的应用过滤条件（本地状态） */
   const updateApps = useCallback((apps: string[]) => {
     dispatch(setSelectedApps(apps));
   }, [dispatch]);
 
+  /** 更新当前选中的分类过滤条件（本地状态） */
   const updateCategories = useCallback((categories: string[]) => {
     dispatch(setSelectedCategories(categories));
   }, [dispatch]);
 
+  /** 更新排序状态（本地状态） */
   const updateSort = useCallback((column: string, direction: 'asc' | 'desc') => {
     dispatch(setSortingState({ column, direction }));
   }, [dispatch]);

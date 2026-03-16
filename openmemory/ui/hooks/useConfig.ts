@@ -32,6 +32,10 @@ export const useConfig = (): UseConfigApiReturn => {
   const dispatch = useDispatch<AppDispatch>();
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
   
+  /**
+   * 获取系统配置（LLM、Embedder 等）
+   * GET /api/v1/config
+   */
   const fetchConfig = async () => {
     setIsLoading(true);
     dispatch(setConfigLoading());
@@ -49,6 +53,10 @@ export const useConfig = (): UseConfigApiReturn => {
     }
   };
 
+  /**
+   * 保存完整系统配置
+   * PUT /api/v1/config
+   */
   const saveConfig = async (config: { openmemory?: OpenMemoryConfig; mem0: Mem0Config }) => {
     setIsLoading(true);
     setError(null);
@@ -67,6 +75,10 @@ export const useConfig = (): UseConfigApiReturn => {
     }
   };
 
+  /**
+   * 重置系统配置为默认值
+   * POST /api/v1/config/reset
+   */
   const resetConfig = async () => {
     setIsLoading(true);
     setError(null);
@@ -85,6 +97,10 @@ export const useConfig = (): UseConfigApiReturn => {
     }
   };
 
+  /**
+   * 单独保存 LLM（大语言模型）配置
+   * PUT /api/v1/config/mem0/llm
+   */
   const saveLLMConfig = async (llmConfig: LLMProvider) => {
     setIsLoading(true);
     setError(null);
@@ -102,6 +118,10 @@ export const useConfig = (): UseConfigApiReturn => {
     }
   };
 
+  /**
+   * 单独保存 Embedder（向量嵌入模型）配置
+   * PUT /api/v1/config/mem0/embedder
+   */
   const saveEmbedderConfig = async (embedderConfig: EmbedderProvider) => {
     setIsLoading(true);
     setError(null);

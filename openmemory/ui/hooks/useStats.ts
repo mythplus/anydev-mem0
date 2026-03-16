@@ -37,6 +37,10 @@ export const useStats = (): UseMemoriesApiReturn => {
 
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
 
+  /**
+   * 获取全局统计数据（总记忆数、总应用数、应用列表）
+   * GET /api/v1/stats
+   */
   const fetchStats = async () => {
     setIsLoading(true);
     setError(null);

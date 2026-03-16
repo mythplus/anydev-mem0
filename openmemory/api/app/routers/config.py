@@ -48,25 +48,27 @@ class ConfigSchema(BaseModel):
 
 def get_default_configuration():
     """Get the default configuration with sensible defaults for LLM and embedder."""
+    import os
+    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
     return {
         "openmemory": {
             "custom_instructions": None
         },
         "mem0": {
             "llm": {
-                "provider": "openai",
+                "provider": "ollama",
                 "config": {
-                    "model": "gpt-4o-mini",
+                    "model": "llama3.1:8b",
                     "temperature": 0.1,
                     "max_tokens": 2000,
-                    "api_key": "env:OPENAI_API_KEY"
+                    "ollama_base_url": ollama_base_url
                 }
             },
             "embedder": {
-                "provider": "openai",
+                "provider": "ollama",
                 "config": {
-                    "model": "text-embedding-3-small",
-                    "api_key": "env:OPENAI_API_KEY"
+                    "model": "nomic-embed-text",
+                    "ollama_base_url": ollama_base_url
                 }
             },
             "vector_store": None

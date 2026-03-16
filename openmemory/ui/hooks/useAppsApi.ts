@@ -69,6 +69,10 @@ export const useAppsApi = (): UseAppsApiReturn => {
 
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
 
+  /**
+   * 获取应用列表（支持搜索、排序和分页）
+   * GET /api/v1/apps/
+   */
   const fetchApps = useCallback(async (params: FetchAppsParams = {}): Promise<{ apps: App[], total: number }> => {
     const {
       name,
@@ -111,6 +115,10 @@ export const useAppsApi = (): UseAppsApiReturn => {
     }
   }, [dispatch]);
 
+  /**
+   * 获取应用详情
+   * GET /api/v1/apps/:appId
+   */
   const fetchAppDetails = useCallback(async (appId: string): Promise<void> => {
     setIsLoading(true);
     dispatch(setSelectedAppLoading());
@@ -129,6 +137,10 @@ export const useAppsApi = (): UseAppsApiReturn => {
     }
   }, [dispatch]);
 
+  /**
+   * 获取应用创建的记忆列表
+   * GET /api/v1/apps/:appId/memories
+   */
   const fetchAppMemories = useCallback(async (appId: string, page: number = 1, pageSize: number = 10): Promise<void> => {
     setIsLoading(true);
     dispatch(setCreatedMemoriesLoading());
@@ -150,6 +162,10 @@ export const useAppsApi = (): UseAppsApiReturn => {
     }
   }, [dispatch]);
 
+  /**
+   * 获取应用访问过的记忆列表
+   * GET /api/v1/apps/:appId/accessed
+   */
   const fetchAppAccessedMemories = useCallback(async (appId: string, page: number = 1, pageSize: number = 10): Promise<void> => {
     setIsLoading(true);
     dispatch(setAccessedMemoriesLoading());
@@ -171,6 +187,10 @@ export const useAppsApi = (): UseAppsApiReturn => {
     }
   }, [dispatch]);
 
+  /**
+   * 更新应用详情（启用/禁用）
+   * PUT /api/v1/apps/:appId
+   */
   const updateAppDetails = async (appId: string, details: { is_active: boolean }) => {
     setIsLoading(true);
     try {
