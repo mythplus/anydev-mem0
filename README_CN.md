@@ -5,6 +5,7 @@
 ## 📋 目录
 
 - [项目简介](#项目简介)
+- [技术栈](#技术栈)
 - [架构总览](#架构总览)
 - [环境要求](#环境要求)
 - [依赖安装](#依赖安装)
@@ -42,6 +43,69 @@
 - **多向量数据库**：支持 Qdrant、Chroma、Milvus、PgVector、Redis、Elasticsearch、FAISS 等 20+ 种
 - **多 LLM 支持**：OpenAI、Anthropic、Ollama、Together 等 10+ 提供商
 - **MCP 集成**：可与 Claude Desktop、Cursor、Cline 等 AI 客户端集成
+
+---
+
+## 技术栈
+
+### 🧠 AI / 模型层
+
+| 技术 | 版本 / 说明 | 用途 |
+|------|------------|------|
+| **Ollama** | 本地推理引擎 | 本地运行大语言模型和 Embedding 模型 |
+| **Qwen3** | `qwen3:8b`（8B 参数） | LLM 推理：记忆提取、更新、分类、语义理解 |
+| **nomic-embed-text** | 768 维向量 | 文本向量嵌入（Embedding），用于语义搜索和记忆匹配 |
+| **mem0ai** | `1.0.5` | 核心记忆引擎 SDK，提供记忆的增删改查、语义搜索、智能去重 |
+
+### 🔧 后端
+
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| **Python** | `≥ 3.9`（推荐 3.10+） | 后端主要开发语言 |
+| **FastAPI** | `≥ 0.68.0` | Web API 框架，提供 RESTful 接口 |
+| **Uvicorn** | `≥ 0.15.0` | ASGI 高性能服务器 |
+| **SQLAlchemy** | `≥ 1.4.0` | ORM 框架，管理 SQLite 元数据存储 |
+| **Alembic** | `≥ 1.7.0` | 数据库迁移工具 |
+| **Pydantic** | `≥ 2.7.3` | 数据校验和序列化 |
+| **MCP (Model Context Protocol)** | `≥ 1.3.0` | AI 客户端通信协议（SSE），集成 Cursor / Claude 等 |
+| **OpenAI SDK** | `≥ 1.40.0` | LLM API 客户端（兼容 Ollama 接口） |
+| **Anthropic SDK** | `0.51.0` | Anthropic Claude API 客户端 |
+| **Tenacity** | `9.1.2` | 重试机制库 |
+
+### 🗄️ 数据存储
+
+| 技术 | 说明 | 用途 |
+|------|------|------|
+| **Qdrant** | 向量数据库（Docker 部署） | 存储和检索记忆向量，支持语义相似度搜索 |
+| **SQLite** | 轻量级关系数据库 | 元数据存储：用户、应用、记忆、分类、权限、日志 |
+| 可选：Chroma / Milvus / PgVector / Redis / Elasticsearch / FAISS 等 20+ 种 | — | 可替换的向量存储后端 |
+
+### 🖥️ 前端
+
+| 技术 | 版本 | 用途 |
+|------|------|------|
+| **Next.js** | `15.2.4` | React 全栈框架，SSR / SSG 支持 |
+| **React** | `19.x` | UI 组件库 |
+| **TypeScript** | `5.x` | 类型安全的 JavaScript 超集 |
+| **Tailwind CSS** | `3.4.17` | 原子化 CSS 框架 |
+| **Radix UI** | — | 无障碍 Headless UI 组件库 |
+| **Redux Toolkit** | `2.7.0` | 全局状态管理 |
+| **Recharts** | `2.15.0` | 数据可视化图表库 |
+| **Axios** | `1.8.4` | HTTP 请求客户端 |
+| **Lucide React** | `0.454.0` | 图标库 |
+| **Sass** | `1.86.3` | CSS 预处理器 |
+
+### 🏗️ 基础设施 & 工具链
+
+| 技术 | 版本 / 说明 | 用途 |
+|------|------------|------|
+| **Docker** + **Docker Compose V2** | — | 容器化部署（API + Qdrant） |
+| **Node.js** | `18+` | 前端构建运行环境 |
+| **pnpm** | `10.5.2` | 前端包管理器（高效磁盘利用） |
+| **pip** | — | Python 包管理器 |
+| **Hatchling** | — | Python 项目构建后端 |
+| **Ruff** | `≥ 0.6.5` | Python 代码格式化 & Lint 工具 |
+| **Makefile** | — | 快捷命令管理 |
 
 ---
 

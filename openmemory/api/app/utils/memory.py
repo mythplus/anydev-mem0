@@ -20,7 +20,7 @@ Example configuration that will be automatically adjusted:
     "llm": {
         "provider": "ollama",
         "config": {
-            "model": "llama3.1:latest",
+            "model": "qwen3:8b",
             "ollama_base_url": "http://localhost:11434"  # Auto-adjusted in Docker
         }
     }
@@ -136,9 +136,12 @@ def reset_memory_client():
 def get_default_memory_config():
     """Get default memory client configuration with sensible defaults."""
     # Detect vector store based on environment variables
+    # 注意：embedding_model_dims 必须与 embedder 模型的输出维度一致
+    # nomic-embed-text 输出 768 维，OpenAI text-embedding-3-small 输出 1536 维
     vector_store_config = {
         "collection_name": "openmemory",
         "host": "mem0_store",
+        "embedding_model_dims": 768,
     }
     
     # Check for different vector store configurations based on environment variables
@@ -236,25 +239,28 @@ def get_default_memory_config():
     
     print(f"Auto-detected vector store: {vector_store_provider} with config: {vector_store_config}")
     
+    # 获取 Ollama 基础 URL（优先从环境变量读取）
+    ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://host.docker.internal:11434')
+    
     return {
         "vector_store": {
             "provider": vector_store_provider,
             "config": vector_store_config
         },
         "llm": {
-            "provider": "openai",
+            "provider": "ollama",
             "config": {
-                "model": "gpt-4o-mini",
+                "model": "qwen3:8b",
                 "temperature": 0.1,
                 "max_tokens": 2000,
-                "api_key": "env:OPENAI_API_KEY"
+                "ollama_base_url": ollama_base_url
             }
         },
         "embedder": {
-            "provider": "openai",
+            "provider": "ollama",
             "config": {
-                "model": "text-embedding-3-small",
-                "api_key": "env:OPENAI_API_KEY"
+                "model": "nomic-embed-text",
+                "ollama_base_url": ollama_base_url
             }
         },
         "version": "v1.1"

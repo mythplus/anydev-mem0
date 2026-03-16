@@ -58,7 +58,7 @@ def get_default_configuration():
             "llm": {
                 "provider": "ollama",
                 "config": {
-                    "model": "llama3.1:8b",
+                    "model": "qwen3:8b",
                     "temperature": 0.1,
                     "max_tokens": 2000,
                     "ollama_base_url": ollama_base_url

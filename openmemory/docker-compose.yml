@@ -23,6 +23,16 @@ services:
       - ./api:/usr/src/openmemory
     command: >
       sh -c "uvicorn main:app --host 0.0.0.0 --port 8765 --reload --workers 4"
+  openmemory-ui:
+    image: mem0/openmemory-ui:latest
+    build: ui/
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8765
+      - NEXT_PUBLIC_USER_ID=default_user
+    depends_on:
+      - openmemory-mcp
+    ports:
+      - "3000:3000"
 
 volumes:
   mem0_storage:
