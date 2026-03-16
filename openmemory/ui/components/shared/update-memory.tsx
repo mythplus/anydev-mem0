@@ -2,20 +2,21 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useRef } from "react";
-import { Loader2 } from "lucide-react";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useRef } from "react";
+import { toast } from "sonner";
 
 interface UpdateMemoryProps {
   memoryId: string;
@@ -34,6 +35,7 @@ const UpdateMemory = ({
     useMemoriesApi();
   const textRef = useRef<HTMLTextAreaElement>(null);
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const handleUpdateMemory = async (text: string) => {
     try {
@@ -55,12 +57,12 @@ const UpdateMemory = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800 z-50">
         <DialogHeader>
-          <DialogTitle>Update Memory</DialogTitle>
-          <DialogDescription>Edit your existing memory</DialogDescription>
+          <DialogTitle>{t("updateMemory.title")}</DialogTitle>
+          <DialogDescription>{t("updateMemory.description")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="memory">Memory</Label>
+            <Label htmlFor="memory">{t("updateMemory.label")}</Label>
             <Textarea
               ref={textRef}
               id="memory"
@@ -71,7 +73,7 @@ const UpdateMemory = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("updateMemory.cancel")}
           </Button>
           <Button
             className="w-[140px]"
@@ -81,7 +83,7 @@ const UpdateMemory = ({
             {isLoading ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              "Update Memory"
+              t("updateMemory.save")
             )}
           </Button>
         </DialogFooter>

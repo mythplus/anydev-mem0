@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Category, Client } from "../../../components/types";
-import { MemoryTable } from "./MemoryTable";
-import { MemoryPagination } from "./MemoryPagination";
-import { CreateMemoryDialog } from "./CreateMemoryDialog";
-import { PageSizeSelector } from "./PageSizeSelector";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useLanguage } from "@/lib/LanguageContext";
 import { MemoryTableSkeleton } from "@/skeleton/MemoryTableSkeleton";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Category, Client } from "../../../components/types";
+import { CreateMemoryDialog } from "./CreateMemoryDialog";
+import { MemoryPagination } from "./MemoryPagination";
+import { MemoryTable } from "./MemoryTable";
+import { PageSizeSelector } from "./PageSizeSelector";
 
 export function MemoriesSection() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { fetchMemories } = useMemoriesApi();
+  const { t } = useLanguage();
   const [memories, setMemories] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -86,9 +88,9 @@ export function MemoriesSection() {
                 onPageSizeChange={handlePageSizeChange}
               />
               <div className="text-sm text-zinc-500 mr-2">
-                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-                {Math.min(currentPage * itemsPerPage, totalItems)} of{" "}
-                {totalItems} memories
+                {t("memories.showing")} {(currentPage - 1) * itemsPerPage + 1} {t("memories.to")}{" "}
+                {Math.min(currentPage * itemsPerPage, totalItems)} {t("memories.of")}{" "}
+                {totalItems} {t("memories.memoriesLabel")}
               </div>
               <MemoryPagination
                 currentPage={currentPage}
@@ -118,11 +120,11 @@ export function MemoriesSection() {
                 <path d="M9 15h6"></path>
               </svg>
             </div>
-            <h3 className="text-lg font-medium">No memories found</h3>
+            <h3 className="text-lg font-medium">{t("memories.noMemories")}</h3>
             <p className="text-zinc-400 mt-1 mb-4">
               {selectedCategory !== "all" || selectedClient !== "all"
-                ? "Try adjusting your filters"
-                : "Create your first memory to see it here"}
+                ? t("memories.adjustFilters")
+                : t("memories.createFirst")}
             </p>
             {selectedCategory !== "all" || selectedClient !== "all" ? (
               <Button
@@ -132,7 +134,7 @@ export function MemoriesSection() {
                   setSelectedClient("all");
                 }}
               >
-                Clear Filters
+                {t("memories.clearFilters")}
               </Button>
             ) : (
               <CreateMemoryDialog />

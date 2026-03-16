@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session, joinedload
 
-router = APIRouter(prefix="/api/v1/apps", tags=["apps"])
+router = APIRouter(prefix="/api/v1/apps", tags=["应用管理 Apps"])
 
 # Helper functions
 def get_app_or_404(db: Session, app_id: UUID) -> App:
@@ -17,7 +17,7 @@ def get_app_or_404(db: Session, app_id: UUID) -> App:
     return app
 
 # List all apps with filtering
-@router.get("/")
+@router.get("/", summary="获取应用列表", description="获取所有应用列表，支持按名称、激活状态筛选，支持分页和排序")
 async def list_apps(
     name: Optional[str] = None,
     is_active: Optional[bool] = None,
@@ -98,7 +98,7 @@ async def list_apps(
     }
 
 # Get app details
-@router.get("/{app_id}")
+@router.get("/{app_id}", summary="获取应用详情", description="根据应用ID获取应用的详细信息，包括记忆访问统计")
 async def get_app_details(
     app_id: UUID,
     db: Session = Depends(get_db)
@@ -123,7 +123,7 @@ async def get_app_details(
     }
 
 # List memories created by app
-@router.get("/{app_id}/memories")
+@router.get("/{app_id}/memories", summary="获取应用创建的记忆列表", description="获取指定应用创建的所有记忆，支持分页")
 async def list_app_memories(
     app_id: UUID,
     page: int = Query(1, ge=1),
@@ -159,7 +159,7 @@ async def list_app_memories(
     }
 
 # List memories accessed by app
-@router.get("/{app_id}/accessed")
+@router.get("/{app_id}/accessed", summary="获取应用访问过的记忆列表", description="获取指定应用访问过的所有记忆及访问次数，支持分页")
 async def list_app_accessed_memories(
     app_id: UUID,
     page: int = Query(1, ge=1),
@@ -211,7 +211,7 @@ async def list_app_accessed_memories(
     }
 
 
-@router.put("/{app_id}")
+@router.put("/{app_id}", summary="更新应用信息", description="更新指定应用的激活状态")
 async def update_app_details(
     app_id: UUID,
     is_active: bool,

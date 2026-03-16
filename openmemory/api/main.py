@@ -10,7 +10,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 
-app = FastAPI(title="OpenMemory API")
+app = FastAPI(
+    title="OpenMemory API",
+    description="OpenMemory 开放记忆管理平台 API - 提供记忆的增删改查、应用管理、配置管理、数据备份等功能",
+    version="1.0.0",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,8 +39,8 @@ def create_default_user():
                 id=uuid4(),
                 user_id=USER_ID,
                 name="Default User",
-                created_at=datetime.datetime.now(datetime.UTC)
-            )
+            created_at=datetime.datetime.now(datetime.timezone.utc)
+        )
             db.add(user)
             db.commit()
     finally:
@@ -63,8 +67,8 @@ def create_default_app():
             id=uuid4(),
             name=DEFAULT_APP_ID,
             owner_id=user.id,
-            created_at=datetime.datetime.now(datetime.UTC),
-            updated_at=datetime.datetime.now(datetime.UTC),
+            created_at=datetime.datetime.now(datetime.timezone.utc),
+            updated_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(app)
         db.commit()

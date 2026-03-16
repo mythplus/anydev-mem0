@@ -2,24 +2,26 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { useState, useRef } from "react";
-import { GoPlus } from "react-icons/go";
-import { Loader2 } from "lucide-react";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { GoPlus } from "react-icons/go";
+import { toast } from "sonner";
 
 export function CreateMemoryDialog() {
   const { createMemory, isLoading, fetchMemories } = useMemoriesApi();
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
@@ -46,30 +48,30 @@ export function CreateMemoryDialog() {
           className="bg-primary hover:bg-primary/90 text-white"
         >
           <GoPlus />
-          Create Memory
+          {t("nav.createMemory")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800">
         <DialogHeader>
-          <DialogTitle>Create New Memory</DialogTitle>
+          <DialogTitle>{t("createMemory.title")}</DialogTitle>
           <DialogDescription>
-            Add a new memory to your OpenMemory instance
+            {t("createMemory.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="memory">Memory</Label>
+            <Label htmlFor="memory">{t("createMemory.label")}</Label>
             <Textarea
               ref={textRef}
               id="memory"
-              placeholder="e.g., Lives in San Francisco"
+              placeholder={t("createMemory.placeholder")}
               className="bg-zinc-950 border-zinc-800 min-h-[150px]"
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("createMemory.cancel")}
           </Button>
           <Button
             disabled={isLoading}
@@ -78,7 +80,7 @@ export function CreateMemoryDialog() {
             {isLoading ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              "Save Memory"
+              t("createMemory.save")
             )}
           </Button>
         </DialogFooter>

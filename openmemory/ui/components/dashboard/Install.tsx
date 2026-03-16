@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Check } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Check, Copy } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 const clientTabs = [
   { key: "claude", label: "Claude", icon: "/images/claude.webp" },
@@ -45,6 +46,7 @@ const allTabs = [{ key: "mcp", label: "MCP Link", icon: "🔗" }, ...clientTabs]
 
 export const Install = () => {
   const [copiedTab, setCopiedTab] = useState<string | null>(null);
+  const { t } = useLanguage();
   const user = process.env.NEXT_PUBLIC_USER_ID || "user";
 
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
@@ -81,7 +83,7 @@ export const Install = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6">Install OpenMemory</h2>
+      <h2 className="text-xl font-semibold mb-6">{t("install.title")}</h2>
 
       <div className="hidden">
         <div className="data-[state=active]:bg-[linear-gradient(to_top,_rgba(239,108,60,0.3),_rgba(239,108,60,0))] data-[state=active]:border-[#EF6C3C]"></div>
@@ -159,8 +161,7 @@ export const Install = () => {
             <Card className="bg-zinc-900 border-zinc-800">
               <CardHeader className="py-4">
                 <CardTitle className="text-white text-xl">
-                  {key.charAt(0).toUpperCase() + key.slice(1)} Installation
-                  Command
+                  {key.charAt(0).toUpperCase() + key.slice(1)} {t("install.command")}
                 </CardTitle>
               </CardHeader>
               <hr className="border-zinc-800" />

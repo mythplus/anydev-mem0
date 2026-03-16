@@ -1,48 +1,52 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Search, ChevronDown, SortAsc, SortDesc } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
+import { Button } from "@/components/ui/button";
 import {
-  setSearchQuery,
-  setActiveFilter,
-  setSortBy,
-  setSortDirection,
-} from "@/store/appsSlice";
-import { RootState } from "@/store/store";
-import { useCallback } from "react";
-import debounce from "lodash/debounce";
-import { useAppsApi } from "@/hooks/useAppsApi";
-import { AppFiltersSkeleton } from "@/skeleton/AppFiltersSkeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useAppsApi } from "@/hooks/useAppsApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { AppFiltersSkeleton } from "@/skeleton/AppFiltersSkeleton";
+import {
+    setActiveFilter,
+    setSearchQuery,
+    setSortBy,
+    setSortDirection,
+} from "@/store/appsSlice";
+import { RootState } from "@/store/store";
+import debounce from "lodash/debounce";
+import { ChevronDown, Search, SortAsc, SortDesc } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-const sortOptions = [
-  { value: "name", label: "Name" },
-  { value: "memories", label: "Memories Created" },
-  { value: "memories_accessed", label: "Memories Accessed" },
-];
+function getSortOptions(t: (key: string) => string) {
+  return [
+    { value: "name", label: t("apps.sortName") },
+    { value: "memories", label: t("apps.sortMemories") },
+    { value: "memories_accessed", label: t("apps.sortAccessed") },
+  ];
+}
 
 export function AppFilters() {
   const dispatch = useDispatch();
   const filters = useSelector((state: RootState) => state.apps.filters);
   const [localSearch, setLocalSearch] = useState(filters.searchQuery);
   const { isLoading } = useAppsApi();
+  const { t } = useLanguage();
+  const sortOptions = getSortOptions(t);
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
@@ -83,7 +87,7 @@ export function AppFilters() {
       <div className="relative flex-1">
         <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
         <Input
-          placeholder="Search Apps..."
+          placeholder={t("apps.searchPlaceholder")}
           className="pl-8 bg-zinc-950 border-zinc-800 max-w-[500px]"
           value={localSearch}
           onChange={handleSearchChange}
@@ -98,9 +102,9 @@ export function AppFilters() {
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800">
-          <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value="true">Active</SelectItem>
-          <SelectItem value="false">Inactive</SelectItem>
+          <SelectItem value="all">{t("apps.allStatus")}</SelectItem>
+          <SelectItem value="true">{t("apps.active")}</SelectItem>
+          <SelectItem value="false">{t("apps.inactive")}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -115,12 +119,12 @@ export function AppFilters() {
             ) : (
               <SortAsc className="h-4 w-4 mr-2" />
             )}
-            Sort: {sortOptions.find((o) => o.value === filters.sortBy)?.label}
+            {t("filter.sort")}: {sortOptions.find((o) => o.value === filters.sortBy)?.label}
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100">
-          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("filter.sortBy")}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-800" />
           <DropdownMenuGroup>
             {sortOptions.map((option) => (

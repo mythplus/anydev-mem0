@@ -3,9 +3,9 @@ from app.models import App, Memory, MemoryState, User
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/api/v1/stats", tags=["stats"])
+router = APIRouter(prefix="/api/v1/stats", tags=["统计信息 Stats"])
 
-@router.get("/")
+@router.get("/", summary="获取用户统计概览", description="获取用户的统计信息概览，包括记忆总数、应用总数及应用列表")
 async def get_profile(
     user_id: str,
     db: Session = Depends(get_db)
@@ -26,4 +26,3 @@ async def get_profile(
         "total_apps": total_apps,
         "apps": apps.all()
     }
-

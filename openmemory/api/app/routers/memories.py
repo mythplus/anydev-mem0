@@ -1,5 +1,5 @@
 import logging
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Set
 from uuid import UUID
 
@@ -24,7 +24,7 @@ from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
-router = APIRouter(prefix="/api/v1/memories", tags=["memories"])
+router = APIRouter(prefix="/api/v1/memories", tags=["记忆管理 Memories"])
 
 
 def get_memory_or_404(db: Session, memory_id: UUID) -> Memory:
@@ -41,9 +41,9 @@ def update_memory_state(db: Session, memory_id: UUID, new_state: MemoryState, us
     # Update memory state
     memory.state = new_state
     if new_state == MemoryState.archived:
-        memory.archived_at = datetime.now(UTC)
+        memory.archived_at = datetime.now(timezone.utc)
     elif new_state == MemoryState.deleted:
-        memory.deleted_at = datetime.now(UTC)
+        memory.deleted_at = datetime.now(timezone.utc)
 
     # Record state change
     history = MemoryStatusHistory(
@@ -98,7 +98,7 @@ def get_accessible_memory_ids(db: Session, app_id: UUID) -> Set[UUID]:
 
 
 # List all memories with filtering
-@router.get("/", response_model=Page[MemoryResponse])
+@router.get("/", response_model=Page[MemoryResponse], summary="获取记忆列表", description="获取用户的所有记忆，支持按应用、时间范围、分类筛选，支持搜索、排序和分页")
 async def list_memories(
     user_id: str,
     app_id: Optional[UUID] = None,
@@ -136,11 +136,11 @@ async def list_memories(
         query = query.filter(Memory.app_id == app_id)
 
     if from_date:
-        from_datetime = datetime.fromtimestamp(from_date, tz=UTC)
+        from_datetime = datetime.fromtimestamp(from_date, tz=timezone.utc)
         query = query.filter(Memory.created_at >= from_datetime)
 
     if to_date:
-        to_datetime = datetime.fromtimestamp(to_date, tz=UTC)
+        to_datetime = datetime.fromtimestamp(to_date, tz=timezone.utc)
         query = query.filter(Memory.created_at <= to_datetime)
 
     # Add joins for app and categories after filtering
@@ -186,7 +186,7 @@ async def list_memories(
 
 
 # Get all categories
-@router.get("/categories")
+@router.get("/categories", summary="获取分类列表", description="获取用户记忆的所有分类列表")
 async def get_categories(
     user_id: str,
     db: Session = Depends(get_db)
@@ -218,7 +218,7 @@ class CreateMemoryRequest(BaseModel):
 
 
 # Create new memory
-@router.post("/")
+@router.post("/", summary="创建新记忆", description="创建一条新的记忆，支持自动推断和自定义元数据")
 async def create_memory(
     request: CreateMemoryRequest,
     db: Session = Depends(get_db)
@@ -329,7 +329,7 @@ async def create_memory(
 
 
 # Get memory by ID
-@router.get("/{memory_id}")
+@router.get("/{memory_id}", summary="获取记忆详情", description="根据记忆ID获取单条记忆的详细信息")
 async def get_memory(
     memory_id: UUID,
     db: Session = Depends(get_db)
@@ -352,7 +352,7 @@ class DeleteMemoriesRequest(BaseModel):
     user_id: str
 
 # Delete multiple memories
-@router.delete("/")
+@router.delete("/", summary="批量删除记忆", description="批量删除指定的多条记忆，同时从向量存储中移除")
 async def delete_memories(
     request: DeleteMemoriesRequest,
     db: Session = Depends(get_db)
@@ -391,7 +391,7 @@ async def delete_memories(
 
 
 # Archive memories
-@router.post("/actions/archive")
+@router.post("/actions/archive", summary="归档记忆", description="将指定的记忆标记为归档状态")
 async def archive_memories(
     memory_ids: List[UUID],
     user_id: UUID,
@@ -412,7 +412,7 @@ class PauseMemoriesRequest(BaseModel):
     user_id: str
 
 # Pause access to memories
-@router.post("/actions/pause")
+@router.post("/actions/pause", summary="暂停/恢复记忆访问", description="暂停或恢复记忆的访问权限，支持按记忆ID、分类ID、应用ID或全局暂停")
 async def pause_memories(
     request: PauseMemoriesRequest,
     db: Session = Depends(get_db)
@@ -485,7 +485,7 @@ async def pause_memories(
 
 
 # Get memory access logs
-@router.get("/{memory_id}/access-log")
+@router.get("/{memory_id}/access-log", summary="获取记忆访问日志", description="获取指定记忆的访问日志记录，支持分页")
 async def get_memory_access_log(
     memory_id: UUID,
     page: int = Query(1, ge=1),
@@ -514,7 +514,7 @@ class UpdateMemoryRequest(BaseModel):
     user_id: str
 
 # Update a memory
-@router.put("/{memory_id}")
+@router.put("/{memory_id}", summary="更新记忆内容", description="更新指定记忆的文本内容")
 async def update_memory(
     memory_id: UUID,
     request: UpdateMemoryRequest,
@@ -542,7 +542,7 @@ class FilterMemoriesRequest(BaseModel):
     to_date: Optional[int] = None
     show_archived: Optional[bool] = False
 
-@router.post("/filter", response_model=Page[MemoryResponse])
+@router.post("/filter", response_model=Page[MemoryResponse], summary="筛选记忆", description="通过多条件组合筛选记忆，支持按应用、分类、时间范围、关键词筛选，支持排序和分页")
 async def filter_memories(
     request: FilterMemoriesRequest,
     db: Session = Depends(get_db)
@@ -580,11 +580,11 @@ async def filter_memories(
 
     # Apply date filters
     if request.from_date:
-        from_datetime = datetime.fromtimestamp(request.from_date, tz=UTC)
+        from_datetime = datetime.fromtimestamp(request.from_date, tz=timezone.utc)
         query = query.filter(Memory.created_at >= from_datetime)
 
     if request.to_date:
-        to_datetime = datetime.fromtimestamp(request.to_date, tz=UTC)
+        to_datetime = datetime.fromtimestamp(request.to_date, tz=timezone.utc)
         query = query.filter(Memory.created_at <= to_datetime)
 
     # Apply sorting
@@ -636,7 +636,7 @@ async def filter_memories(
     )
 
 
-@router.get("/{memory_id}/related", response_model=Page[MemoryResponse])
+@router.get("/{memory_id}/related", response_model=Page[MemoryResponse], summary="获取相关记忆", description="根据记忆的分类查找相关的记忆列表")
 async def get_related_memories(
     memory_id: UUID,
     user_id: str,

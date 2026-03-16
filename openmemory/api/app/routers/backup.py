@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 import io 
 import json 
 import gzip 
@@ -21,7 +21,7 @@ from app.utils.memory import get_memory_client
 
 from uuid import uuid4
 
-router = APIRouter(prefix="/api/v1/backup", tags=["backup"])
+router = APIRouter(prefix="/api/v1/backup", tags=["备份管理 Backup"])
 
 class ExportRequest(BaseModel):
     user_id: str
@@ -33,9 +33,9 @@ class ExportRequest(BaseModel):
 def _iso(dt: Optional[datetime]) -> Optional[str]: 
     if isinstance(dt, datetime): 
         try: 
-            return dt.astimezone(UTC).isoformat()
+            return dt.astimezone(timezone.utc).isoformat()
         except: 
-            return dt.replace(tzinfo=UTC).isoformat()
+            return dt.replace(tzinfo=timezone.utc).isoformat()
     return None
 
 def _parse_iso(dt: Optional[str]) -> Optional[datetime]:
@@ -56,9 +56,9 @@ def _export_sqlite(db: Session, req: ExportRequest) -> Dict[str, Any]:
     
     time_filters = []
     if req.from_date: 
-        time_filters.append(Memory.created_at >= datetime.fromtimestamp(req.from_date, tz=UTC))
+        time_filters.append(Memory.created_at >= datetime.fromtimestamp(req.from_date, tz=timezone.utc))
     if req.to_date: 
-        time_filters.append(Memory.created_at <= datetime.fromtimestamp(req.to_date, tz=UTC))
+        time_filters.append(Memory.created_at <= datetime.fromtimestamp(req.to_date, tz=timezone.utc))
 
     mem_q = (
         db.query(Memory)
@@ -170,7 +170,7 @@ def _export_sqlite(db: Session, req: ExportRequest) -> Dict[str, Any]:
             "from_date": req.from_date,
             "to_date": req.to_date,
             "version": "1",
-            "generated_at": datetime.now(UTC).isoformat(),
+            "generated_at": datetime.now(timezone.utc).isoformat(),
         },
     }
 
@@ -205,9 +205,9 @@ def _export_logical_memories_gz(
     
     time_filters = []
     if from_date: 
-        time_filters.append(Memory.created_at >= datetime.fromtimestamp(from_date, tz=UTC))
+        time_filters.append(Memory.created_at >= datetime.fromtimestamp(from_date, tz=timezone.utc))
     if to_date: 
-        time_filters.append(Memory.created_at <= datetime.fromtimestamp(to_date, tz=UTC))
+        time_filters.append(Memory.created_at <= datetime.fromtimestamp(to_date, tz=timezone.utc))
     
     q = (
         db.query(Memory)
@@ -236,8 +236,8 @@ def _export_logical_memories_gz(
             gz.write((json.dumps(record) + "\n").encode("utf-8"))
     return buf.getvalue()
 
-@router.post("/export")
-async def export_backup(req: ExportRequest, db: Session = Depends(get_db)): 
+@router.post("/export", summary="导出备份", description="将用户的记忆数据导出为ZIP压缩包，包含memories.json和memories.jsonl.gz文件，支持按应用和时间范围筛选")
+async def export_backup(req: ExportRequest, db: Session = Depends(get_db)):
     sqlite_payload = _export_sqlite(db=db, req=req)
     memories_blob = _export_logical_memories_gz(
         db=db, 
@@ -262,9 +262,9 @@ async def export_backup(req: ExportRequest, db: Session = Depends(get_db)):
         headers={"Content-Disposition": f'attachment; filename="memories_export_{req.user_id}.zip"'},
     )
 
-@router.post("/import")
+@router.post("/import", summary="导入备份", description="从ZIP备份文件中导入记忆数据，支持skip（跳过已存在）和overwrite（覆盖已存在）两种模式")
 async def import_backup(
-    file: UploadFile = File(..., description="Zip with memories.json and memories.jsonl.gz"), 
+    file: UploadFile = File(..., description="Zip with memories.json and memories.jsonl.gz"),
     user_id: str = Form(..., description="Import memories into this user_id"),
     mode: str = Query("overwrite"), 
     db: Session = Depends(get_db)
@@ -365,8 +365,8 @@ async def import_backup(
             content=m.get("content") or "",
             metadata_=m.get("metadata") or {},
             state=MemoryState(m.get("state", "active")) if m.get("state") else MemoryState.active,
-            created_at=_parse_iso(m.get("created_at")) or datetime.now(UTC),
-            updated_at=_parse_iso(m.get("updated_at")) or datetime.now(UTC),
+            created_at=_parse_iso(m.get("created_at")) or datetime.now(timezone.utc),
+            updated_at=_parse_iso(m.get("updated_at")) or datetime.now(timezone.utc),
             archived_at=_parse_iso(m.get("archived_at")),
             deleted_at=_parse_iso(m.get("deleted_at")),
         )
@@ -403,7 +403,7 @@ async def import_backup(
         except Exception:
             rec.old_state = MemoryState.active
             rec.new_state = MemoryState.active
-        rec.changed_at = _parse_iso(h.get("changed_at")) or datetime.now(UTC)
+        rec.changed_at = _parse_iso(h.get("changed_at")) or datetime.now(timezone.utc)
         db.add(rec)
         db.commit()
 
@@ -493,7 +493,3 @@ async def import_backup(
 
 
  
-
-
-
-

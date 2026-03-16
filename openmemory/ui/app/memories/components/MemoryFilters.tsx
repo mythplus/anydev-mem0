@@ -1,26 +1,28 @@
 "use client";
-import { Archive, Pause, Play, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FiTrash2 } from "react-icons/fi";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store/store";
-import { clearSelection } from "@/store/memoriesSlice";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRouter, useSearchParams } from "next/navigation";
-import { debounce } from "lodash";
-import { useEffect, useRef } from "react";
-import FilterComponent from "./FilterComponent";
+import { Input } from "@/components/ui/input";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
 import { clearFilters } from "@/store/filtersSlice";
+import { clearSelection } from "@/store/memoriesSlice";
+import { RootState } from "@/store/store";
+import { debounce } from "lodash";
+import { Archive, Pause, Play, Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { FiTrash2 } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import FilterComponent from "./FilterComponent";
 
 export function MemoryFilters() {
   const dispatch = useDispatch();
+  const { t } = useLanguage();
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
@@ -94,7 +96,7 @@ export function MemoryFilters() {
         <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
         <Input
           ref={inputRef}
-          placeholder="Search memories..."
+          placeholder={t("memories.searchPlaceholder")}
           className="pl-8 bg-zinc-950 border-zinc-800 max-w-[500px]"
           onChange={(e) => handleSearch(e.target.value)}
         />
@@ -107,7 +109,7 @@ export function MemoryFilters() {
             className="bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
             onClick={handleClearAllFilters}
           >
-            Clear Filters
+            {t("memories.clearFilters")}
           </Button>
         )}
         {selectedMemoryIds.length > 0 && (
@@ -118,7 +120,7 @@ export function MemoryFilters() {
                   variant="outline"
                   className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
                 >
-                  Actions
+                  {t("memories.actions")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -127,22 +129,22 @@ export function MemoryFilters() {
               >
                 <DropdownMenuItem onClick={handleArchiveSelected}>
                   <Archive className="mr-2 h-4 w-4" />
-                  Archive Selected
+                  {t("memories.archiveSelected")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handlePauseSelected}>
                   <Pause className="mr-2 h-4 w-4" />
-                  Pause Selected
+                  {t("memories.pauseSelected")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleResumeSelected}>
                   <Play className="mr-2 h-4 w-4" />
-                  Resume Selected
+                  {t("memories.resumeSelected")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDeleteSelected}
                   className="text-red-500"
                 >
                   <FiTrash2 className="mr-2 h-4 w-4" />
-                  Delete Selected
+                  {t("memories.deleteSelected")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

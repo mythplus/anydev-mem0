@@ -1,18 +1,19 @@
 "use client";
 
+import { CreateMemoryDialog } from "@/app/memories/components/CreateMemoryDialog";
 import { Button } from "@/components/ui/button";
-import { HiHome, HiMiniRectangleStack } from "react-icons/hi2";
-import { RiApps2AddFill } from "react-icons/ri";
-import { FiRefreshCcw } from "react-icons/fi";
+import { useAppsApi } from "@/hooks/useAppsApi";
+import { useConfig } from "@/hooks/useConfig";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useStats } from "@/hooks/useStats";
+import { useLanguage } from "@/lib/LanguageContext";
+import { Settings } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CreateMemoryDialog } from "@/app/memories/components/CreateMemoryDialog";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import Image from "next/image";
-import { useStats } from "@/hooks/useStats";
-import { useAppsApi } from "@/hooks/useAppsApi";
-import { Settings } from "lucide-react";
-import { useConfig } from "@/hooks/useConfig";
+import { FiRefreshCcw } from "react-icons/fi";
+import { HiHome, HiMiniRectangleStack } from "react-icons/hi2";
+import { RiApps2AddFill } from "react-icons/ri";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -21,6 +22,8 @@ export function Navbar() {
   const appsApi = useAppsApi();
   const statsApi = useStats();
   const configApi = useConfig();
+
+  const { t } = useLanguage();
 
   // Define route matchers with typed parameter extraction
   const routeBasedFetchMapping: {
@@ -107,7 +110,7 @@ export function Navbar() {
               }`}
             >
               <HiHome />
-              Dashboard
+              {t("nav.dashboard")}
             </Button>
           </Link>
           <Link href="/memories">
@@ -119,7 +122,7 @@ export function Navbar() {
               }`}
             >
               <HiMiniRectangleStack />
-              Memories
+              {t("nav.memories")}
             </Button>
           </Link>
           <Link href="/apps">
@@ -131,7 +134,7 @@ export function Navbar() {
               }`}
             >
               <RiApps2AddFill />
-              Apps
+              {t("nav.apps")}
             </Button>
           </Link>
           <Link href="/settings">
@@ -143,7 +146,7 @@ export function Navbar() {
               }`}
             >
               <Settings />
-              Settings
+              {t("nav.settings")}
             </Button>
           </Link>
         </div>
@@ -155,7 +158,7 @@ export function Navbar() {
             className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
           >
             <FiRefreshCcw className="transition-transform duration-300 group-hover:rotate-180" />
-            Refresh
+            {t("nav.refresh")}
           </Button>
           <CreateMemoryDialog />
         </div>

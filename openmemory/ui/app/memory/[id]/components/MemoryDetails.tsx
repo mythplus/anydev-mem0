@@ -1,16 +1,17 @@
 "use client";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
-import { MemoryActions } from "./MemoryActions";
-import { ArrowLeft, Copy, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { AccessLog } from "./AccessLog";
-import Image from "next/image";
 import Categories from "@/components/shared/categories";
+import { constants } from "@/components/shared/source-app";
+import { Button } from "@/components/ui/button";
+import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useLanguage } from "@/lib/LanguageContext";
+import { RootState } from "@/store/store";
+import { ArrowLeft, Check, Copy } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
-import { constants } from "@/components/shared/source-app";
+import { AccessLog } from "./AccessLog";
+import { MemoryActions } from "./MemoryActions";
 import { RelatedMemories } from "./RelatedMemories";
 
 interface MemoryDetailsProps {
@@ -19,6 +20,7 @@ interface MemoryDetailsProps {
 
 export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const { fetchMemoryById, hasUpdates } = useMemoriesApi();
   const memory = useSelector(
     (state: RootState) => state.memories.selectedMemory
@@ -45,7 +47,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Memories
+        {t("memoryDetail.backToMemories")}
       </Button>
       <div className="flex gap-4 w-full">
         <div className="rounded-lg w-2/3 border h-fit pb-2 border-zinc-800 bg-zinc-900 overflow-hidden">
@@ -53,7 +55,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
             <div className="flex px-6 py-3 justify-between items-center mb-6 bg-zinc-800 border-b border-zinc-800">
               <div className="flex items-center gap-2">
                 <h1 className="font-semibold text-white">
-                  Memory{" "}
+                  {t("memoryDetail.memory")}{" "}
                   <span className="ml-1 text-zinc-400 text-sm font-normal">
                     #{memory?.id?.slice(0, 6)}
                   </span>
@@ -106,7 +108,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1 bg-zinc-700 px-3 py-1 rounded-lg">
                         <span className="text-sm text-zinc-400">
-                          Created by:
+                        {t("appDetail.createdBy")}
                         </span>
                         <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
                           <Image
