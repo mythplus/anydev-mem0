@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Filter, SortAsc, SortDesc, Check, X } from "lucide-react";
+import { ChevronDown, Filter, SortAsc, SortDesc, Check, X, Calendar } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -24,6 +24,7 @@ import {
     clearFilters,
     setSelectedApps,
     setSelectedCategories,
+    setDateRange,
 } from "@/store/filtersSlice";
 import { RootState } from "@/store/store";
 
@@ -60,7 +61,11 @@ export default function FilterComponent() {
 
   // 控制筛选下拉菜单和内部 Tab
   const [filterOpen, setFilterOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"apps" | "categories">("apps");
+  const [activeTab, setActiveTab] = useState<"apps" | "categories" | "dateRange">("apps");
+
+  // 时间范围本地状态（用于输入，仅在点击应用时才提交）
+  const [localStartDate, setLocalStartDate] = useState<string>("");
+  const [localEndDate, setLocalEndDate] = useState<string>("");
 
   useEffect(() => {
     fetchApps();
@@ -74,7 +79,8 @@ export default function FilterComponent() {
   // 应用筛选相关的回调
   const applyWithFilters = async (
     selectedApps: string[],
-    selectedCategories: string[]
+    selectedCategories: string[],
+    dateRange?: { startDate: string | null; endDate: string | null }
   ) => {
     const selectedCategoryIds = categories
       .filter((cat) => selectedCategories.includes(cat.name))
@@ -83,6 +89,14 @@ export default function FilterComponent() {
       .filter((app) => selectedApps.includes(app.id))
       .map((app) => app.id);
 
+    const effectiveDateRange = dateRange || filters.dateRange;
+    const fromDate = effectiveDateRange.startDate
+      ? Math.floor(new Date(effectiveDateRange.startDate).getTime() / 1000)
+      : null;
+    const toDate = effectiveDateRange.endDate
+      ? Math.floor(new Date(effectiveDateRange.endDate + "T23:59:59").getTime() / 1000)
+      : null;
+
     try {
       await fetchMemories(undefined, 1, 10, {
         apps: selectedAppIds,
@@ -90,6 +104,8 @@ export default function FilterComponent() {
         sortColumn: filters.sortColumn,
         sortDirection: filters.sortDirection,
         showArchived: filters.showArchived,
+        fromDate,
+        toDate,
       });
     } catch (error) {
       console.error("Failed to apply filters:", error);
@@ -126,7 +142,27 @@ export default function FilterComponent() {
 
   const handleClearFilters = async () => {
     dispatch(clearFilters());
+    setLocalStartDate("");
+    setLocalEndDate("");
     await fetchMemories();
+  };
+
+  // 时间范围筛选回调
+  const applyDateRange = async () => {
+    const dateRange = {
+      startDate: localStartDate || null,
+      endDate: localEndDate || null,
+    };
+    dispatch(setDateRange(dateRange));
+    await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
+  };
+
+  const clearDateRange = async () => {
+    setLocalStartDate("");
+    setLocalEndDate("");
+    const dateRange = { startDate: null, endDate: null };
+    dispatch(setDateRange(dateRange));
+    await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
   };
 
   const setSorting = async (column: string) => {
@@ -143,12 +179,21 @@ export default function FilterComponent() {
       .filter((app) => filters.selectedApps.includes(app.id))
       .map((app) => app.id);
 
+    const fromDate = filters.dateRange.startDate
+      ? Math.floor(new Date(filters.dateRange.startDate).getTime() / 1000)
+      : null;
+    const toDate = filters.dateRange.endDate
+      ? Math.floor(new Date(filters.dateRange.endDate + "T23:59:59").getTime() / 1000)
+      : null;
+
     try {
       await fetchMemories(undefined, 1, 10, {
         apps: selectedAppIds,
         categories: selectedCategoryIds,
         sortColumn: column,
         sortDirection: newDirection,
+        fromDate,
+        toDate,
       });
     } catch (error) {
       console.error("Failed to apply sorting:", error);
@@ -157,7 +202,8 @@ export default function FilterComponent() {
 
   const appFilterCount = filters.selectedApps.length;
   const categoryFilterCount = filters.selectedCategories.length;
-  const totalFilterCount = appFilterCount + categoryFilterCount;
+  const dateFilterCount = (filters.dateRange.startDate || filters.dateRange.endDate) ? 1 : 0;
+  const totalFilterCount = appFilterCount + categoryFilterCount + dateFilterCount;
 
   // 获取筛选按钮显示文本
   const getFilterLabel = () => {
@@ -222,6 +268,24 @@ export default function FilterComponent() {
                 </span>
               )}
               {activeTab === "categories" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeTab === "dateRange"
+                  ? "text-primary"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+              onClick={() => setActiveTab("dateRange")}
+            >
+              {t("filter.dateRange")}
+              {dateFilterCount > 0 && (
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                  {dateFilterCount}
+                </span>
+              )}
+              {activeTab === "dateRange" && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
@@ -333,6 +397,55 @@ export default function FilterComponent() {
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
+            )}
+
+            {activeTab === "dateRange" && (
+              <div className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">{t("filter.startDate")}</label>
+                  <input
+                    type="date"
+                    value={localStartDate}
+                    onChange={(e) => setLocalStartDate(e.target.value)}
+                    className="w-full h-9 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">{t("filter.endDate")}</label>
+                  <input
+                    type="date"
+                    value={localEndDate}
+                    onChange={(e) => setLocalEndDate(e.target.value)}
+                    className="w-full h-9 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={applyDateRange}
+                    disabled={!localStartDate && !localEndDate}
+                    className="flex-1 h-9 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {t("filter.applyDateRange")}
+                  </button>
+                  {(localStartDate || localEndDate || filters.dateRange.startDate || filters.dateRange.endDate) && (
+                    <button
+                      onClick={clearDateRange}
+                      className="h-9 px-3 rounded-md border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {filters.dateRange.startDate || filters.dateRange.endDate ? (
+                  <div className="text-xs text-zinc-500 pt-1">
+                    {filters.dateRange.startDate && filters.dateRange.endDate
+                      ? `${filters.dateRange.startDate} ~ ${filters.dateRange.endDate}`
+                      : filters.dateRange.startDate
+                        ? `${filters.dateRange.startDate} ~`
+                        : `~ ${filters.dateRange.endDate}`}
+                  </div>
+                ) : null}
+              </div>
             )}
           </div>
         </DropdownMenuContent>

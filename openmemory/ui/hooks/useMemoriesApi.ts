@@ -79,6 +79,8 @@ interface UseMemoriesApiReturn {
       sortColumn?: string;
       sortDirection?: 'asc' | 'desc';
       showArchived?: boolean;
+      fromDate?: number | null;
+      toDate?: number | null;
     }
   ) => Promise<{ memories: Memory[]; total: number; pages: number }>;
   fetchMemoryById: (memoryId: string) => Promise<void>;
@@ -121,6 +123,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       sortColumn?: string;
       sortDirection?: 'asc' | 'desc';
       showArchived?: boolean;
+      fromDate?: number | null;
+      toDate?: number | null;
     }
   ): Promise<{ memories: Memory[], total: number, pages: number }> => {
     setIsLoading(true);
@@ -137,7 +141,9 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
           category_ids: filters?.categories,
           sort_column: filters?.sortColumn?.toLowerCase(),
           sort_direction: filters?.sortDirection,
-          show_archived: filters?.showArchived
+          show_archived: filters?.showArchived,
+          from_date: filters?.fromDate || undefined,
+          to_date: filters?.toDate || undefined
         }
       );
 

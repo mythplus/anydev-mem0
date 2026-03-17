@@ -91,6 +91,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "filter.columnMemory": "Memory",
     "filter.columnAppName": "App Name",
     "filter.columnCreatedOn": "Created On",
+    "filter.dateRange": "Time",
+    "filter.startDate": "Start Date",
+    "filter.endDate": "End Date",
+    "filter.clearDateRange": "Clear Date Range",
+    "filter.applyDateRange": "Apply",
 
     // Apps page
     "apps.searchPlaceholder": "Search Apps...",
@@ -299,6 +304,11 @@ export const translations: Record<Locale, Record<string, string>> = {
     "filter.columnMemory": "记忆",
     "filter.columnAppName": "应用名称",
     "filter.columnCreatedOn": "创建时间",
+    "filter.dateRange": "时间",
+    "filter.startDate": "开始日期",
+    "filter.endDate": "结束日期",
+    "filter.clearDateRange": "清除时间范围",
+    "filter.applyDateRange": "应用",
 
     // 应用页面
     "apps.searchPlaceholder": "搜索应用...",

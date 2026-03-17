@@ -12,6 +12,10 @@ export interface FiltersState {
   apps: {
     selectedApps: string[];
     selectedCategories: string[];
+    dateRange: {
+      startDate: string | null;
+      endDate: string | null;
+    };
     sortColumn: string;
     sortDirection: 'asc' | 'desc';
     showArchived: boolean;
@@ -28,6 +32,10 @@ const initialState: FiltersState = {
   apps: {
     selectedApps: [],
     selectedCategories: [],
+    dateRange: {
+      startDate: null,
+      endDate: null,
+    },
     sortColumn: 'created_at',
     sortDirection: 'desc',
     showArchived: false,
@@ -64,12 +72,16 @@ const filtersSlice = createSlice({
     setSelectedCategories: (state, action: PayloadAction<string[]>) => {
       state.apps.selectedCategories = action.payload;
     },
+    setDateRange: (state, action: PayloadAction<{ startDate: string | null; endDate: string | null }>) => {
+      state.apps.dateRange = action.payload;
+    },
     setShowArchived: (state, action: PayloadAction<boolean>) => {
       state.apps.showArchived = action.payload;
     },
     clearFilters: (state) => {
       state.apps.selectedApps = [];
       state.apps.selectedCategories = [];
+      state.apps.dateRange = { startDate: null, endDate: null };
       state.apps.showArchived = false;
     },
     setSortingState: (state, action: PayloadAction<{ column: string; direction: 'asc' | 'desc' }>) => {
@@ -85,6 +97,7 @@ export const {
   setCategoriesError,
   setSelectedApps,
   setSelectedCategories,
+  setDateRange,
   setShowArchived,
   clearFilters,
   setSortingState
