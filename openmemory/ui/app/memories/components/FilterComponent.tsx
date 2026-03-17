@@ -57,9 +57,9 @@ export default function FilterComponent() {
   );
   const filters = useSelector((state: RootState) => state.filters.apps);
 
-  // 用于控制下拉菜单保持打开状态
-  const [appsOpen, setAppsOpen] = useState(false);
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  // 控制筛选下拉菜单和内部 Tab
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"apps" | "categories">("apps");
 
   useEffect(() => {
     fetchApps();
@@ -156,142 +156,151 @@ export default function FilterComponent() {
 
   const appFilterCount = filters.selectedApps.length;
   const categoryFilterCount = filters.selectedCategories.length;
+  const totalFilterCount = appFilterCount + categoryFilterCount;
 
-  // 获取应用筛选按钮显示文本
-  const getAppFilterLabel = () => {
-    if (appFilterCount === 0) return t("filter.apps");
-    if (appFilterCount === 1) {
-      const app = apps.find((a) => a.id === filters.selectedApps[0]);
-      return app?.name || t("filter.apps");
-    }
-    return `${t("filter.apps")} (${appFilterCount})`;
-  };
-
-  // 获取分类筛选按钮显示文本
-  const getCategoryFilterLabel = () => {
-    if (categoryFilterCount === 0) return t("filter.categories");
-    if (categoryFilterCount === 1) {
-      return filters.selectedCategories[0];
-    }
-    return `${t("filter.categories")} (${categoryFilterCount})`;
+  // 获取筛选按钮显示文本
+  const getFilterLabel = () => {
+    if (totalFilterCount === 0) return t("filter.button");
+    return `${t("filter.button")} (${totalFilterCount})`;
   };
 
   return (
     <div className="flex items-center gap-2">
-      {/* 应用筛选下拉 */}
-      <DropdownMenu open={appsOpen} onOpenChange={setAppsOpen}>
+      {/* 合并的筛选下拉 */}
+      <DropdownMenu open={filterOpen} onOpenChange={setFilterOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             className={`h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 ${
-              appFilterCount > 0 ? "border-primary" : ""
+              totalFilterCount > 0 ? "border-primary" : ""
             }`}
           >
             <Filter
-              className={`h-4 w-4 ${appFilterCount > 0 ? "text-primary" : ""}`}
+              className={`h-4 w-4 ${totalFilterCount > 0 ? "text-primary" : ""}`}
             />
-            {getAppFilterLabel()}
+            {getFilterLabel()}
             <ChevronDown className="h-4 w-4 ml-1" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[300px] overflow-y-auto"
+          className="w-64 bg-zinc-900 border-zinc-800 text-zinc-100 p-0"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <DropdownMenuLabel>{t("filter.apps")}</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-zinc-800" />
-          <DropdownMenuGroup>
-            {/* 全选 */}
-            <DropdownMenuItem
-              className="cursor-pointer flex justify-between items-center"
-              onSelect={(e) => {
-                e.preventDefault();
-                toggleAllApps(
-                  !(apps.length > 0 && filters.selectedApps.length === apps.length)
-                );
-              }}
+          {/* Tab 切换栏 */}
+          <div className="flex border-b border-zinc-800">
+            <button
+              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeTab === "apps"
+                  ? "text-primary"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+              onClick={() => setActiveTab("apps")}
             >
-              {t("filter.selectAll")}
-              {apps.length > 0 && filters.selectedApps.length === apps.length && (
-                <Check className="h-4 w-4 text-primary" />
+              {t("filter.apps")}
+              {appFilterCount > 0 && (
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                  {appFilterCount}
+                </span>
               )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-zinc-800" />
-            {apps.map((app) => (
-              <DropdownMenuItem
-                key={app.id}
-                className="cursor-pointer flex justify-between items-center"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  toggleAppFilter(app.id);
-                }}
-              >
-                {app.name}
-                {filters.selectedApps.includes(app.id) && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* 分类筛选下拉 */}
-      <DropdownMenu open={categoriesOpen} onOpenChange={setCategoriesOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            className={`h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 ${
-              categoryFilterCount > 0 ? "border-primary" : ""
-            }`}
-          >
-            <Filter
-              className={`h-4 w-4 ${categoryFilterCount > 0 ? "text-primary" : ""}`}
-            />
-            {getCategoryFilterLabel()}
-            <ChevronDown className="h-4 w-4 ml-1" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[300px] overflow-y-auto"
-          onCloseAutoFocus={(e) => e.preventDefault()}
-        >
-          <DropdownMenuLabel>{t("filter.categories")}</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-zinc-800" />
-          <DropdownMenuGroup>
-            {/* 全选 */}
-            <DropdownMenuItem
-              className="cursor-pointer flex justify-between items-center"
-              onSelect={(e) => {
-                e.preventDefault();
-                toggleAllCategories(
-                  !(categories.length > 0 && filters.selectedCategories.length === categories.length)
-                );
-              }}
+              {activeTab === "apps" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+            <button
+              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeTab === "categories"
+                  ? "text-primary"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+              onClick={() => setActiveTab("categories")}
             >
-              {t("filter.selectAll")}
-              {categories.length > 0 &&
-                filters.selectedCategories.length === categories.length && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-zinc-800" />
-            {categories.map((category) => (
-              <DropdownMenuItem
-                key={category.name}
-                className="cursor-pointer flex justify-between items-center"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  toggleCategoryFilter(category.name);
-                }}
-              >
-                {category.name}
-                {filters.selectedCategories.includes(category.name) && (
-                  <Check className="h-4 w-4 text-primary" />
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuGroup>
+              {t("filter.categories")}
+              {categoryFilterCount > 0 && (
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                  {categoryFilterCount}
+                </span>
+              )}
+              {activeTab === "categories" && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
+          </div>
+
+          {/* Tab 内容区 */}
+          <div className="max-h-[300px] overflow-y-auto">
+            {activeTab === "apps" && (
+              <DropdownMenuGroup>
+                {/* 全选 */}
+                <DropdownMenuItem
+                  className="cursor-pointer flex justify-between items-center px-4 py-2"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    toggleAllApps(
+                      !(apps.length > 0 && filters.selectedApps.length === apps.length)
+                    );
+                  }}
+                >
+                  {t("filter.selectAll")}
+                  {apps.length > 0 && filters.selectedApps.length === apps.length && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-800" />
+                {apps.map((app) => (
+                  <DropdownMenuItem
+                    key={app.id}
+                    className="cursor-pointer flex justify-between items-center px-4 py-2"
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      toggleAppFilter(app.id);
+                    }}
+                  >
+                    {app.name}
+                    {filters.selectedApps.includes(app.id) && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            )}
+
+            {activeTab === "categories" && (
+              <DropdownMenuGroup>
+                {/* 全选 */}
+                <DropdownMenuItem
+                  className="cursor-pointer flex justify-between items-center px-4 py-2"
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    toggleAllCategories(
+                      !(categories.length > 0 && filters.selectedCategories.length === categories.length)
+                    );
+                  }}
+                >
+                  {t("filter.selectAll")}
+                  {categories.length > 0 &&
+                    filters.selectedCategories.length === categories.length && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-800" />
+                {categories.map((category) => (
+                  <DropdownMenuItem
+                    key={category.name}
+                    className="cursor-pointer flex justify-between items-center px-4 py-2"
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      toggleCategoryFilter(category.name);
+                    }}
+                  >
+                    {category.name}
+                    {filters.selectedCategories.includes(category.name) && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            )}
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
 

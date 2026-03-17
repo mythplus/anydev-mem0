@@ -29,7 +29,6 @@ def get_current_utc_time():
 
 class MemoryState(enum.Enum):
     active = "active"
-    paused = "paused"
     archived = "archived"
     deleted = "deleted"
 

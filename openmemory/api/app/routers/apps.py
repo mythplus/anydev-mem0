@@ -32,7 +32,7 @@ async def list_apps(
         Memory.app_id,
         func.count(Memory.id).label('memory_count')
     ).filter(
-        Memory.state.in_([MemoryState.active, MemoryState.paused, MemoryState.archived])
+        Memory.state.in_([MemoryState.active, MemoryState.archived])
     ).group_by(Memory.app_id).subquery()
 
     # Create a subquery for access counts
@@ -133,7 +133,7 @@ async def list_app_memories(
     get_app_or_404(db, app_id)
     query = db.query(Memory).filter(
         Memory.app_id == app_id,
-        Memory.state.in_([MemoryState.active, MemoryState.paused, MemoryState.archived])
+        Memory.state.in_([MemoryState.active, MemoryState.archived])
     )
     # Add eager loading for categories
     query = query.options(joinedload(Memory.categories))

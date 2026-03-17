@@ -243,7 +243,7 @@ async def create_memory(
 
     # Check if app is active
     if not app_obj.is_active:
-        raise HTTPException(status_code=403, detail=f"App {request.app} is currently paused on OpenMemory. Cannot create new memories.")
+        raise HTTPException(status_code=403, detail=f"App {request.app} is currently inactive on OpenMemory. Cannot create new memories.")
 
     # Log what we're about to do
     logging.info(f"Creating memory for user_id: {request.user_id} with app: {request.app}")
@@ -410,88 +410,6 @@ async def archive_memories(
     for memory_id in request.memory_ids:
         update_memory_state(db, memory_id, MemoryState.archived, request.user_id)
     return {"message": f"Successfully archived {len(request.memory_ids)} memories"}
-
-
-class PauseMemoriesRequest(BaseModel):
-    memory_ids: Optional[List[UUID]] = None
-    category_ids: Optional[List[UUID]] = None
-    app_id: Optional[UUID] = None
-    all_for_app: bool = False
-    global_pause: bool = False
-    state: Optional[MemoryState] = None
-    user_id: str
-
-# Pause access to memories
-@router.post("/actions/pause", summary="暂停/恢复记忆访问", description="暂停或恢复记忆的访问权限，支持按记忆ID、分类ID、应用ID或全局暂停")
-async def pause_memories(
-    request: PauseMemoriesRequest,
-    db: Session = Depends(get_db)
-):
-    
-    global_pause = request.global_pause
-    all_for_app = request.all_for_app
-    app_id = request.app_id
-    memory_ids = request.memory_ids
-    category_ids = request.category_ids
-    state = request.state or MemoryState.paused
-
-    user = db.query(User).filter(User.user_id == request.user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    user_id = user.id
-    
-    if global_pause:
-        # Pause all memories
-        memories = db.query(Memory).filter(
-            Memory.state != MemoryState.deleted,
-            Memory.state != MemoryState.archived
-        ).all()
-        for memory in memories:
-            update_memory_state(db, memory.id, state, user_id)
-        return {"message": "Successfully paused all memories"}
-
-    if app_id:
-        # Pause all memories for an app
-        memories = db.query(Memory).filter(
-            Memory.app_id == app_id,
-            Memory.user_id == user.id,
-            Memory.state != MemoryState.deleted,
-            Memory.state != MemoryState.archived
-        ).all()
-        for memory in memories:
-            update_memory_state(db, memory.id, state, user_id)
-        return {"message": f"Successfully paused all memories for app {app_id}"}
-    
-    if all_for_app and memory_ids:
-        # Pause all memories for an app
-        memories = db.query(Memory).filter(
-            Memory.user_id == user.id,
-            Memory.state != MemoryState.deleted,
-            Memory.id.in_(memory_ids)
-        ).all()
-        for memory in memories:
-            update_memory_state(db, memory.id, state, user_id)
-        return {"message": "Successfully paused all memories"}
-
-    if memory_ids:
-        # Pause specific memories
-        for memory_id in memory_ids:
-            update_memory_state(db, memory_id, state, user_id)
-        return {"message": f"Successfully paused {len(memory_ids)} memories"}
-
-    if category_ids:
-        # Pause memories by category
-        memories = db.query(Memory).join(Memory.categories).filter(
-            Category.id.in_(category_ids),
-            Memory.state != MemoryState.deleted,
-            Memory.state != MemoryState.archived
-        ).all()
-        for memory in memories:
-            update_memory_state(db, memory.id, state, user_id)
-        return {"message": f"Successfully paused memories in {len(category_ids)} categories"}
-
-    raise HTTPException(status_code=400, detail="Invalid pause request parameters")
 
 
 # Get memory access logs

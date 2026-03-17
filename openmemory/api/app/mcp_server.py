@@ -80,7 +80,7 @@ async def add_memories(text: str) -> str:
 
             # Check if app is active
             if not app.is_active:
-                return f"Error: App {app.name} is currently paused on OpenMemory. Cannot create new memories."
+                return f"Error: App {app.name} is currently inactive on OpenMemory. Cannot create new memories."
 
             response = memory_client.add(text,
                                          user_id=uid,

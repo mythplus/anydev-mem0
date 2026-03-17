@@ -193,7 +193,7 @@ def _export_logical_memories_gz(
       "metadata": {...},
       "created_at": "<iso8601 or null>",
       "updated_at": "<iso8601 or null>",
-      "state": "active|paused|archived|deleted",
+      "state": "active|archived|deleted",
       "app": "<app name or null>",
       "categories": ["catA", "catB", ...]
     }
