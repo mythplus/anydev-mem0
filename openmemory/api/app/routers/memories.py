@@ -197,6 +197,8 @@ async def get_categories(
     user_id: str,
     db: Session = Depends(get_db)
 ):
+    import re
+
     user = db.query(User).filter(User.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -205,9 +207,26 @@ async def get_categories(
     # Get all memories
     memories = db.query(Memory).filter(Memory.user_id == user.id, Memory.state != MemoryState.deleted, Memory.state != MemoryState.archived).all()
     # Get all categories from memories
-    categories = [category for memory in memories for category in memory.categories]
-    # Get unique categories
-    unique_categories = list(set(categories))
+    raw_categories = [category for memory in memories for category in memory.categories]
+
+    # 对分类名做拆分和去重处理
+    invalid_names = {'null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'}
+    seen_names = set()
+    unique_categories = []
+    for cat in raw_categories:
+        # 按逗号、&、and 等分隔符拆分复合分类
+        sub_names = re.split(r'\s*[,，]\s*|\s*&\s*|\s+and\s+', cat.name)
+        for sub in sub_names:
+            cleaned = sub.strip().lower()
+            if not cleaned:
+                continue
+            if cleaned in invalid_names:
+                continue
+            if re.match(r'^[^\w]+$', cleaned):
+                continue
+            if cleaned not in seen_names:
+                seen_names.add(cleaned)
+                unique_categories.append({"id": str(cat.id), "name": cleaned, "description": cat.description or "", "created_at": str(cat.created_at), "updated_at": str(cat.updated_at)})
 
     return {
         "categories": unique_categories,

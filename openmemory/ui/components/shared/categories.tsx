@@ -157,7 +157,23 @@ const Categories = ({
     // 去重
     .filter((cat, index, self) => self.indexOf(cat) === index);
 
-  if (validCategories.length === 0) return null;
+  // 没有有效分类时，默认显示 "null" 标签
+  if (validCategories.length === 0) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Badge
+          variant="outline"
+          className={`${
+            isPaused
+              ? pausedStyle
+              : "text-zinc-400 bg-zinc-500/10 border-zinc-500/20"
+          } ${baseBadgeStyle}`}
+        >
+          null
+        </Badge>
+      </div>
+    );
+  }
 
   const baseBadgeStyle =
     "backdrop-blur-sm transition-colors hover:bg-opacity-20";

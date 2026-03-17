@@ -19,6 +19,7 @@ import { useAppsApi } from "@/hooks/useAppsApi";
 import { useFiltersApi } from "@/hooks/useFiltersApi";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
+import { constants as appConstants, Icon } from "@/components/shared/source-app";
 import {
     clearFilters,
     setSelectedApps,
@@ -227,7 +228,7 @@ export default function FilterComponent() {
           </div>
 
           {/* Tab 内容区 */}
-          <div className="max-h-[300px] overflow-y-auto">
+          <div className="max-h-[600px] overflow-y-auto">
             {activeTab === "apps" && (
               <DropdownMenuGroup>
                 {/* 全选 */}
@@ -259,21 +260,28 @@ export default function FilterComponent() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator className="bg-zinc-800" />
-                {apps.map((app) => (
-                  <DropdownMenuItem
-                    key={app.id}
-                    className="cursor-pointer flex justify-between items-center px-4 py-2"
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      toggleAppFilter(app.id);
-                    }}
-                  >
-                    {app.name}
-                    {filters.selectedApps.includes(app.id) && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
+                {apps.map((app) => {
+                  const appConst = appConstants[app.name as keyof typeof appConstants];
+                  const displayName = appConst ? appConst.name : app.name;
+                  return (
+                    <DropdownMenuItem
+                      key={app.id}
+                      className="cursor-pointer flex justify-between items-center px-4 py-2"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        toggleAppFilter(app.id);
+                      }}
+                    >
+                      <span className="flex items-center gap-2">
+                        {appConst && appConst.icon}
+                        {displayName}
+                      </span>
+                      {filters.selectedApps.includes(app.id) && (
+                        <Check className="h-4 w-4 text-primary" />
+                      )}
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuGroup>
             )}
 
