@@ -10,7 +10,7 @@ import {
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useUI } from "@/hooks/useUI";
 import { useLanguage } from "@/lib/LanguageContext";
-import { Archive, ChevronDown, Pause, Pencil, Play } from "lucide-react";
+import { Archive, ChevronDown, Pencil, Play } from "lucide-react";
 
 interface MemoryActionsProps {
   memoryId: string;
@@ -39,8 +39,6 @@ export function MemoryActions({
     switch (memoryState) {
       case "archived":
         return t("state.archived");
-      case "paused":
-        return t("state.paused");
       default:
         return t("state.active");
     }
@@ -50,8 +48,6 @@ export function MemoryActions({
     switch (memoryState) {
       case "archived":
         return <Archive className="h-3 w-3 mr-2" />;
-      case "paused":
-        return <Pause className="h-3 w-3 mr-2" />;
       default:
         return <Play className="h-3 w-3 mr-2" />;
     }
@@ -81,14 +77,6 @@ export function MemoryActions({
           >
             <Play className="h-3 w-3 mr-2" />
             <span className="font-semibold">{t("memoryDetail.active")}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handleStateChange("paused")}
-            className="cursor-pointer flex items-center"
-            disabled={memoryState === "paused"}
-          >
-            <Pause className="h-3 w-3 mr-2" />
-            <span className="font-semibold">{t("memoryDetail.pause")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => handleStateChange("archived")}

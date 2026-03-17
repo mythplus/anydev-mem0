@@ -49,8 +49,6 @@ import {
     Archive,
     Edit,
     MoreHorizontal,
-    Pause,
-    Play,
     Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -71,7 +69,7 @@ export function MemoryTable() {
   );
   const memories = useSelector((state: RootState) => state.memories.memories);
 
-  const { deleteMemories, updateMemoryState, isLoading } = useMemoriesApi();
+  const { deleteMemories, updateMemoryState, archiveMemories, isLoading } = useMemoriesApi();
 
   // 删除确认对话框状态
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -116,13 +114,25 @@ export function MemoryTable() {
     handleOpenUpdateMemoryDialog(memory_id, memory_content);
   };
 
-  const handleUpdateMemoryState = async (id: string, newState: string) => {
+  const handleArchiveMemory = async (id: string) => {
     try {
-      await updateMemoryState([id], newState);
+      await archiveMemories([id]);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update memory state",
+        description: "Failed to archive memory",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnarchiveMemory = async (id: string) => {
+    try {
+      await updateMemoryState([id], "active");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unarchive memory",
         variant: "destructive",
       });
     }
@@ -193,7 +203,7 @@ export function MemoryTable() {
             <TableRow
               key={memory.id}
               className={`hover:bg-zinc-900/50 ${
-                memory.state === "paused" || memory.state === "archived"
+                memory.state === "archived"
                   ? "text-zinc-400"
                   : ""
               } ${isLoading ? "animate-pulse opacity-50" : ""}`}
@@ -208,18 +218,13 @@ export function MemoryTable() {
                 />
               </TableCell>
               <TableCell className="">
-                {memory.state === "paused" || memory.state === "archived" ? (
+                {memory.state === "archived" ? (
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
                         <div
                           onClick={() => handleMemoryClick(memory.id)}
-                          className={`font-medium ${
-                            memory.state === "paused" ||
-                            memory.state === "archived"
-                              ? "text-zinc-400"
-                              : "text-white"
-                          } cursor-pointer`}
+                          className="font-medium text-zinc-400 cursor-pointer"
                         >
                           {memory.memory}
                         </div>
@@ -228,7 +233,7 @@ export function MemoryTable() {
                         <p>
                           {t("table.memoryIsPaused")}
                           <span className="font-bold">
-                            {memory.state === "paused" ? t("table.paused") : t("table.archived")}
+                            {t("table.archived")}
                           </span>
                           {t("table.andDisabled")}<span className="font-bold">{t("table.disabled")}</span>
                         </p>
@@ -238,7 +243,7 @@ export function MemoryTable() {
                 ) : (
                   <div
                     onClick={() => handleMemoryClick(memory.id)}
-                    className={`font-medium text-white cursor-pointer`}
+                    className="font-medium text-white cursor-pointer"
                   >
                     {memory.memory}
                   </div>
@@ -248,9 +253,7 @@ export function MemoryTable() {
                 <div className="flex flex-wrap gap-1">
                   <Categories
                     categories={memory.categories}
-                    isPaused={
-                      memory.state === "paused" || memory.state === "archived"
-                    }
+                    isPaused={memory.state === "archived"}
                     concat={true}
                   />
                 </div>
@@ -275,29 +278,11 @@ export function MemoryTable() {
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onClick={() => {
-                        const newState =
-                          memory.state === "active" ? "paused" : "active";
-                        handleUpdateMemoryState(memory.id, newState);
-                      }}
-                    >
-                      {memory?.state === "active" ? (
-                        <>
-                      <Pause className="mr-2 h-4 w-4" />
-                          {t("table.pause")}
-                        </>
-                      ) : (
-                        <>
-                          <Play className="mr-2 h-4 w-4" />
-                          {t("table.resume")}
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() => {
-                        const newState =
-                          memory.state === "active" ? "archived" : "active";
-                        handleUpdateMemoryState(memory.id, newState);
+                        if (memory.state !== "archived") {
+                          handleArchiveMemory(memory.id);
+                        } else {
+                          handleUnarchiveMemory(memory.id);
+                        }
                       }}
                     >
                       <Archive className="mr-2 h-4 w-4" />

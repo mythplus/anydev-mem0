@@ -278,7 +278,7 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // 创建记忆对话框
     "createMemory.title": "创建新记忆",
-    "createMemory.description": "添加一条新记忆到你的 OpenMemory 实例",
+    "createMemory.description": "添加一条新记忆到你的应用实例",
     "createMemory.label": "记忆内容",
     "createMemory.placeholder": "例如：住在旧金山",
     "createMemory.cancel": "取消",

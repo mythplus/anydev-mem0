@@ -89,12 +89,22 @@ const SidebarProvider = React.forwardRef<
       [setOpenProp, open]
     )
 
+    // 当窗口宽度跨过断点时，自动折叠/展开侧边栏
+    React.useEffect(() => {
+      if (isMobile) {
+        // 窗口缩小到移动端断点，自动折叠侧边栏
+        setOpen(false)
+      } else {
+        // 窗口放大到桌面端断点，自动展开侧边栏
+        setOpen(true)
+      }
+    }, [isMobile]) // eslint-disable-line react-hooks/exhaustive-deps
+
     // Helper to toggle the sidebar.
+    // 始终使用setOpen来控制折叠状态，确保在小屏幕下也能正常切换
     const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open)
-    }, [isMobile, setOpen, setOpenMobile])
+      return setOpen((open) => !open)
+    }, [setOpen])
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -192,8 +202,7 @@ const Sidebar = React.forwardRef<
       )
     }
 
-    // 在移动端(小屏幕)下，如果collapsible为icon，则自动折叠成图标模式，始终显示
-    // 否则使用Sheet抽屉模式
+    // 非icon模式下，移动端使用Sheet抽屉模式
     if (isMobile && collapsible !== "icon") {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
@@ -214,15 +223,12 @@ const Sidebar = React.forwardRef<
       )
     }
 
-    // 当collapsible为icon且是移动端时，强制折叠状态
-    const effectiveState = (isMobile && collapsible === "icon") ? "collapsed" : state
-
     return (
       <div
         ref={ref}
         className="group peer block text-sidebar-foreground"
-        data-state={effectiveState}
-        data-collapsible={effectiveState === "collapsed" ? collapsible : ""}
+        data-state={state}
+        data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
         data-side={side}
       >

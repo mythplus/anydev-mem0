@@ -84,7 +84,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
               <div className="border-l-2 border-primary pl-4 mb-6">
                 <p
                   className={`${
-                    memory?.state === "archived" || memory?.state === "paused"
+                    memory?.state === "archived"
                       ? "text-zinc-400"
                       : "text-white"
                   }`}
@@ -98,10 +98,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
                   <div className="">
                     <Categories
                       categories={memory?.categories || []}
-                      isPaused={
-                        memory?.state === "archived" ||
-                        memory?.state === "paused"
-                      }
+                      isPaused={memory?.state === "archived"}
                     />
                   </div>
                   <div className="flex items-center gap-2 min-w-[300px] justify-end">
