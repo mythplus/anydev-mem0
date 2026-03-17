@@ -73,9 +73,9 @@ export function MemoryCard({
               )}
             </span>
 
-            {state !== "active" && (
+            {state === "archived" && (
               <span className="inline-block px-3 border border-yellow-600 text-yellow-600 font-semibold text-xs rounded-full bg-yellow-400/10 backdrop-blur-sm">
-                {state === "paused" ? t("state.paused") : t("state.archived")}
+                {t("state.archived")}
               </span>
             )}
           </div>

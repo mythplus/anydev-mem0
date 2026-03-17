@@ -1,19 +1,11 @@
 "use client";
 
-import { ChevronDown, Filter, SortAsc, SortDesc } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown, Filter, SortAsc, SortDesc, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -23,8 +15,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppsApi } from "@/hooks/useAppsApi";
 import { useFiltersApi } from "@/hooks/useFiltersApi";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
@@ -60,12 +50,6 @@ export default function FilterComponent() {
   const { fetchMemories } = useMemoriesApi();
   const { t } = useLanguage();
   const columns = getColumns(t);
-  const [isOpen, setIsOpen] = useState(false);
-  const [tempSelectedApps, setTempSelectedApps] = useState<string[]>([]);
-  const [tempSelectedCategories, setTempSelectedCategories] = useState<
-    string[]
-  >([]);
-
 
   const apps = useSelector((state: RootState) => state.apps.apps);
   const categories = useSelector(
@@ -73,67 +57,32 @@ export default function FilterComponent() {
   );
   const filters = useSelector((state: RootState) => state.filters.apps);
 
+  // 用于控制下拉菜单保持打开状态
+  const [appsOpen, setAppsOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+
   useEffect(() => {
     fetchApps();
     fetchCategories();
   }, [fetchApps, fetchCategories]);
 
   useEffect(() => {
-    // Initialize temporary selections with current active filters when dialog opens
-    if (isOpen) {
-      setTempSelectedApps(filters.selectedApps);
-      setTempSelectedCategories(filters.selectedCategories);
-    }
-  }, [isOpen, filters]);
-
-  useEffect(() => {
     handleClearFilters();
   }, []);
 
-  const toggleAppFilter = (app: string) => {
-    setTempSelectedApps((prev) =>
-      prev.includes(app) ? prev.filter((a) => a !== app) : [...prev, app]
-    );
-  };
+  // 应用筛选相关的回调
+  const applyWithFilters = async (
+    selectedApps: string[],
+    selectedCategories: string[]
+  ) => {
+    const selectedCategoryIds = categories
+      .filter((cat) => selectedCategories.includes(cat.name))
+      .map((cat) => cat.id);
+    const selectedAppIds = apps
+      .filter((app) => selectedApps.includes(app.id))
+      .map((app) => app.id);
 
-  const toggleCategoryFilter = (category: string) => {
-    setTempSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  const toggleAllApps = (checked: boolean) => {
-    setTempSelectedApps(checked ? apps.map((app) => app.id) : []);
-  };
-
-  const toggleAllCategories = (checked: boolean) => {
-    setTempSelectedCategories(checked ? categories.map((cat) => cat.name) : []);
-  };
-
-  const handleClearFilters = async () => {
-    setTempSelectedApps([]);
-    setTempSelectedCategories([]);
-    dispatch(clearFilters());
-    await fetchMemories();
-  };
-
-  const handleApplyFilters = async () => {
     try {
-      // Get category IDs for selected category names
-      const selectedCategoryIds = categories
-        .filter((cat) => tempSelectedCategories.includes(cat.name))
-        .map((cat) => cat.id);
-
-      // Get app IDs for selected app names
-      const selectedAppIds = apps
-        .filter((app) => tempSelectedApps.includes(app.id))
-        .map((app) => app.id);
-
-      // Update the global state with temporary selections
-      dispatch(setSelectedApps(tempSelectedApps));
-      dispatch(setSelectedCategories(tempSelectedCategories));
       await fetchMemories(undefined, 1, 10, {
         apps: selectedAppIds,
         categories: selectedCategoryIds,
@@ -141,19 +90,42 @@ export default function FilterComponent() {
         sortDirection: filters.sortDirection,
         showArchived: filters.showArchived,
       });
-      setIsOpen(false);
     } catch (error) {
       console.error("Failed to apply filters:", error);
     }
   };
 
-  const handleDialogChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      // Reset temporary selections to active filters when dialog closes without applying
-      setTempSelectedApps(filters.selectedApps);
-      setTempSelectedCategories(filters.selectedCategories);
-    }
+  const toggleAppFilter = async (appId: string) => {
+    const newSelected = filters.selectedApps.includes(appId)
+      ? filters.selectedApps.filter((a) => a !== appId)
+      : [...filters.selectedApps, appId];
+    dispatch(setSelectedApps(newSelected));
+    await applyWithFilters(newSelected, filters.selectedCategories);
+  };
+
+  const toggleAllApps = async (selectAll: boolean) => {
+    const newSelected = selectAll ? apps.map((app) => app.id) : [];
+    dispatch(setSelectedApps(newSelected));
+    await applyWithFilters(newSelected, filters.selectedCategories);
+  };
+
+  const toggleCategoryFilter = async (categoryName: string) => {
+    const newSelected = filters.selectedCategories.includes(categoryName)
+      ? filters.selectedCategories.filter((c) => c !== categoryName)
+      : [...filters.selectedCategories, categoryName];
+    dispatch(setSelectedCategories(newSelected));
+    await applyWithFilters(filters.selectedApps, newSelected);
+  };
+
+  const toggleAllCategories = async (selectAll: boolean) => {
+    const newSelected = selectAll ? categories.map((cat) => cat.name) : [];
+    dispatch(setSelectedCategories(newSelected));
+    await applyWithFilters(filters.selectedApps, newSelected);
+  };
+
+  const handleClearFilters = async () => {
+    dispatch(clearFilters());
+    await fetchMemories();
   };
 
   const setSorting = async (column: string) => {
@@ -163,14 +135,11 @@ export default function FilterComponent() {
         : "asc";
     updateSort(column, newDirection);
 
-    // Get category IDs for selected category names
     const selectedCategoryIds = categories
-      .filter((cat) => tempSelectedCategories.includes(cat.name))
+      .filter((cat) => filters.selectedCategories.includes(cat.name))
       .map((cat) => cat.id);
-
-    // Get app IDs for selected app names
     const selectedAppIds = apps
-      .filter((app) => tempSelectedApps.includes(app.id))
+      .filter((app) => filters.selectedApps.includes(app.id))
       .map((app) => app.id);
 
     try {
@@ -185,162 +154,148 @@ export default function FilterComponent() {
     }
   };
 
-  const hasActiveFilters =
-    filters.selectedApps.length > 0 ||
-    filters.selectedCategories.length > 0;
+  const appFilterCount = filters.selectedApps.length;
+  const categoryFilterCount = filters.selectedCategories.length;
 
-  const hasTempFilters =
-    tempSelectedApps.length > 0 ||
-    tempSelectedCategories.length > 0;
+  // 获取应用筛选按钮显示文本
+  const getAppFilterLabel = () => {
+    if (appFilterCount === 0) return t("filter.apps");
+    if (appFilterCount === 1) {
+      const app = apps.find((a) => a.id === filters.selectedApps[0]);
+      return app?.name || t("filter.apps");
+    }
+    return `${t("filter.apps")} (${appFilterCount})`;
+  };
+
+  // 获取分类筛选按钮显示文本
+  const getCategoryFilterLabel = () => {
+    if (categoryFilterCount === 0) return t("filter.categories");
+    if (categoryFilterCount === 1) {
+      return filters.selectedCategories[0];
+    }
+    return `${t("filter.categories")} (${categoryFilterCount})`;
+  };
 
   return (
     <div className="flex items-center gap-2">
-      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-        <DialogTrigger asChild>
+      {/* 应用筛选下拉 */}
+      <DropdownMenu open={appsOpen} onOpenChange={setAppsOpen}>
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             className={`h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 ${
-              hasActiveFilters ? "border-primary" : ""
+              appFilterCount > 0 ? "border-primary" : ""
             }`}
           >
             <Filter
-              className={`h-4 w-4 ${hasActiveFilters ? "text-primary" : ""}`}
+              className={`h-4 w-4 ${appFilterCount > 0 ? "text-primary" : ""}`}
             />
-            {t("filter.button")}
-            {hasActiveFilters && (
-              <Badge className="ml-2 bg-primary hover:bg-primary/80 text-xs">
-                {filters.selectedApps.length +
-                  filters.selectedCategories.length}
-              </Badge>
-            )}
+            {getAppFilterLabel()}
+            <ChevronDown className="h-4 w-4 ml-1" />
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] bg-zinc-900 border-zinc-800 text-zinc-100">
-          <DialogHeader>
-            <DialogTitle className="text-zinc-100 flex justify-between items-center">
-              <span>{t("filter.title")}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <Tabs defaultValue="apps" className="w-full">
-            <TabsList className="grid grid-cols-2 bg-zinc-800">
-              <TabsTrigger
-                value="apps"
-                className="data-[state=active]:bg-zinc-700"
-              >
-                {t("filter.apps")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="categories"
-                className="data-[state=active]:bg-zinc-700"
-              >
-                {t("filter.categories")}
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="apps" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="select-all-apps"
-                    checked={
-                      apps.length > 0 && tempSelectedApps.length === apps.length
-                    }
-                    onCheckedChange={(checked) =>
-                      toggleAllApps(checked as boolean)
-                    }
-                    className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <Label
-                    htmlFor="select-all-apps"
-                    className="text-sm font-normal text-zinc-300 cursor-pointer"
-                  >
-                    {t("filter.selectAll")}
-                  </Label>
-                </div>
-                {apps.map((app) => (
-                  <div key={app.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`app-${app.id}`}
-                      checked={tempSelectedApps.includes(app.id)}
-                      onCheckedChange={() => toggleAppFilter(app.id)}
-                      className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <Label
-                      htmlFor={`app-${app.id}`}
-                      className="text-sm font-normal text-zinc-300 cursor-pointer"
-                    >
-                      {app.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="categories" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="select-all-categories"
-                    checked={
-                      categories.length > 0 &&
-                      tempSelectedCategories.length === categories.length
-                    }
-                    onCheckedChange={(checked) =>
-                      toggleAllCategories(checked as boolean)
-                    }
-                    className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <Label
-                    htmlFor="select-all-categories"
-                    className="text-sm font-normal text-zinc-300 cursor-pointer"
-                  >
-                    {t("filter.selectAll")}
-                  </Label>
-                </div>
-                {categories.map((category) => (
-                  <div
-                    key={category.name}
-                    className="flex items-center space-x-2"
-                  >
-                    <Checkbox
-                      id={`category-${category.name}`}
-                      checked={tempSelectedCategories.includes(category.name)}
-                      onCheckedChange={() =>
-                        toggleCategoryFilter(category.name)
-                      }
-                      className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <Label
-                      htmlFor={`category-${category.name}`}
-                      className="text-sm font-normal text-zinc-300 cursor-pointer"
-                    >
-                      {category.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-          </Tabs>
-          <div className="flex justify-end mt-4 gap-3">
-            {/* Clear all button */}
-            {hasTempFilters && (
-              <Button
-                onClick={handleClearFilters}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-              >
-                {t("filter.clearAll")}
-              </Button>
-            )}
-            {/* Apply filters button */}
-            <Button
-              onClick={handleApplyFilters}
-              className="bg-primary hover:bg-primary/80 text-white"
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[300px] overflow-y-auto"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DropdownMenuLabel>{t("filter.apps")}</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-zinc-800" />
+          <DropdownMenuGroup>
+            {/* 全选 */}
+            <DropdownMenuItem
+              className="cursor-pointer flex justify-between items-center"
+              onSelect={(e) => {
+                e.preventDefault();
+                toggleAllApps(
+                  !(apps.length > 0 && filters.selectedApps.length === apps.length)
+                );
+              }}
             >
-              {t("filter.apply")}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              {t("filter.selectAll")}
+              {apps.length > 0 && filters.selectedApps.length === apps.length && (
+                <Check className="h-4 w-4 text-primary" />
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-zinc-800" />
+            {apps.map((app) => (
+              <DropdownMenuItem
+                key={app.id}
+                className="cursor-pointer flex justify-between items-center"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  toggleAppFilter(app.id);
+                }}
+              >
+                {app.name}
+                {filters.selectedApps.includes(app.id) && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
+      {/* 分类筛选下拉 */}
+      <DropdownMenu open={categoriesOpen} onOpenChange={setCategoriesOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className={`h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 ${
+              categoryFilterCount > 0 ? "border-primary" : ""
+            }`}
+          >
+            <Filter
+              className={`h-4 w-4 ${categoryFilterCount > 0 ? "text-primary" : ""}`}
+            />
+            {getCategoryFilterLabel()}
+            <ChevronDown className="h-4 w-4 ml-1" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100 max-h-[300px] overflow-y-auto"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
+          <DropdownMenuLabel>{t("filter.categories")}</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-zinc-800" />
+          <DropdownMenuGroup>
+            {/* 全选 */}
+            <DropdownMenuItem
+              className="cursor-pointer flex justify-between items-center"
+              onSelect={(e) => {
+                e.preventDefault();
+                toggleAllCategories(
+                  !(categories.length > 0 && filters.selectedCategories.length === categories.length)
+                );
+              }}
+            >
+              {t("filter.selectAll")}
+              {categories.length > 0 &&
+                filters.selectedCategories.length === categories.length && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-zinc-800" />
+            {categories.map((category) => (
+              <DropdownMenuItem
+                key={category.name}
+                className="cursor-pointer flex justify-between items-center"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  toggleCategoryFilter(category.name);
+                }}
+              >
+                {category.name}
+                {filters.selectedCategories.includes(category.name) && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* 排序下拉 */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

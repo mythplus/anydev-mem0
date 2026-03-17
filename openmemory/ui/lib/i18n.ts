@@ -27,8 +27,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.clearFilters": "Clear Filters",
     "memories.actions": "Actions",
     "memories.archiveSelected": "Archive Selected",
-    "memories.pauseSelected": "Pause Selected",
-    "memories.resumeSelected": "Resume Selected",
     "memories.deleteSelected": "Delete Selected",
     "memories.noMemories": "No memories found",
     "memories.adjustFilters": "Try adjusting your filters",
@@ -45,8 +43,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.categories": "Categories",
     "table.sourceApp": "Source App",
     "table.createdOn": "Created On",
-    "table.pause": "Pause",
-    "table.resume": "Resume",
     "table.archive": "Archive",
     "table.unarchive": "Unarchive",
     "table.edit": "Edit",
@@ -55,8 +51,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.deleteConfirmDesc": "Are you sure you want to delete the following memory?",
     "table.deleteConfirmBtn": "Confirm Delete",
     "table.deleteCancel": "Cancel",
-    "table.memoryIsPaused": "This memory is",
-    "table.paused": "paused",
+    "table.memoryIsPaused": "This memory is ",
     "table.archived": "archived",
     "table.andDisabled": "and",
     "table.disabled": "disabled",
@@ -138,7 +133,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memoryDetail.loadingRelated": "Loading related memories...",
     "memoryDetail.changeState": "Change State",
     "memoryDetail.active": "Active",
-    "memoryDetail.pause": "Pause",
     "memoryDetail.archive": "Archive",
 
     // Settings page
@@ -208,7 +202,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notFound.pageNotFound": "Page Not Found",
 
     // Memory states
-    "state.paused": "Paused",
     "state.archived": "Archived",
     "state.active": "Active",
     "state.inactive": "Inactive",
@@ -242,8 +235,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.clearFilters": "清除筛选",
     "memories.actions": "操作",
     "memories.archiveSelected": "归档选中",
-    "memories.pauseSelected": "暂停选中",
-    "memories.resumeSelected": "恢复选中",
     "memories.deleteSelected": "删除选中",
     "memories.noMemories": "未找到记忆",
     "memories.adjustFilters": "请尝试调整筛选条件",
@@ -260,8 +251,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.categories": "分类",
     "table.sourceApp": "来源应用",
     "table.createdOn": "创建时间",
-    "table.pause": "暂停",
-    "table.resume": "恢复",
     "table.archive": "归档",
     "table.unarchive": "取消归档",
     "table.edit": "编辑",
@@ -271,7 +260,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.deleteConfirmBtn": "确认删除",
     "table.deleteCancel": "取消",
     "table.memoryIsPaused": "该记忆已",
-    "table.paused": "暂停",
     "table.archived": "归档",
     "table.andDisabled": "且已",
     "table.disabled": "禁用",
@@ -353,7 +341,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memoryDetail.loadingRelated": "正在加载相关记忆...",
     "memoryDetail.changeState": "更改状态",
     "memoryDetail.active": "活跃",
-    "memoryDetail.pause": "暂停",
     "memoryDetail.archive": "归档",
 
     // 设置页面
@@ -423,7 +410,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "notFound.pageNotFound": "页面未找到",
 
     // 记忆状态
-    "state.paused": "已暂停",
     "state.archived": "已归档",
     "state.active": "活跃",
     "state.inactive": "未活跃",

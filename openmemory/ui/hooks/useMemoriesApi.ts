@@ -145,7 +145,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         id: item.id,
         memory: item.content,
         created_at: new Date(item.created_at).getTime(),
-        state: item.state as "active" | "paused" | "archived" | "deleted",
+        state: item.state as "active" | "archived" | "deleted",
         metadata: item.metadata_,
         categories: item.categories as Category[],
         client: 'api',
@@ -277,7 +277,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         id: item.id,
         memory: item.content,
         created_at: item.created_at,
-        state: item.state as "active" | "paused" | "archived" | "deleted",
+        state: item.state as "active" | "archived" | "deleted",
         metadata: item.metadata_,
         categories: item.categories as Category[],
         client: 'api',
@@ -348,7 +348,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
   };
 
   /**
-   * 批量更新记忆状态（暂停/激活/归档）
+   * 批量更新记忆状态（激活/归档）
    * POST /api/v1/memories/actions/pause
    */
   const updateMemoryState = async (memoryIds: string[], state: string): Promise<void> => {
@@ -366,7 +366,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       });
       dispatch(setMemoriesSuccess(memories.map((memory: Memory) => {
         if (memoryIds.includes(memory.id)) {
-          return { ...memory, state: state as "active" | "paused" | "archived" | "deleted" };
+          return { ...memory, state: state as "active" | "archived" | "deleted" };
         }
         return memory;
       })));
@@ -378,7 +378,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
 
       // if selected memory, update it
       if (selectedMemory?.id && memoryIds.includes(selectedMemory.id)) {
-        dispatch(setSelectedMemory({ ...selectedMemory, state: state as "active" | "paused" | "archived" | "deleted" }));
+        dispatch(setSelectedMemory({ ...selectedMemory, state: state as "active" | "archived" | "deleted" }));
       }
 
       setIsLoading(false);

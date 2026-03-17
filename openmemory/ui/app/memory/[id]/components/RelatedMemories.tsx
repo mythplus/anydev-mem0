@@ -66,14 +66,12 @@ export function RelatedMemories({ memoryId }: RelatedMemoriesProps) {
                 <div className="flex items-center gap-3">
                   <Categories
                     categories={memory.categories}
-                    isPaused={
-                      memory.state === "paused" || memory.state === "archived"
-                    }
+                    isPaused={memory.state === "archived"}
                     concat={true}
                   />
-                  {memory.state !== "active" && (
+                  {memory.state === "archived" && (
                     <span className="inline-block px-3 border border-yellow-600 text-yellow-600 font-semibold text-xs rounded-full bg-yellow-400/10 backdrop-blur-sm">
-                      {memory.state === "paused" ? t("state.paused") : t("state.archived")}
+                      {t("state.archived")}
                     </span>
                   )}
                 </div>
