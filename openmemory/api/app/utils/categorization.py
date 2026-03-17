@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from typing import List
 
 from app.utils.prompts import MEMORY_CATEGORIZATION_PROMPT
@@ -46,7 +47,19 @@ def get_categories_for_memory(memory: str) -> List[str]:
 
         raw_content = completion.choices[0].message.content
         parsed = MemoryCategories(**json.loads(raw_content))
-        return [cat.strip().lower() for cat in parsed.categories]
+        # 过滤无效分类：去除空字符串、纯符号（如 ——、--、…）等
+        valid_categories = []
+        for cat in parsed.categories:
+            cleaned = cat.strip().lower()
+            # 跳过空字符串或仅由非字母数字字符组成的值（如 ——、--、...、null、none）
+            if not cleaned:
+                continue
+            if cleaned in ('null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'):
+                continue
+            if re.match(r'^[^\w]+$', cleaned):
+                continue
+            valid_categories.append(cleaned)
+        return valid_categories
 
     except Exception as e:
         logging.error(f"[ERROR] Failed to get categories: {e}")
@@ -54,4 +67,5 @@ def get_categories_for_memory(memory: str) -> List[str]:
             logging.debug(f"[DEBUG] Raw response: {completion.choices[0].message.content}")
         except Exception as debug_e:
             logging.debug(f"[DEBUG] Could not extract raw response: {debug_e}")
-        raise
+        # 分类失败时返回空列表，而不是抛出异常触发重试
+        return []

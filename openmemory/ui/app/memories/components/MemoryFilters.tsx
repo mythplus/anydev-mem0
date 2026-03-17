@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
-import { clearFilters, setShowArchived } from "@/store/filtersSlice";
+import { setShowArchived } from "@/store/filtersSlice";
 import { clearSelection, triggerRefresh } from "@/store/memoriesSlice";
 import { RootState } from "@/store/store";
 import { debounce } from "lodash";
@@ -26,7 +26,7 @@ export function MemoryFilters() {
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
-  const { deleteMemories, archiveMemories, fetchMemories } = useMemoriesApi();
+  const { deleteMemories, archiveMemories } = useMemoriesApi();
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeFilters = useSelector((state: RootState) => state.filters.apps);
@@ -74,14 +74,7 @@ export function MemoryFilters() {
     dispatch(triggerRefresh());
   }, [dispatch]);
 
-  const handleClearAllFilters = async () => {
-    dispatch(clearFilters());
-    await fetchMemories(); // Fetch memories without any filters
-  };
 
-  const hasActiveFilters =
-    activeFilters.selectedApps.length > 0 ||
-    activeFilters.selectedCategories.length > 0;
 
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -124,15 +117,6 @@ export function MemoryFilters() {
           </DropdownMenuContent>
         </DropdownMenu>
         <FilterComponent />
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            className="bg-zinc-900 text-zinc-300 hover:bg-zinc-800 whitespace-nowrap"
-            onClick={handleClearAllFilters}
-          >
-            {t("memories.clearFilters")}
-          </Button>
-        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

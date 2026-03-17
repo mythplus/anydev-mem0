@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Filter, SortAsc, SortDesc, Check } from "lucide-react";
+import { ChevronDown, Filter, SortAsc, SortDesc, Check, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -245,6 +245,19 @@ export default function FilterComponent() {
                     <Check className="h-4 w-4 text-primary" />
                   )}
                 </DropdownMenuItem>
+                {/* 清除筛选 */}
+                {appFilterCount > 0 && (
+                  <DropdownMenuItem
+                    className="cursor-pointer flex justify-between items-center px-4 py-2 text-zinc-400 hover:text-zinc-200"
+                    onSelect={() => {
+                      toggleAllApps(false);
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {t("memories.clearFilters")}
+                    <X className="h-4 w-4" />
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="bg-zinc-800" />
                 {apps.map((app) => (
                   <DropdownMenuItem
@@ -282,6 +295,19 @@ export default function FilterComponent() {
                       <Check className="h-4 w-4 text-primary" />
                     )}
                 </DropdownMenuItem>
+                {/* 清除筛选 */}
+                {categoryFilterCount > 0 && (
+                  <DropdownMenuItem
+                    className="cursor-pointer flex justify-between items-center px-4 py-2 text-zinc-400 hover:text-zinc-200"
+                    onSelect={() => {
+                      toggleAllCategories(false);
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {t("memories.clearFilters")}
+                    <X className="h-4 w-4" />
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="bg-zinc-800" />
                 {categories.map((category) => (
                   <DropdownMenuItem

@@ -140,7 +140,16 @@ const Categories = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!categories || categories.length === 0) return null;
+  // 过滤无效分类名（如 ——、--、null 等）
+  const validCategories = (categories || []).filter((cat) => {
+    if (!cat || !cat.trim()) return false;
+    const cleaned = cat.trim().toLowerCase();
+    if (['null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'].includes(cleaned)) return false;
+    if (/^[^\w]+$/.test(cleaned)) return false;
+    return true;
+  });
+
+  if (validCategories.length === 0) return null;
 
   const baseBadgeStyle =
     "backdrop-blur-sm transition-colors hover:bg-opacity-20";
@@ -148,7 +157,7 @@ const Categories = ({
     "text-zinc-500 bg-zinc-800/40 border-zinc-700/40 hover:bg-zinc-800/60";
 
   if (concat) {
-    const remainingCount = categories.length - 1;
+    const remainingCount = validCategories.length - 1;
 
     return (
       <div className="flex flex-wrap gap-2">
@@ -158,10 +167,10 @@ const Categories = ({
           className={`${
             isPaused
               ? pausedStyle
-              : `${getColor(categories[0])} ${baseBadgeStyle}`
+              : `${getColor(validCategories[0])} ${baseBadgeStyle}`
           }`}
         >
-          {categories[0]}
+          {validCategories[0]}
         </Badge>
 
         {/* Popover for remaining categories */}
@@ -188,7 +197,7 @@ const Categories = ({
               onMouseLeave={() => setIsOpen(false)}
             >
               <div className="flex flex-col gap-2">
-                {categories.slice(1).map((cat, i) => (
+                {validCategories.slice(1).map((cat, i) => (
                   <Badge
                     key={i}
                     variant="outline"
@@ -212,7 +221,7 @@ const Categories = ({
   // Default view
   return (
     <div className="flex flex-wrap gap-2">
-      {categories?.map((cat, i) => (
+      {validCategories?.map((cat, i) => (
         <Badge
           key={i}
           variant="outline"
