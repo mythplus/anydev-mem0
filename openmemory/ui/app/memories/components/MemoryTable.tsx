@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+
 import Categories from "@/components/shared/categories";
 import SourceApp from "@/components/shared/source-app";
 import { Button } from "@/components/ui/button";
@@ -160,15 +160,11 @@ export function MemoryTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <AnimatePresence>
           {memories.map((memory, index) => (
-            <motion.tr
+            <TableRow
               key={memory.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2, delay: index * 0.03 }}
-              className={`border-b transition-colors hover:bg-accent/50 ${
+              style={{ animationDelay: `${index * 30}ms` }}
+              className={`animate-fade-in hover:bg-accent/50 ${
                 memory.state === "paused" || memory.state === "archived"
                   ? "text-muted-foreground"
                   : ""
@@ -301,9 +297,8 @@ export function MemoryTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
-            </motion.tr>
+            </TableRow>
           ))}
-          </AnimatePresence>
         </TableBody>
       </Table>
     </div>

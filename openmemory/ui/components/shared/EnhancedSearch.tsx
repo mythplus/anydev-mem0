@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X, Clock, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/lib/LanguageContext";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { debounce } from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const RECENT_SEARCHES_KEY = "openmemory-recent-searches";
@@ -33,6 +31,8 @@ export function EnhancedSearch() {
 
   const memories = useSelector((state: RootState) => state.memories.memories);
 
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // 初始化：加载最近搜索和 URL 参数
   useEffect(() => {
     const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -50,14 +50,18 @@ export function EnhancedSearch() {
     }
   }, []);
 
-  // 实时联想：根据输入从本地记忆列表中模糊匹配
-  const updateSuggestions = useCallback(
-    debounce((q: string) => {
-      if (!q.trim()) {
+  // 实时联想：使用手动 debounce 避免依赖问题
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (!query.trim()) {
         setSuggestions([]);
         return;
       }
-      const lower = q.toLowerCase();
+      const lower = query.toLowerCase();
       const matched = memories
         .filter((m) => m.memory.toLowerCase().includes(lower))
         .slice(0, MAX_SUGGESTIONS)
@@ -70,13 +74,14 @@ export function EnhancedSearch() {
               : "",
         }));
       setSuggestions(matched);
-    }, 150),
-    [memories]
-  );
+    }, 150);
 
-  useEffect(() => {
-    updateSuggestions(query);
-  }, [query, updateSuggestions]);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [query, memories]);
 
   // 保存最近搜索
   const saveRecentSearch = (q: string) => {

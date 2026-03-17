@@ -7,8 +7,8 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 
-// react-force-graph 需要 window 对象，使用动态导入禁用 SSR
-const ForceGraph2D = dynamic(() => import("react-force-graph").then(mod => mod.ForceGraph2D as any), {
+// react-force-graph-2d 需要 window/Canvas 对象，使用动态导入禁用 SSR
+const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   ssr: false,
 });
 
@@ -153,8 +153,7 @@ export function KnowledgeGraph() {
         </div>
       ) : (
         <div className="rounded-lg overflow-hidden" style={{ height: 350 }}>
-          {typeof window !== "undefined" && (
-            <ForceGraph2D
+          <ForceGraph2D
               ref={graphRef}
               graphData={graphData}
               width={dimensions.width - 32}
@@ -174,7 +173,6 @@ export function KnowledgeGraph() {
               enableZoomInteraction={true}
               enablePanInteraction={true}
             />
-          )}
         </div>
       )}
 
