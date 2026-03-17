@@ -17,7 +17,7 @@ export function RelatedMemories({ memoryId }: RelatedMemoriesProps) {
     (state: RootState) => state.memories.relatedMemories
   );
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   useEffect(() => {
     const loadRelatedMemories = async () => {
@@ -79,7 +79,7 @@ export function RelatedMemories({ memoryId }: RelatedMemoriesProps) {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-zinc-400 text-sm">
-                    {formatDate(memory.created_at)}
+                    {formatDate(memory.created_at, locale)}
                   </div>
                 </div>
               </div>

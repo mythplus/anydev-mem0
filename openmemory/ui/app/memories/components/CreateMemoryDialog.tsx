@@ -24,14 +24,33 @@ export function CreateMemoryDialog() {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  // 用于标记当前请求是否已被用户取消
+  const cancelledRef = useRef(false);
+
+  // 统一的关闭/取消处理
+  const handleCancel = () => {
+    // 标记为已取消，让进行中的请求回调忽略结果
+    cancelledRef.current = true;
+    // 清空输入框
+    if (textRef.current) {
+      textRef.current.value = "";
+    }
+    setOpen(false);
+  };
 
   const handleCreateMemory = async (text: string) => {
     if (!text.trim()) {
       toast.error(t("createMemory.emptyError") || "请输入记忆内容");
       return;
     }
+    // 重置取消标记
+    cancelledRef.current = false;
     try {
       await createMemory(text);
+      // 如果在请求过程中用户点了取消，则不显示成功提示
+      if (cancelledRef.current) {
+        return;
+      }
       toast.success(t("createMemory.successToast") || "记忆创建成功");
       // 清空输入框
       if (textRef.current) {
@@ -40,13 +59,29 @@ export function CreateMemoryDialog() {
       // 关闭对话框（createMemory 内部已经通过 Redux triggerRefresh 通知列表刷新）
       setOpen(false);
     } catch (error) {
+      // 如果已取消则忽略错误
+      if (cancelledRef.current) {
+        return;
+      }
       console.error(error);
       toast.error(t("createMemory.errorToast") || "记忆创建失败");
     }
   };
 
+  // 处理对话框打开/关闭状态变化（包括 ESC 键、点击遮罩层、点击 X 按钮）
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      // 关闭时执行取消逻辑
+      handleCancel();
+    } else {
+      // 打开时重置取消标记
+      cancelledRef.current = false;
+      setOpen(true);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -76,10 +111,15 @@ export function CreateMemoryDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+          >
             {t("createMemory.cancel")}
           </Button>
           <Button
+            type="button"
             disabled={isLoading}
             onClick={() => handleCreateMemory(textRef?.current?.value || "")}
           >

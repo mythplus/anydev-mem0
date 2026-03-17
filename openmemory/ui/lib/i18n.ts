@@ -9,6 +9,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.settings": "Settings",
     "nav.refresh": "Refresh",
     "nav.createMemory": "Create Memory",
+    "nav.collapseSidebar": "Collapse Sidebar",
 
     // Dashboard - Stats
     "stats.title": "Memories Stats",
@@ -50,6 +51,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.unarchive": "Unarchive",
     "table.edit": "Edit",
     "table.delete": "Delete",
+    "table.deleteConfirmTitle": "Confirm Delete Memory",
+    "table.deleteConfirmDesc": "Are you sure you want to delete the following memory?",
+    "table.deleteConfirmBtn": "Confirm Delete",
+    "table.deleteCancel": "Cancel",
     "table.memoryIsPaused": "This memory is",
     "table.paused": "paused",
     "table.archived": "archived",
@@ -217,6 +222,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.settings": "设置",
     "nav.refresh": "刷新",
     "nav.createMemory": "创建记忆",
+    "nav.collapseSidebar": "收起侧边栏",
 
     // 仪表盘 - 统计
     "stats.title": "记忆统计",
@@ -258,6 +264,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "table.unarchive": "取消归档",
     "table.edit": "编辑",
     "table.delete": "删除",
+    "table.deleteConfirmTitle": "确认删除记忆",
+    "table.deleteConfirmDesc": "确定要删除以下记忆吗？",
+    "table.deleteConfirmBtn": "确认删除",
+    "table.deleteCancel": "取消",
     "table.memoryIsPaused": "该记忆已",
     "table.paused": "暂停",
     "table.archived": "归档",

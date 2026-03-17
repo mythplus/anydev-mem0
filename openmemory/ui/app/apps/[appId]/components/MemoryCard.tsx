@@ -25,7 +25,7 @@ export function MemoryCard({
   app_name,
   state,
 }: MemoryCardProps) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
       <div className="p-4">
@@ -63,7 +63,7 @@ export function MemoryCard({
                   Accessed {access_count} times
                 </span>
               ) : (
-                new Date(created_at + "Z").toLocaleDateString("en-US", {
+                new Date(created_at + "Z").toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
                   year: "numeric",
                   month: "short",
                   day: "numeric",

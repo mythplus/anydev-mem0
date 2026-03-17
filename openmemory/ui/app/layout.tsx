@@ -1,9 +1,9 @@
 import type React from "react";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Navbar } from "@/components/Navbar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Providers } from "./providers";
 
 export const metadata = {
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="h-screen font-sans antialiased flex flex-col bg-zinc-950">
+      <body className="h-screen font-sans antialiased bg-background">
         <Providers>
           <ThemeProvider
             attribute="class"
@@ -27,8 +27,16 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
-            <ScrollArea className="h-[calc(100vh-64px)]">{children}</ScrollArea>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset>
+
+                {/* 主内容区 */}
+                <div className="flex-1 overflow-auto">
+                  {children}
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
             <Toaster />
           </ThemeProvider>
         </Providers>

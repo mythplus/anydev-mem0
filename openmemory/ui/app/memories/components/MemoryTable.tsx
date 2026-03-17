@@ -3,6 +3,16 @@ import SourceApp from "@/components/shared/source-app";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -44,6 +54,7 @@ import {
     Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { GoPackage } from "react-icons/go";
 import { HiMiniRectangleStack } from "react-icons/hi2";
@@ -54,7 +65,7 @@ export function MemoryTable() {
   const { toast } = useToast();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
@@ -62,8 +73,26 @@ export function MemoryTable() {
 
   const { deleteMemories, updateMemoryState, isLoading } = useMemoriesApi();
 
-  const handleDeleteMemory = (id: string) => {
-    deleteMemories([id]);
+  // 删除确认对话框状态
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingDeleteMemory, setPendingDeleteMemory] = useState<{ id: string; content: string } | null>(null);
+
+  const handleDeleteMemory = (id: string, content: string) => {
+    setPendingDeleteMemory({ id, content });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (pendingDeleteMemory) {
+      deleteMemories([pendingDeleteMemory.id]);
+    }
+    setDeleteDialogOpen(false);
+    setPendingDeleteMemory(null);
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setPendingDeleteMemory(null);
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -109,6 +138,7 @@ export function MemoryTable() {
   };
 
   return (
+    <>
     <div className="rounded-md border">
       <Table className="">
         <TableHeader>
@@ -229,7 +259,7 @@ export function MemoryTable() {
                 <SourceApp source={memory.app_name} />
               </TableCell>
               <TableCell className="w-[140px] text-center">
-                {formatDate(memory.created_at)}
+                {formatDate(memory.created_at, locale)}
               </TableCell>
               <TableCell className="text-right flex justify-center">
                 <DropdownMenu>
@@ -287,7 +317,7 @@ export function MemoryTable() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="cursor-pointer text-red-500 focus:text-red-500"
-                      onClick={() => handleDeleteMemory(memory.id)}
+                      onClick={() => handleDeleteMemory(memory.id, memory.memory)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       {t("table.delete")}
@@ -300,5 +330,41 @@ export function MemoryTable() {
         </TableBody>
       </Table>
     </div>
+
+    {/* 删除确认对话框 */}
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-white">
+            {t("table.deleteConfirmTitle")}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-zinc-400">
+            {t("table.deleteConfirmDesc")}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {pendingDeleteMemory && (
+          <div className="my-2 rounded-md bg-zinc-800 border border-zinc-700 p-3">
+            <p className="text-sm text-zinc-200 break-all line-clamp-5">
+              {pendingDeleteMemory.content}
+            </p>
+          </div>
+        )}
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            onClick={cancelDelete}
+            className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+          >
+            {t("table.deleteCancel")}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmDelete}
+            className="bg-red-600 text-white hover:bg-red-700"
+          >
+            {t("table.deleteConfirmBtn")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

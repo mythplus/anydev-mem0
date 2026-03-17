@@ -24,7 +24,7 @@ const AppDetailCard = ({
   const { updateAppDetails } = useAppsApi();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const apps = useSelector((state: RootState) => state.apps.apps);
   const currentApp = apps.find((app: any) => app.id === appId);
   const appConfig = currentApp
@@ -112,7 +112,7 @@ const AppDetailCard = ({
               {selectedApp.details.first_accessed
                 ? new Date(
                     selectedApp.details.first_accessed
-                  ).toLocaleDateString("en-US", {
+                  ).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
@@ -129,7 +129,7 @@ const AppDetailCard = ({
               {selectedApp.details.last_accessed
                 ? new Date(
                     selectedApp.details.last_accessed
-                  ).toLocaleDateString("en-US", {
+                  ).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
