@@ -31,8 +31,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "../ui/badge";
-import { translateCategory } from "@/lib/helpers";
-import { useLanguage } from "@/lib/LanguageContext";
 
 type Category = string;
 
@@ -141,7 +139,6 @@ const Categories = ({
   concat?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { locale } = useLanguage();
 
   if (!categories || categories.length === 0) return null;
 
@@ -164,7 +161,7 @@ const Categories = ({
               : `${getColor(categories[0])} ${baseBadgeStyle}`
           }`}
         >
-          {translateCategory(categories[0], locale)}
+          {categories[0]}
         </Badge>
 
         {/* Popover for remaining categories */}
@@ -201,7 +198,7 @@ const Categories = ({
                         : `${getColor(cat)} ${baseBadgeStyle}`
                     }`}
                   >
-                    {translateCategory(cat, locale)}
+                    {cat}
                   </Badge>
                 ))}
               </div>
@@ -223,7 +220,7 @@ const Categories = ({
             isPaused ? pausedStyle : `${getColor(cat)} ${baseBadgeStyle}`
           }`}
         >
-          {translateCategory(cat, locale)}
+          {cat}
         </Badge>
       ))}
     </div>
