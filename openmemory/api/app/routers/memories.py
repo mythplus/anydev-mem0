@@ -210,7 +210,7 @@ async def get_categories(
     raw_categories = [category for memory in memories for category in memory.categories]
 
     # 对分类名做拆分和去重处理
-    invalid_names = {'null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'}
+    invalid_names = {'none', 'n/a', 'unknown', 'undefined', '无', '未知'}
     seen_names = set()
     unique_categories = []
     for cat in raw_categories:
@@ -227,6 +227,15 @@ async def get_categories(
             if cleaned not in seen_names:
                 seen_names.add(cleaned)
                 unique_categories.append({"id": str(cat.id), "name": cleaned, "description": cat.description or "", "created_at": str(cat.created_at), "updated_at": str(cat.updated_at)})
+
+    # 检查是否有没有分类的记忆，如果有则添加 "null" 标签
+    has_uncategorized = any(len(memory.categories) == 0 for memory in memories)
+    if has_uncategorized and 'null' not in seen_names:
+        unique_categories.append({"id": "null", "name": "null", "description": "未分类记忆", "created_at": "", "updated_at": ""})
+        seen_names.add('null')
+
+    # 按首字母排序，null 标签排在最后
+    unique_categories.sort(key=lambda x: (x["name"] == "null", x["name"].lower()))
 
     return {
         "categories": unique_categories,
@@ -482,7 +491,7 @@ class FilterMemoriesRequest(BaseModel):
     size: int = 10
     search_query: Optional[str] = None
     app_ids: Optional[List[UUID]] = None
-    category_ids: Optional[List[UUID]] = None
+    category_ids: Optional[List[str]] = None  # 支持 UUID 字符串和 "null" 虚拟分类
     sort_column: Optional[str] = None
     sort_direction: Optional[str] = None
     from_date: Optional[int] = None
@@ -521,7 +530,38 @@ async def filter_memories(
 
     # Apply category filter
     if request.category_ids:
-        query = query.join(Memory.categories).filter(Category.id.in_(request.category_ids))
+        # 检查是否包含 "null" 虚拟分类（表示无分类的记忆）
+        has_null_category = "null" in request.category_ids
+        real_category_ids = [cid for cid in request.category_ids if cid != "null"]
+
+        if real_category_ids and has_null_category:
+            # 同时筛选有指定分类的记忆和无分类的记忆
+            from sqlalchemy import or_, exists, select
+            mem_cat_table = Memory.categories.property.secondary
+            has_category_subq = exists(
+                select(mem_cat_table.c.memory_id).where(
+                    mem_cat_table.c.memory_id == Memory.id
+                )
+            )
+            query = query.outerjoin(Memory.categories).filter(
+                or_(
+                    Category.id.in_([UUID(cid) for cid in real_category_ids]),
+                    ~has_category_subq
+                )
+            )
+        elif has_null_category:
+            # 只筛选无分类的记忆
+            from sqlalchemy import exists, select
+            mem_cat_table = Memory.categories.property.secondary
+            has_category_subq = exists(
+                select(mem_cat_table.c.memory_id).where(
+                    mem_cat_table.c.memory_id == Memory.id
+                )
+            )
+            query = query.outerjoin(Memory.categories).filter(~has_category_subq)
+        else:
+            # 只筛选有指定分类的记忆
+            query = query.join(Memory.categories).filter(Category.id.in_([UUID(cid) for cid in real_category_ids]))
     else:
         query = query.outerjoin(Memory.categories)
 

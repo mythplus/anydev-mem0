@@ -157,6 +157,11 @@ const Categories = ({
     // 去重
     .filter((cat, index, self) => self.indexOf(cat) === index);
 
+  const baseBadgeStyle =
+    "backdrop-blur-sm transition-colors hover:bg-opacity-20";
+  const pausedStyle =
+    "text-zinc-500 bg-zinc-800/40 border-zinc-700/40 hover:bg-zinc-800/60";
+
   // 没有有效分类时，默认显示 "null" 标签
   if (validCategories.length === 0) {
     return (
@@ -174,11 +179,6 @@ const Categories = ({
       </div>
     );
   }
-
-  const baseBadgeStyle =
-    "backdrop-blur-sm transition-colors hover:bg-opacity-20";
-  const pausedStyle =
-    "text-zinc-500 bg-zinc-800/40 border-zinc-700/40 hover:bg-zinc-800/60";
 
   if (concat) {
     const remainingCount = validCategories.length - 1;
