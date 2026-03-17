@@ -50,16 +50,26 @@ def get_categories_for_memory(memory: str) -> List[str]:
         # 过滤无效分类：去除空字符串、纯符号（如 ——、--、…）等
         valid_categories = []
         for cat in parsed.categories:
-            cleaned = cat.strip().lower()
-            # 跳过空字符串或仅由非字母数字字符组成的值（如 ——、--、...、null、none）
-            if not cleaned:
-                continue
-            if cleaned in ('null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'):
-                continue
-            if re.match(r'^[^\w]+$', cleaned):
-                continue
-            valid_categories.append(cleaned)
-        return valid_categories
+            # 先按逗号、&、and 等分隔符拆分复合分类（如 "ai, ml & technology" → ["ai", "ml", "technology"]）
+            sub_cats = re.split(r'\s*[,，]\s*|\s*&\s*|\s+and\s+', cat)
+            for sub in sub_cats:
+                cleaned = sub.strip().lower()
+                # 跳过空字符串或仅由非字母数字字符组成的值（如 ——、--、...、null、none）
+                if not cleaned:
+                    continue
+                if cleaned in ('null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'):
+                    continue
+                if re.match(r'^[^\w]+$', cleaned):
+                    continue
+                valid_categories.append(cleaned)
+        # 去重但保持顺序
+        seen = set()
+        unique_categories = []
+        for cat in valid_categories:
+            if cat not in seen:
+                seen.add(cat)
+                unique_categories.append(cat)
+        return unique_categories
 
     except Exception as e:
         logging.error(f"[ERROR] Failed to get categories: {e}")

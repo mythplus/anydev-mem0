@@ -140,14 +140,22 @@ const Categories = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // 过滤无效分类名（如 ——、--、null 等）
-  const validCategories = (categories || []).filter((cat) => {
-    if (!cat || !cat.trim()) return false;
-    const cleaned = cat.trim().toLowerCase();
-    if (['null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'].includes(cleaned)) return false;
-    if (/^[^\w]+$/.test(cleaned)) return false;
-    return true;
-  });
+  // 过滤无效分类名（如 ——、--、null 等），并拆分复合分类（如 "ai, ml & technology" → ["ai", "ml", "technology"]）
+  const validCategories = (categories || [])
+    .flatMap((cat) => {
+      // 先按逗号、&、and 等分隔符拆分
+      return cat.split(/\s*[,，]\s*|\s*&\s*|\s+and\s+/i);
+    })
+    .map((c) => c.trim())
+    .filter((cat) => {
+      if (!cat) return false;
+      const cleaned = cat.toLowerCase();
+      if (['null', 'none', 'n/a', 'unknown', 'undefined', '无', '未知'].includes(cleaned)) return false;
+      if (/^[^\w]+$/.test(cleaned)) return false;
+      return true;
+    })
+    // 去重
+    .filter((cat, index, self) => self.indexOf(cat) === index);
 
   if (validCategories.length === 0) return null;
 

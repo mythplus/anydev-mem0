@@ -10,7 +10,7 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  locale: "en",
+  locale: "zh",
   setLocale: () => {},
   t: (key: string) => key,
 });
@@ -18,7 +18,7 @@ const LanguageContext = createContext<LanguageContextType>({
 const STORAGE_KEY = "openmemory-locale";
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("zh");
 
   useEffect(() => {
     // 从 localStorage 读取保存的语言设置

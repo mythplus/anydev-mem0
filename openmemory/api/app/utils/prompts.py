@@ -8,7 +8,9 @@ MEMORY_CATEGORIZATION_PROMPT = """Your task is to assign each piece of informati
 - Work: job roles, companies, projects, promotions
 - Education: courses, degrees, certifications, skills development
 - Projects: to‑dos, milestones, deadlines, status updates
-- AI, ML & Technology: infrastructure, algorithms, tools, research
+- AI: artificial intelligence, neural networks, deep learning
+- Machine Learning: ML models, training, inference, datasets
+- Technology: infrastructure, tools, hardware, software
 - Technical Support: bug reports, error logs, fixes
 - Finance: income, expenses, investments, billing
 - Shopping: purchases, wishlists, returns, deliveries
@@ -24,5 +26,6 @@ MEMORY_CATEGORIZATION_PROMPT = """Your task is to assign each piece of informati
 Guidelines:
 - Return only the categories under 'categories' key in the JSON format.
 - If you cannot categorize the memory, return an empty list with key 'categories'.
-- Don't limit yourself to the categories listed above only. Feel free to create new categories based on the memory. Make sure that it is a single phrase.
+- Don't limit yourself to the categories listed above only. Feel free to create new categories based on the memory.
+- IMPORTANT: Each category MUST be a single short phrase (1-3 words). Never combine multiple categories into one with commas, '&' or 'and'. For example, use ["AI", "Machine Learning", "Technology"] instead of ["AI, ML & Technology"].
 """
