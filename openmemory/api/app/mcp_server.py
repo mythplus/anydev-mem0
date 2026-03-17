@@ -97,6 +97,7 @@ async def add_memories(text: str) -> str:
 
                     if result['event'] == 'ADD':
                         if not memory:
+                            old_state = MemoryState.deleted
                             memory = Memory(
                                 id=memory_id,
                                 user_id=user.id,
@@ -106,14 +107,41 @@ async def add_memories(text: str) -> str:
                             )
                             db.add(memory)
                         else:
+                            old_state = memory.state
                             memory.state = MemoryState.active
                             memory.content = result['memory']
 
-                        # Create history entry
+                        # 记录状态变更
                         history = MemoryStatusHistory(
                             memory_id=memory_id,
                             changed_by=user.id,
-                            old_state=MemoryState.deleted if memory else None,
+                            old_state=old_state,
+                            new_state=MemoryState.active
+                        )
+                        db.add(history)
+
+                    elif result['event'] == 'UPDATE':
+                        if memory:
+                            old_state = memory.state
+                            memory.content = result['memory']
+                            memory.state = MemoryState.active
+                        else:
+                            # 向量库返回 UPDATE 但数据库中不存在，视为新建
+                            old_state = MemoryState.deleted
+                            memory = Memory(
+                                id=memory_id,
+                                user_id=user.id,
+                                app_id=app.id,
+                                content=result['memory'],
+                                state=MemoryState.active
+                            )
+                            db.add(memory)
+
+                        # 记录状态变更
+                        history = MemoryStatusHistory(
+                            memory_id=memory_id,
+                            changed_by=user.id,
+                            old_state=old_state,
                             new_state=MemoryState.active
                         )
                         db.add(history)
@@ -122,7 +150,7 @@ async def add_memories(text: str) -> str:
                         if memory:
                             memory.state = MemoryState.deleted
                             memory.deleted_at = datetime.datetime.now(datetime.timezone.utc)
-                            # Create history entry
+                            # 记录状态变更
                             history = MemoryStatusHistory(
                                 memory_id=memory_id,
                                 changed_by=user.id,
@@ -130,6 +158,10 @@ async def add_memories(text: str) -> str:
                                 new_state=MemoryState.deleted
                             )
                             db.add(history)
+
+                    elif result['event'] == 'NOOP':
+                        # 无操作事件，跳过
+                        logging.info(f"Memory {memory_id} no change (NOOP)")
 
                 db.commit()
 

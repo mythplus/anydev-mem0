@@ -308,22 +308,21 @@ async def create_memory(
             created_memories = []
             
             for result in vector_response['results']:
+                memory_id = UUID(result['id'])
+                existing_memory = db.query(Memory).filter(Memory.id == memory_id).first()
+
                 if result['event'] == 'ADD':
-                    # Get the Qdrant-generated ID
-                    memory_id = UUID(result['id'])
-                    
-                    # Check if memory already exists
-                    existing_memory = db.query(Memory).filter(Memory.id == memory_id).first()
-                    
                     if existing_memory:
-                        # Update existing memory
+                        # 更新已有记忆
+                        old_state = existing_memory.state
                         existing_memory.state = MemoryState.active
                         existing_memory.content = result['memory']
                         memory = existing_memory
                     else:
-                        # Create memory with the EXACT SAME ID from Qdrant
+                        # 创建新记忆，使用向量库生成的同一 ID
+                        old_state = MemoryState.deleted
                         memory = Memory(
-                            id=memory_id,  # Use the same ID that Qdrant generated
+                            id=memory_id,
                             user_id=user.id,
                             app_id=app_obj.id,
                             content=result['memory'],
@@ -332,25 +331,70 @@ async def create_memory(
                         )
                         db.add(memory)
                     
-                    # Create history entry
+                    # 记录状态变更
                     history = MemoryStatusHistory(
                         memory_id=memory_id,
                         changed_by=user.id,
-                        old_state=MemoryState.deleted if existing_memory else MemoryState.deleted,
+                        old_state=old_state,
                         new_state=MemoryState.active
                     )
                     db.add(history)
-                    
                     created_memories.append(memory)
+
+                elif result['event'] == 'UPDATE':
+                    if existing_memory:
+                        # 更新已有记忆内容和状态
+                        old_state = existing_memory.state
+                        existing_memory.content = result['memory']
+                        existing_memory.state = MemoryState.active
+                        memory = existing_memory
+                    else:
+                        # 向量库返回 UPDATE 但数据库中不存在，视为新建
+                        old_state = MemoryState.deleted
+                        memory = Memory(
+                            id=memory_id,
+                            user_id=user.id,
+                            app_id=app_obj.id,
+                            content=result['memory'],
+                            metadata_=request.metadata,
+                            state=MemoryState.active
+                        )
+                        db.add(memory)
+                    
+                    # 记录状态变更
+                    history = MemoryStatusHistory(
+                        memory_id=memory_id,
+                        changed_by=user.id,
+                        old_state=old_state,
+                        new_state=MemoryState.active
+                    )
+                    db.add(history)
+                    created_memories.append(memory)
+
+                elif result['event'] == 'DELETE':
+                    if existing_memory:
+                        existing_memory.state = MemoryState.deleted
+                        existing_memory.deleted_at = datetime.now(timezone.utc)
+                        # 记录状态变更
+                        history = MemoryStatusHistory(
+                            memory_id=memory_id,
+                            changed_by=user.id,
+                            old_state=MemoryState.active,
+                            new_state=MemoryState.deleted
+                        )
+                        db.add(history)
+
+                elif result['event'] == 'NOOP':
+                    # 无操作事件，跳过
+                    logging.info(f"Memory {memory_id} no change (NOOP)")
             
-            # Commit all changes at once
+            # 统一提交所有变更
+            db.commit()
             if created_memories:
-                db.commit()
                 for memory in created_memories:
                     db.refresh(memory)
                 
-                # Return the first memory (for API compatibility)
-                # but all memories are now saved to the database
+                # 返回第一条记忆（保持 API 兼容性）
                 return created_memories[0]
     except Exception as vector_error:
         logging.warning(f"Vector store operation failed: {vector_error}.")
