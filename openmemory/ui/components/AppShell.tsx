@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,7 +25,6 @@ import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useAppsApi } from "@/hooks/useAppsApi";
 import { useStats } from "@/hooks/useStats";
 import { useConfig } from "@/hooks/useConfig";
-import { RippleButton } from "@/components/ui/ripple-button";
 import {
   Tooltip,
   TooltipContent,
@@ -46,6 +45,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const memoriesApi = useMemoriesApi();
   const appsApi = useAppsApi();
@@ -234,41 +238,54 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     ${collapsed ? "justify-center" : ""}
                   `}
                 >
-                  <AnimatePresence mode="wait">
-                    {theme === "dark" ? (
-                      <motion.div
-                        key="sun"
-                        initial={{ rotate: -90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: 90, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Sun size={18} />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="moon"
-                        initial={{ rotate: 90, opacity: 0 }}
-                        animate={{ rotate: 0, opacity: 1 }}
-                        exit={{ rotate: -90, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Moon size={18} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <AnimatePresence>
-                    {!collapsed && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: "auto" }}
-                        exit={{ opacity: 0, width: 0 }}
-                        className="text-sm whitespace-nowrap overflow-hidden"
-                      >
-                        {theme === "dark" ? t("theme.light") : t("theme.dark")}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  {mounted ? (
+                    <>
+                      <AnimatePresence mode="wait">
+                        {theme === "dark" ? (
+                          <motion.div
+                            key="sun"
+                            initial={{ rotate: -90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: 90, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Sun size={18} />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="moon"
+                            initial={{ rotate: 90, opacity: 0 }}
+                            animate={{ rotate: 0, opacity: 1 }}
+                            exit={{ rotate: -90, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <Moon size={18} />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                      <AnimatePresence>
+                        {!collapsed && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: "auto" }}
+                            exit={{ opacity: 0, width: 0 }}
+                            className="text-sm whitespace-nowrap overflow-hidden"
+                          >
+                            {theme === "dark" ? t("theme.light") : t("theme.dark")}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-[18px] h-[18px]" />
+                      {!collapsed && (
+                        <span className="text-sm whitespace-nowrap overflow-hidden">
+                          &nbsp;
+                        </span>
+                      )}
+                    </>
+                  )}
                 </motion.button>
               </TooltipTrigger>
               {collapsed && (
@@ -324,15 +341,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
           <div className="flex items-center gap-3">
-            <RippleButton
+            <Button
               onClick={handleRefresh}
               variant="outline"
               size="sm"
-              className="border-border"
+              className="border-border group active:scale-95 transition-all duration-200"
             >
               <FiRefreshCcw className="transition-transform duration-300 group-hover:rotate-180" />
               {t("nav.refresh")}
-            </RippleButton>
+            </Button>
             <CreateMemoryDialog />
           </div>
         </header>
