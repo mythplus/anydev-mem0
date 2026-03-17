@@ -139,8 +139,8 @@ export function MemoryTable() {
 
   return (
     <>
-    <div className="rounded-md border">
-      <Table className="">
+    <div className="rounded-md border overflow-x-auto">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow className="bg-zinc-800 hover:bg-zinc-800">
             <TableHead className="w-[50px] pl-4">
@@ -158,32 +158,32 @@ export function MemoryTable() {
               />
             </TableHead>
             <TableHead className="border-zinc-700">
-              <div className="flex items-center min-w-[600px]">
-                <HiMiniRectangleStack className="mr-1" />
+              <div className="flex items-center">
+                <HiMiniRectangleStack className="mr-1 shrink-0" />
                 {t("table.memory")}
               </div>
             </TableHead>
             <TableHead className="border-zinc-700">
               <div className="flex items-center">
-                <PiSwatches className="mr-1" size={15} />
+                <PiSwatches className="mr-1 shrink-0" size={15} />
                 {t("table.categories")}
               </div>
             </TableHead>
             <TableHead className="w-[140px] border-zinc-700">
               <div className="flex items-center">
-                <GoPackage className="mr-1" />
+                <GoPackage className="mr-1 shrink-0" />
                 {t("table.sourceApp")}
               </div>
             </TableHead>
-            <TableHead className="w-[140px] border-zinc-700">
+            <TableHead className="w-[120px] border-zinc-700 whitespace-nowrap">
               <div className="flex items-center w-full justify-center">
-                <CiCalendar className="mr-1" size={16} />
+                <CiCalendar className="mr-1 shrink-0" size={16} />
                 {t("table.createdOn")}
               </div>
             </TableHead>
-            <TableHead className="text-right border-zinc-700 flex justify-center">
-              <div className="flex items-center justify-end">
-                <MoreHorizontal className="h-4 w-4 mr-2" />
+            <TableHead className="w-[50px] text-right border-zinc-700">
+              <div className="flex items-center justify-center">
+                <MoreHorizontal className="h-4 w-4" />
               </div>
             </TableHead>
           </TableRow>

@@ -65,7 +65,7 @@ export default function FilterComponent() {
   const [tempSelectedCategories, setTempSelectedCategories] = useState<
     string[]
   >([]);
-  const [showArchived, setShowArchived] = useState(false);
+
 
   const apps = useSelector((state: RootState) => state.apps.apps);
   const categories = useSelector(
@@ -83,7 +83,6 @@ export default function FilterComponent() {
     if (isOpen) {
       setTempSelectedApps(filters.selectedApps);
       setTempSelectedCategories(filters.selectedCategories);
-      setShowArchived(filters.showArchived || false);
     }
   }, [isOpen, filters]);
 
@@ -116,7 +115,6 @@ export default function FilterComponent() {
   const handleClearFilters = async () => {
     setTempSelectedApps([]);
     setTempSelectedCategories([]);
-    setShowArchived(false);
     dispatch(clearFilters());
     await fetchMemories();
   };
@@ -136,14 +134,12 @@ export default function FilterComponent() {
       // Update the global state with temporary selections
       dispatch(setSelectedApps(tempSelectedApps));
       dispatch(setSelectedCategories(tempSelectedCategories));
-      dispatch({ type: "filters/setShowArchived", payload: showArchived });
-
       await fetchMemories(undefined, 1, 10, {
         apps: selectedAppIds,
         categories: selectedCategoryIds,
         sortColumn: filters.sortColumn,
         sortDirection: filters.sortDirection,
-        showArchived: showArchived,
+        showArchived: filters.showArchived,
       });
       setIsOpen(false);
     } catch (error) {
@@ -157,7 +153,6 @@ export default function FilterComponent() {
       // Reset temporary selections to active filters when dialog closes without applying
       setTempSelectedApps(filters.selectedApps);
       setTempSelectedCategories(filters.selectedCategories);
-      setShowArchived(filters.showArchived || false);
     }
   };
 
@@ -192,13 +187,11 @@ export default function FilterComponent() {
 
   const hasActiveFilters =
     filters.selectedApps.length > 0 ||
-    filters.selectedCategories.length > 0 ||
-    filters.showArchived;
+    filters.selectedCategories.length > 0;
 
   const hasTempFilters =
     tempSelectedApps.length > 0 ||
-    tempSelectedCategories.length > 0 ||
-    showArchived;
+    tempSelectedCategories.length > 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -217,8 +210,7 @@ export default function FilterComponent() {
             {hasActiveFilters && (
               <Badge className="ml-2 bg-primary hover:bg-primary/80 text-xs">
                 {filters.selectedApps.length +
-                  filters.selectedCategories.length +
-                  (filters.showArchived ? 1 : 0)}
+                  filters.selectedCategories.length}
               </Badge>
             )}
           </Button>
@@ -230,7 +222,7 @@ export default function FilterComponent() {
             </DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="apps" className="w-full">
-            <TabsList className="grid grid-cols-3 bg-zinc-800">
+            <TabsList className="grid grid-cols-2 bg-zinc-800">
               <TabsTrigger
                 value="apps"
                 className="data-[state=active]:bg-zinc-700"
@@ -242,12 +234,6 @@ export default function FilterComponent() {
                 className="data-[state=active]:bg-zinc-700"
               >
                 {t("filter.categories")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="archived"
-                className="data-[state=active]:bg-zinc-700"
-              >
-                {t("filter.archivedTab")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="apps" className="mt-4">
@@ -332,26 +318,7 @@ export default function FilterComponent() {
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value="archived" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="show-archived"
-                    checked={showArchived}
-                    onCheckedChange={(checked) =>
-                      setShowArchived(checked as boolean)
-                    }
-                    className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <Label
-                    htmlFor="show-archived"
-                    className="text-sm font-normal text-zinc-300 cursor-pointer"
-                  >
-                    {t("filter.showArchived")}
-                  </Label>
-                </div>
-              </div>
-            </TabsContent>
+
           </Tabs>
           <div className="flex justify-end mt-4 gap-3">
             {/* Clear all button */}

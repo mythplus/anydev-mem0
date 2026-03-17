@@ -86,6 +86,7 @@ interface UseMemoriesApiReturn {
   fetchRelatedMemories: (memoryId: string) => Promise<void>;
   createMemory: (text: string) => Promise<void>;
   deleteMemories: (memoryIds: string[]) => Promise<void>;
+  archiveMemories: (memoryIds: string[]) => Promise<void>;
   updateMemory: (memoryId: string, content: string) => Promise<void>;
   updateMemoryState: (memoryIds: string[], state: string) => Promise<void>;
   isLoading: boolean;
@@ -320,6 +321,33 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
   };
 
   /**
+   * 批量归档记忆
+   * POST /api/v1/memories/actions/archive
+   */
+  const archiveMemories = async (memoryIds: string[]): Promise<void> => {
+    if (memoryIds.length === 0) {
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      await axios.post(`${URL}/api/v1/memories/actions/archive`, {
+        memory_ids: memoryIds,
+        user_id: user_id
+      });
+      // 从本地列表中移除归档的记忆
+      dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
+      setIsLoading(false);
+      setHasUpdates(hasUpdates + 1);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to archive memories';
+      setError(errorMessage);
+      setIsLoading(false);
+      throw new Error(errorMessage);
+    }
+  };
+
+  /**
    * 批量更新记忆状态（暂停/激活/归档）
    * POST /api/v1/memories/actions/pause
    */
@@ -370,6 +398,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     fetchRelatedMemories,
     createMemory,
     deleteMemories,
+    archiveMemories,
     updateMemory,
     updateMemoryState,
     isLoading,

@@ -396,16 +396,20 @@ async def delete_memories(
     return {"message": f"Successfully deleted {len(request.memory_ids)} memories"}
 
 
+class ArchiveMemoriesRequest(BaseModel):
+    memory_ids: List[UUID]
+    user_id: str
+
+
 # Archive memories
 @router.post("/actions/archive", summary="归档记忆", description="将指定的记忆标记为归档状态")
 async def archive_memories(
-    memory_ids: List[UUID],
-    user_id: UUID,
+    request: ArchiveMemoriesRequest,
     db: Session = Depends(get_db)
 ):
-    for memory_id in memory_ids:
-        update_memory_state(db, memory_id, MemoryState.archived, user_id)
-    return {"message": f"Successfully archived {len(memory_ids)} memories"}
+    for memory_id in request.memory_ids:
+        update_memory_state(db, memory_id, MemoryState.archived, request.user_id)
+    return {"message": f"Successfully archived {len(request.memory_ids)} memories"}
 
 
 class PauseMemoriesRequest(BaseModel):

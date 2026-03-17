@@ -5,19 +5,20 @@ import { MemoriesSection } from "@/app/memories/components/MemoriesSection";
 import { MemoryFilters } from "@/app/memories/components/MemoryFilters";
 import { CreateMemoryDialog } from "@/app/memories/components/CreateMemoryDialog";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
 import { RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import "@/styles/animation.css";
 import UpdateMemory from "@/components/shared/update-memory";
 import { useUI } from "@/hooks/useUI";
+import { useDispatch } from "react-redux";
+import { triggerRefresh } from "@/store/memoriesSlice";
 
 export default function MemoriesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updateMemoryDialog, handleCloseUpdateMemoryDialog } = useUI();
-  const { fetchMemories } = useMemoriesApi();
+  const dispatch = useDispatch();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -30,8 +31,8 @@ export default function MemoriesPage() {
     }
   }, []);
 
-  const handleRefresh = async () => {
-    await fetchMemories();
+  const handleRefresh = () => {
+    dispatch(triggerRefresh());
   };
 
   return (
@@ -44,8 +45,9 @@ export default function MemoriesPage() {
       />
       <main className="flex-1 py-6">
         <div className="container">
-          {/* 刷新(左) 和 创建记忆(右) - 固定在搜索框上方 */}
-          <div className="flex items-center justify-between mb-4 animate-fade-slide-down">
+          {/* 创建记忆 + 刷新 - 固定在搜索框上方左侧 */}
+          <div className="flex items-center gap-2 mb-4 animate-fade-slide-down">
+            <CreateMemoryDialog />
             <Button
               variant="outline"
               size="sm"
@@ -55,7 +57,6 @@ export default function MemoriesPage() {
               <RefreshCcw className="size-4" />
               {t("nav.refresh")}
             </Button>
-            <CreateMemoryDialog />
           </div>
           <div className="mt-1 pb-4 animate-fade-slide-down">
             <MemoryFilters />

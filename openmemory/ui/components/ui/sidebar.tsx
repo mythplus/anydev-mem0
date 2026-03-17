@@ -192,7 +192,9 @@ const Sidebar = React.forwardRef<
       )
     }
 
-    if (isMobile) {
+    // 在移动端(小屏幕)下，如果collapsible为icon，则自动折叠成图标模式，始终显示
+    // 否则使用Sheet抽屉模式
+    if (isMobile && collapsible !== "icon") {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
           <SheetContent
@@ -212,12 +214,15 @@ const Sidebar = React.forwardRef<
       )
     }
 
+    // 当collapsible为icon且是移动端时，强制折叠状态
+    const effectiveState = (isMobile && collapsible === "icon") ? "collapsed" : state
+
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
-        data-state={state}
-        data-collapsible={state === "collapsed" ? collapsible : ""}
+        className="group peer block text-sidebar-foreground"
+        data-state={effectiveState}
+        data-collapsible={effectiveState === "collapsed" ? collapsible : ""}
         data-variant={variant}
         data-side={side}
       >
@@ -234,7 +239,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
+            "duration-200 fixed inset-y-0 z-10 flex h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -583,7 +588,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={state !== "collapsed"}
           {...tooltip}
         />
       </Tooltip>

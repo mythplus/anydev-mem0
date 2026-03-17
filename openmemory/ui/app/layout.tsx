@@ -29,10 +29,10 @@ export default function RootLayout({
           >
             <SidebarProvider>
               <AppSidebar />
-              <SidebarInset>
+              <SidebarInset className="overflow-hidden min-w-0">
 
                 {/* 主内容区 */}
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto min-w-0">
                   {children}
                 </div>
               </SidebarInset>

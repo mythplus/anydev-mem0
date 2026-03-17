@@ -19,8 +19,14 @@ function formatDate(timestamp: number, locale: string = 'en') {
         const hours = Math.floor(diffInSeconds / 3600);
         return `${hours} 小时前`;
       } else {
-        const days = Math.floor(diffInSeconds / 86400);
-        return `${days} 天前`;
+        // 超过24小时，显示具体日期
+        return date.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
       }
     }
 
@@ -34,8 +40,14 @@ function formatDate(timestamp: number, locale: string = 'en') {
       const hours = Math.floor(diffInSeconds / 3600);
       return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
     } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+      // 超过24小时，显示具体日期
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
   }
 
