@@ -64,7 +64,7 @@ services:
     environment:
       - USER=${USER:-default_user}
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
-      - MILVUS_HOST=mem0_store
+      - MILVUS_HOST=30.20.69.18
       - MILVUS_PORT=19530
       - DATABASE_URL=postgresql://openmemory:openmemory@postgres:5432/openmemory
     env_file:

@@ -21,8 +21,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate as sqlalchemy_paginate
 from pydantic import BaseModel
-from sqlalchemy import func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func, and_
+from sqlalchemy.orm import Session, joinedload, aliased
 
 router = APIRouter(prefix="/api/v1/memories", tags=["记忆管理 Memories"])
 
@@ -152,21 +152,27 @@ async def list_memories(
         category_list = [c.strip() for c in categories.split(",")]
         query = query.filter(Category.name.in_(category_list))
 
-    # Apply sorting if specified
+    # PostgreSQL 兼容：用子查询去重，避免 DISTINCT ON 与 ORDER BY 冲突
+    subquery = query.with_entities(Memory.id).distinct().subquery()
+    final_query = db.query(Memory).filter(Memory.id.in_(
+        db.query(subquery.c.id)
+    ))
+
+    # 在去重后的查询上应用排序
     if sort_column:
         sort_field = getattr(Memory, sort_column, None)
         if sort_field:
-            query = query.order_by(sort_field.desc()) if sort_direction == "desc" else query.order_by(sort_field.asc())
+            final_query = final_query.order_by(sort_field.desc()) if sort_direction == "desc" else final_query.order_by(sort_field.asc())
 
     # Add eager loading for app and categories
-    query = query.options(
+    final_query = final_query.options(
         joinedload(Memory.app),
         joinedload(Memory.categories)
-    ).distinct(Memory.id)
+    )
 
     # Get paginated results with transformer
     return sqlalchemy_paginate(
-        query,
+        final_query,
         params,
         transformer=lambda items: [
             MemoryResponse(
@@ -587,38 +593,50 @@ async def filter_memories(
         to_datetime = datetime.fromtimestamp(request.to_date, tz=timezone.utc)
         query = query.filter(Memory.created_at <= to_datetime)
 
-    # Apply sorting
+    # 参数校验（排序在子查询去重后再应用）
     if request.sort_column and request.sort_direction:
         sort_direction = request.sort_direction.lower()
         if sort_direction not in ['asc', 'desc']:
             raise HTTPException(status_code=400, detail="Invalid sort direction")
+        if request.sort_column not in ['memory', 'app_name', 'created_at']:
+            raise HTTPException(status_code=400, detail="Invalid sort column")
 
+    # PostgreSQL 兼容：用子查询去重，避免 DISTINCT ON 与 ORDER BY 冲突
+    subquery = query.with_entities(Memory.id).distinct().subquery()
+    final_query = db.query(Memory).filter(Memory.id.in_(
+        db.query(subquery.c.id)
+    ))
+
+    # 重新应用排序
+    if request.sort_column and request.sort_direction:
+        sort_direction = request.sort_direction.lower()
         sort_mapping = {
             'memory': Memory.content,
             'app_name': App.name,
             'created_at': Memory.created_at
         }
-
-        if request.sort_column not in sort_mapping:
-            raise HTTPException(status_code=400, detail="Invalid sort column")
-
-        sort_field = sort_mapping[request.sort_column]
-        if sort_direction == 'desc':
-            query = query.order_by(sort_field.desc())
+        if request.sort_column in sort_mapping:
+            sort_field = sort_mapping[request.sort_column]
+            if request.sort_column == 'app_name':
+                final_query = final_query.outerjoin(App, Memory.app_id == App.id)
+            if sort_direction == 'desc':
+                final_query = final_query.order_by(sort_field.desc())
+            else:
+                final_query = final_query.order_by(sort_field.asc())
         else:
-            query = query.order_by(sort_field.asc())
+            final_query = final_query.order_by(Memory.created_at.desc())
     else:
-        # Default sorting
-        query = query.order_by(Memory.created_at.desc())
+        final_query = final_query.order_by(Memory.created_at.desc())
 
-    # Add eager loading for categories and make the query distinct
-    query = query.options(
+    # Add eager loading for categories
+    final_query = final_query.options(
+        joinedload(Memory.app),
         joinedload(Memory.categories)
-    ).distinct(Memory.id)
+    )
 
     # Use fastapi-pagination's paginate function
     return sqlalchemy_paginate(
-        query,
+        final_query,
         Params(page=request.page, size=request.size),
         transformer=lambda items: [
             MemoryResponse(
@@ -658,19 +676,27 @@ async def get_related_memories(
         return Page.create([], total=0, params=params)
     
     # Build query for related memories
-    query = db.query(Memory).distinct(Memory.id).filter(
+    # PostgreSQL 兼容：先用子查询去重和聚合，再加载关联数据
+    sub = db.query(
+        Memory.id.label('mem_id'),
+        func.count(Category.id).label('cat_count')
+    ).filter(
         Memory.user_id == user.id,
         Memory.id != memory_id,
         Memory.state != MemoryState.deleted
     ).join(Memory.categories).filter(
         Category.id.in_(category_ids)
+    ).group_by(Memory.id).subquery()
+
+    query = db.query(Memory).join(
+        sub, Memory.id == sub.c.mem_id
     ).options(
         joinedload(Memory.categories),
         joinedload(Memory.app)
     ).order_by(
-        func.count(Category.id).desc(),
+        sub.c.cat_count.desc(),
         Memory.created_at.desc()
-    ).group_by(Memory.id)
+    )
     
     # ⚡ Force page size to be 5
     params = Params(page=params.page, size=5)
