@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="h-screen font-sans antialiased bg-background">
+      <body className="min-h-screen font-sans antialiased bg-background">
         <Providers>
           <ThemeProvider
             attribute="class"
@@ -29,10 +29,10 @@ export default function RootLayout({
           >
             <SidebarProvider>
               <AppSidebar />
-              <SidebarInset className="overflow-hidden min-w-0">
+              <SidebarInset className="overflow-auto min-w-0 !min-h-0">
 
                 {/* 主内容区 */}
-                <div className="flex-1 overflow-auto min-w-0">
+                <div className="min-w-0">
                   {children}
                 </div>
               </SidebarInset>

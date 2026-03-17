@@ -150,7 +150,7 @@ export function MemoryTable() {
   return (
     <>
     <div className="rounded-md border overflow-x-auto">
-      <Table className="min-w-[800px]">
+      <Table className="min-w-[800px] table-fixed">
         <TableHeader>
           <TableRow className="bg-zinc-800 hover:bg-zinc-800">
             <TableHead className="w-[50px] pl-4">
@@ -167,13 +167,13 @@ export function MemoryTable() {
                 onCheckedChange={handleSelectAll}
               />
             </TableHead>
-            <TableHead className="border-zinc-700">
+            <TableHead className="border-zinc-700" style={{ width: '40%' }}>
               <div className="flex items-center">
                 <HiMiniRectangleStack className="mr-1 shrink-0" />
                 {t("table.memory")}
               </div>
             </TableHead>
-            <TableHead className="border-zinc-700">
+            <TableHead className="border-zinc-700" style={{ width: '15%' }}>
               <div className="flex items-center">
                 <PiSwatches className="mr-1 shrink-0" size={15} />
                 {t("table.categories")}
@@ -217,37 +217,39 @@ export function MemoryTable() {
                   }
                 />
               </TableCell>
-              <TableCell className="">
-                {memory.state === "archived" ? (
-                  <TooltipProvider>
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <div
-                          onClick={() => handleMemoryClick(memory.id)}
-                          className="font-medium text-zinc-400 cursor-pointer"
-                        >
-                          {memory.memory}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          {t("table.memoryIsPaused")}
-                          <span className="font-bold">
-                            {t("table.archived")}
-                          </span>
-                          {t("table.andDisabled")}<span className="font-bold">{t("table.disabled")}</span>
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <div
-                    onClick={() => handleMemoryClick(memory.id)}
-                    className="font-medium text-white cursor-pointer"
-                  >
-                    {memory.memory}
-                  </div>
-                )}
+              <TableCell className="align-top">
+                <div className="max-h-[80px] overflow-y-auto break-all whitespace-pre-wrap pr-1 scrollbar-thin">
+                  {memory.state === "archived" ? (
+                    <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <div
+                            onClick={() => handleMemoryClick(memory.id)}
+                            className="font-medium text-zinc-400 cursor-pointer"
+                          >
+                            {memory.memory}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {t("table.memoryIsPaused")}
+                            <span className="font-bold">
+                              {t("table.archived")}
+                            </span>
+                            {t("table.andDisabled")}<span className="font-bold">{t("table.disabled")}</span>
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <div
+                      onClick={() => handleMemoryClick(memory.id)}
+                      className="font-medium text-white cursor-pointer"
+                    >
+                      {memory.memory}
+                    </div>
+                  )}
+                </div>
               </TableCell>
               <TableCell className="">
                 <div className="flex flex-wrap gap-1">
