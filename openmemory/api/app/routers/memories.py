@@ -254,9 +254,9 @@ async def create_memory(
             "error": str(client_error)
         }
 
-    # Try to save to Qdrant via memory_client
+    # 尝试通过 memory_client 保存到向量存储
     try:
-        qdrant_response = memory_client.add(
+        vector_response = memory_client.add(
             request.text,
             user_id=request.user_id,  # Use string user_id to match search
             metadata={
@@ -267,13 +267,13 @@ async def create_memory(
         )
         
         # Log the response for debugging
-        logging.info(f"Qdrant response: {qdrant_response}")
+        logging.info(f"Vector store response: {vector_response}")
         
-        # Process Qdrant response
-        if isinstance(qdrant_response, dict) and 'results' in qdrant_response:
+        # Process vector store response
+        if isinstance(vector_response, dict) and 'results' in vector_response:
             created_memories = []
             
-            for result in qdrant_response['results']:
+            for result in vector_response['results']:
                 if result['event'] == 'ADD':
                     # Get the Qdrant-generated ID
                     memory_id = UUID(result['id'])
@@ -318,11 +318,11 @@ async def create_memory(
                 # Return the first memory (for API compatibility)
                 # but all memories are now saved to the database
                 return created_memories[0]
-    except Exception as qdrant_error:
-        logging.warning(f"Qdrant operation failed: {qdrant_error}.")
+    except Exception as vector_error:
+        logging.warning(f"Vector store operation failed: {vector_error}.")
         # Return a json response with the error
         return {
-            "error": str(qdrant_error)
+            "error": str(vector_error)
         }
 
 

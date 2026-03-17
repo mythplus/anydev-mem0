@@ -231,11 +231,18 @@ def get_default_memory_config():
             "distance_strategy": "cosine"
         }
     else:
-        # Default fallback to Qdrant
-        vector_store_provider = "qdrant"
-        vector_store_config.update({
-            "port": 6333,
-        })
+        # Default fallback to Milvus
+        vector_store_provider = "milvus"
+        milvus_host = vector_store_config.get("host", "mem0_store")
+        milvus_url = f"http://{milvus_host}:19530"
+        vector_store_config = {
+            "collection_name": "openmemory",
+            "url": milvus_url,
+            "token": "",
+            "db_name": "",
+            "embedding_model_dims": 768,
+            "metric_type": "COSINE"
+        }
     
     print(f"Auto-detected vector store: {vector_store_provider} with config: {vector_store_config}")
     

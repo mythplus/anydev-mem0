@@ -7,14 +7,19 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 # load .env file (make sure you have DATABASE_URL set)
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./openmemory.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://openmemory:openmemory@postgres:5432/openmemory")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set in environment")
 
 # SQLAlchemy engine & session
+# 根据数据库类型动态设置连接参数
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False  # SQLite 需要此参数
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Needed for SQLite
+    connect_args=connect_args
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
