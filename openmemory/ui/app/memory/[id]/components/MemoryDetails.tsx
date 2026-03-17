@@ -43,27 +43,27 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
     <div className="container mx-auto py-6 px-4">
       <Button
         variant="ghost"
-        className="mb-4 text-zinc-400 hover:text-white"
+        className="mb-4 text-muted-foreground hover:text-foreground"
         onClick={() => router.back()}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         {t("memoryDetail.backToMemories")}
       </Button>
       <div className="flex gap-4 w-full">
-        <div className="rounded-lg w-2/3 border h-fit pb-2 border-zinc-800 bg-zinc-900 overflow-hidden">
+        <div className="rounded-lg w-2/3 border h-fit pb-2 border-border bg-card overflow-hidden">
           <div className="">
-            <div className="flex px-6 py-3 justify-between items-center mb-6 bg-zinc-800 border-b border-zinc-800">
+            <div className="flex px-6 py-3 justify-between items-center mb-6 bg-secondary border-b border-border">
               <div className="flex items-center gap-2">
-                <h1 className="font-semibold text-white">
+                <h1 className="font-semibold text-foreground">
                   {t("memoryDetail.memory")}{" "}
-                  <span className="ml-1 text-zinc-400 text-sm font-normal">
+                  <span className="ml-1 text-muted-foreground text-sm font-normal">
                     #{memory?.id?.slice(0, 6)}
                   </span>
                 </h1>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 text-zinc-400 hover:text-white -ml-[5px] mt-1"
+                  className="h-4 w-4 text-muted-foreground hover:text-foreground -ml-[5px] mt-1"
                   onClick={handleCopy}
                 >
                   {copied ? (
@@ -85,15 +85,15 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
                 <p
                   className={`${
                     memory?.state === "archived" || memory?.state === "paused"
-                      ? "text-zinc-400"
-                      : "text-white"
+                      ? "text-muted-foreground"
+                      : "text-foreground"
                   }`}
                 >
                   {memory?.text}
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-zinc-800">
+              <div className="mt-6 pt-4 border-t border-border">
                 <div className="flex justify-between items-center">
                   <div className="">
                     <Categories
@@ -106,11 +106,11 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
                   </div>
                   <div className="flex items-center gap-2 min-w-[300px] justify-end">
                     <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-zinc-700 px-3 py-1 rounded-lg">
-                        <span className="text-sm text-zinc-400">
+                      <div className="flex items-center gap-1 bg-muted px-3 py-1 rounded-lg">
+                        <span className="text-sm text-muted-foreground">
                         {t("appDetail.createdBy")}
                         </span>
-                        <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
+                        <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                           <Image
                             src={
                               constants[
@@ -122,7 +122,7 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
                             height={24}
                           />
                         </div>
-                        <p className="text-sm text-zinc-100 font-semibold">
+                        <p className="text-sm text-foreground font-semibold">
                           {
                             constants[
                               memory?.app_name as keyof typeof constants

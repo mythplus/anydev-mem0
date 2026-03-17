@@ -53,12 +53,12 @@ const AppDetailCard = ({
 
   return (
     <div>
-      <div className="bg-zinc-900 border w-[320px] border-zinc-800 rounded-xl mb-6">
-        <div className="flex items-center gap-2 mb-4 bg-zinc-800 rounded-t-xl p-3">
+      <div className="bg-card border w-[320px] border-border rounded-xl mb-6">
+        <div className="flex items-center gap-2 mb-4 bg-secondary rounded-t-xl p-3">
           <div className="w-5 h-5 flex items-center justify-center">
             {appConfig.iconImage ? (
               <div>
-                <div className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
+              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                   <Image
                     src={appConfig.iconImage}
                     alt={appConfig.name}
@@ -68,8 +68,8 @@ const AppDetailCard = ({
                 </div>
               </div>
             ) : (
-              <div className="w-5 h-5 flex items-center justify-center bg-zinc-700 rounded-full">
-                <BiEdit className="w-4 h-4 text-zinc-400" />
+              <div className="w-5 h-5 flex items-center justify-center bg-muted rounded-full">
+                <BiEdit className="w-4 h-4 text-muted-foreground" />
               </div>
             )}
           </div>
@@ -78,7 +78,7 @@ const AppDetailCard = ({
 
         <div className="space-y-4 p-3">
           <div>
-            <p className="text-xs text-zinc-400">{t("appDetail.accessStatus")}</p>
+            <p className="text-xs text-muted-foreground">{t("appDetail.accessStatus")}</p>
             <p
               className={`font-medium ${
                 selectedApp.details.is_active
@@ -93,21 +93,21 @@ const AppDetailCard = ({
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">{t("appDetail.totalCreated")}</p>
+            <p className="text-xs text-muted-foreground">{t("appDetail.totalCreated")}</p>
             <p className="font-medium">
               {selectedApp.details.total_memories_created} {t("stats.memories")}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">{t("appDetail.totalAccessed")}</p>
+            <p className="text-xs text-muted-foreground">{t("appDetail.totalAccessed")}</p>
             <p className="font-medium">
               {selectedApp.details.total_memories_accessed} {t("stats.memories")}
             </p>
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">{t("appDetail.firstAccessed")}</p>
+            <p className="text-xs text-muted-foreground">{t("appDetail.firstAccessed")}</p>
             <p className="font-medium">
               {selectedApp.details.first_accessed
                 ? new Date(
@@ -124,7 +124,7 @@ const AppDetailCard = ({
           </div>
 
           <div>
-            <p className="text-xs text-zinc-400">{t("appDetail.lastAccessed")}</p>
+            <p className="text-xs text-muted-foreground">{t("appDetail.lastAccessed")}</p>
             <p className="font-medium">
               {selectedApp.details.last_accessed
                 ? new Date(
@@ -140,12 +140,12 @@ const AppDetailCard = ({
             </p>
           </div>
 
-          <hr className="border-zinc-800" />
+          <hr className="border-border" />
 
           <div className="flex gap-2 justify-end">
             <Button
               onClick={handlePauseAccess}
-              className="flex bg-transparent w-[170px] bg-zinc-800 border-zinc-800 hover:bg-zinc-800 text-white"
+              className="flex bg-transparent w-[170px] bg-secondary border-border hover:bg-accent text-card-foreground"
               size="sm"
               disabled={isLoading}
             >

@@ -57,7 +57,7 @@ export function CreateMemoryDialog() {
           {t("nav.createMemory")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800">
+      <DialogContent className="sm:max-w-[525px] bg-popover border-border">
         <DialogHeader>
           <DialogTitle>{t("createMemory.title")}</DialogTitle>
           <DialogDescription>
@@ -71,7 +71,7 @@ export function CreateMemoryDialog() {
               ref={textRef}
               id="memory"
               placeholder={t("createMemory.placeholder")}
-              className="bg-zinc-950 border-zinc-800 min-h-[150px]"
+              className="bg-background border-border min-h-[150px]"
             />
           </div>
         </div>

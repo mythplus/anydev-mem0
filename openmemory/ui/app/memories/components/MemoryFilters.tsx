@@ -6,19 +6,16 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
 import { clearFilters } from "@/store/filtersSlice";
 import { clearSelection } from "@/store/memoriesSlice";
 import { RootState } from "@/store/store";
-import { debounce } from "lodash";
-import { Archive, Pause, Play, Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { Archive, Pause, Play } from "lucide-react";
 import { FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import FilterComponent from "./FilterComponent";
+import { EnhancedSearch } from "@/components/shared/EnhancedSearch";
 
 export function MemoryFilters() {
   const dispatch = useDispatch();
@@ -27,11 +24,7 @@ export function MemoryFilters() {
     (state: RootState) => state.memories.selectedMemoryIds
   );
   const { deleteMemories, updateMemoryState, fetchMemories } = useMemoriesApi();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const activeFilters = useSelector((state: RootState) => state.filters.apps);
-
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDeleteSelected = async () => {
     try {
@@ -66,21 +59,6 @@ export function MemoryFilters() {
     }
   };
 
-  // add debounce
-  const handleSearch = debounce(async (query: string) => {
-    router.push(`/memories?search=${query}`);
-  }, 500);
-
-  useEffect(() => {
-    // if the url has a search param, set the input value to the search param
-    if (searchParams.get("search")) {
-      if (inputRef.current) {
-        inputRef.current.value = searchParams.get("search") || "";
-        inputRef.current.focus();
-      }
-    }
-  }, []);
-
   const handleClearAllFilters = async () => {
     dispatch(clearFilters());
     await fetchMemories(); // Fetch memories without any filters
@@ -92,21 +70,13 @@ export function MemoryFilters() {
 
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-4">
-      <div className="relative flex-1">
-        <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-        <Input
-          ref={inputRef}
-          placeholder={t("memories.searchPlaceholder")}
-          className="pl-8 bg-zinc-950 border-zinc-800 max-w-[500px]"
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </div>
+      <EnhancedSearch />
       <div className="flex gap-2">
         <FilterComponent />
         {hasActiveFilters && (
           <Button
             variant="outline"
-            className="bg-zinc-900 text-zinc-300 hover:bg-zinc-800"
+            className="bg-card text-muted-foreground hover:bg-accent"
             onClick={handleClearAllFilters}
           >
             {t("memories.clearFilters")}
@@ -118,14 +88,14 @@ export function MemoryFilters() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
+                  className="border-border bg-card hover:bg-accent"
                 >
                   {t("memories.actions")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-zinc-900 border-zinc-800"
+                className="bg-popover border-border"
               >
                 <DropdownMenuItem onClick={handleArchiveSelected}>
                   <Archive className="mr-2 h-4 w-4" />

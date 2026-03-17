@@ -19,6 +19,8 @@ interface MemoriesState {
   selectedMemoryIds: string[];
   // 刷新触发器：每次创建/删除/更新记忆后递增，通知列表组件重新加载
   refreshTrigger: number;
+  // 全局操作进行中状态（删除/更新等操作期间为 true，用于显示 loading 指示器）
+  operationLoading: boolean;
 }
 
 const initialState: MemoriesState = {
@@ -30,6 +32,7 @@ const initialState: MemoriesState = {
   error: null,
   selectedMemoryIds: [],
   refreshTrigger: 0,
+  operationLoading: false,
 };
 
 const memoriesSlice = createSlice({
@@ -86,6 +89,10 @@ const memoriesSlice = createSlice({
     triggerRefresh: (state) => {
       state.refreshTrigger += 1;
     },
+    // 设置全局操作 loading 状态
+    setOperationLoading: (state, action: PayloadAction<boolean>) => {
+      state.operationLoading = action.payload;
+    },
   },
   // extraReducers section is removed as API calls are handled by the hook
 });
@@ -102,7 +109,8 @@ export const {
   setSelectedMemory,
   setAccessLogs,
   setRelatedMemories,
-  triggerRefresh
+  triggerRefresh,
+  setOperationLoading
 } = memoriesSlice.actions;
 
 export default memoriesSlice.reducer; 

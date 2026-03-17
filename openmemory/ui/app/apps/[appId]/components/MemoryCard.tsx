@@ -27,11 +27,11 @@ export function MemoryCard({
 }: MemoryCardProps) {
   const { t } = useLanguage();
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div className="p-4">
         <div className="border-l-2 border-primary pl-4 mb-4">
           <p
-            className={`${state !== "active" ? "text-zinc-400" : "text-white"}`}
+            className={`${state !== "active" ? "text-muted-foreground" : "text-foreground"}`}
           >
             {content}
           </p>
@@ -39,8 +39,8 @@ export function MemoryCard({
 
         {metadata && Object.keys(metadata).length > 0 && (
           <div className="mb-4">
-            <p className="text-xs text-zinc-500 uppercase mb-2">{t("common.metadata")}</p>
-            <div className="bg-zinc-800 rounded p-3 text-zinc-400">
+            <p className="text-xs text-muted-foreground uppercase mb-2">{t("common.metadata")}</p>
+            <div className="bg-secondary rounded p-3 text-muted-foreground">
               <pre className="whitespace-pre-wrap">
                 {JSON.stringify(metadata, null, 2)}
               </pre>
@@ -57,7 +57,7 @@ export function MemoryCard({
 
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <span className="text-zinc-400 text-sm">
+            <span className="text-muted-foreground text-sm">
               {access_count ? (
                 <span className="relative top-1">
                   Accessed {access_count} times
@@ -83,7 +83,7 @@ export function MemoryCard({
           {!app_name && (
             <Link
               href={`/memory/${id}`}
-              className="hover:cursor-pointer bg-zinc-800 hover:bg-zinc-700 flex items-center px-3 py-1 text-sm rounded-lg text-white p-0 hover:text-white"
+              className="hover:cursor-pointer bg-secondary hover:bg-accent flex items-center px-3 py-1 text-sm rounded-lg text-card-foreground p-0 hover:text-card-foreground"
             >
               {t("apps.viewDetails")}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -91,9 +91,9 @@ export function MemoryCard({
           )}
           {app_name && (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-zinc-700 px-3 py-1 rounded-lg">
-                <span className="text-sm text-zinc-400">{t("appDetail.createdBy")}</span>
-                <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
+              <div className="flex items-center gap-1 bg-muted px-3 py-1 rounded-lg">
+                <span className="text-sm text-muted-foreground">{t("appDetail.createdBy")}</span>
+                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                   <Image
                     src={
                       constants[app_name as keyof typeof constants]
@@ -104,7 +104,7 @@ export function MemoryCard({
                     height={24}
                   />
                 </div>
-                <p className="text-sm text-zinc-100 font-semibold">
+                <p className="text-sm text-foreground font-semibold">
                   {constants[app_name as keyof typeof constants]?.name}
                 </p>
               </div>

@@ -98,18 +98,18 @@ export const Install = () => {
       </div>
 
       <Tabs defaultValue="claude" className="w-full">
-        <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-full justify-start gap-0 p-0 grid grid-cols-9">
+        <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-0 p-0 grid grid-cols-9">
           {allTabs.map(({ key, label, icon }) => (
             <TabsTrigger
               key={key}
               value={key}
               className={`flex-1 px-0 pb-2 rounded-none ${getColorGradient(
                 key
-              )} data-[state=active]:border-b-2 data-[state=active]:shadow-none text-zinc-400 data-[state=active]:text-white flex items-center justify-center gap-2 text-sm`}
+              )} data-[state=active]:border-b-2 data-[state=active]:shadow-none text-muted-foreground data-[state=active]:text-foreground flex items-center justify-center gap-2 text-sm`}
             >
               {icon.startsWith("/") ? (
                 <div>
-                  <div className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
+                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                     <Image src={icon} alt={label} width={40} height={40} />
                   </div>
                 </div>
@@ -125,28 +125,28 @@ export const Install = () => {
 
         {/* MCP Tab Content */}
         <TabsContent value="mcp" className="mt-6">
-          <Card className="bg-zinc-900 border-zinc-800">
+          <Card className="bg-card border-border">
             <CardHeader className="py-4">
-              <CardTitle className="text-white text-xl">MCP Link</CardTitle>
+              <CardTitle className="text-card-foreground text-xl">MCP Link</CardTitle>
             </CardHeader>
-            <hr className="border-zinc-800" />
+            <hr className="border-border" />
             <CardContent className="py-4">
               <div className="relative">
-                <pre className="bg-zinc-800 px-4 py-3 rounded-md overflow-x-auto text-sm">
+                <pre className="bg-secondary px-4 py-3 rounded-md overflow-x-auto text-sm">
                   <code className="text-gray-300">
                     {URL}/mcp/openmemory/sse/{user}
                   </code>
                 </pre>
                 <div>
                   <button
-                    className="absolute top-0 right-0 py-3 px-4 rounded-md hover:bg-zinc-600 bg-zinc-700"
+                    className="absolute top-0 right-0 py-3 px-4 rounded-md hover:bg-accent bg-muted"
                     aria-label="Copy to clipboard"
                     onClick={() => handleCopy("mcp", true)}
                   >
                     {copiedTab === "mcp" ? (
                       <Check className="h-5 w-5 text-green-400" />
                     ) : (
-                      <Copy className="h-5 w-5 text-zinc-400" />
+                      <Copy className="h-5 w-5 text-muted-foreground" />
                     )}
                   </button>
                 </div>
@@ -158,30 +158,30 @@ export const Install = () => {
         {/* Client Tabs Content */}
         {clientTabs.map(({ key }) => (
           <TabsContent key={key} value={key} className="mt-6">
-            <Card className="bg-zinc-900 border-zinc-800">
+            <Card className="bg-card border-border">
               <CardHeader className="py-4">
-                <CardTitle className="text-white text-xl">
+                <CardTitle className="text-card-foreground text-xl">
                   {key.charAt(0).toUpperCase() + key.slice(1)} {t("install.command")}
                 </CardTitle>
               </CardHeader>
-              <hr className="border-zinc-800" />
+              <hr className="border-border" />
               <CardContent className="py-4">
                 <div className="relative">
-                  <pre className="bg-zinc-800 px-4 py-3 rounded-md overflow-x-auto text-sm">
+                  <pre className="bg-secondary px-4 py-3 rounded-md overflow-x-auto text-sm">
                     <code className="text-gray-300">
                       {`npx @openmemory/install local ${URL}/mcp/${key}/sse/${user} --client ${key}`}
                     </code>
                   </pre>
                   <div>
                     <button
-                      className="absolute top-0 right-0 py-3 px-4 rounded-md hover:bg-zinc-600 bg-zinc-700"
+                    className="absolute top-0 right-0 py-3 px-4 rounded-md hover:bg-accent bg-muted"
                       aria-label="Copy to clipboard"
                       onClick={() => handleCopy(key)}
                     >
                       {copiedTab === key ? (
                         <Check className="h-5 w-5 text-green-400" />
                       ) : (
-                        <Copy className="h-5 w-5 text-zinc-400" />
+                        <Copy className="h-5 w-5 text-muted-foreground" />
                       )}
                     </button>
                   </div>

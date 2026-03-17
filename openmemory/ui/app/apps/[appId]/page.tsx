@@ -59,11 +59,11 @@ export default function AppDetailsPage() {
 
   if (!selectedApp.details) {
     return (
-      <div className="flex-1 py-6 text-white">
+      <div className="flex-1 py-6 text-foreground">
         <div className="container flex justify-between">
           <div className="flex-1 p-4 max-w-4xl animate-fade-slide-down">
             <div className="mb-6">
-              <div className="h-10 w-64 bg-zinc-800 rounded animate-pulse mb-6" />
+              <div className="h-10 w-64 bg-secondary rounded animate-pulse mb-6" />
               <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
                   <MemoryCardSkeleton key={i} />
@@ -100,7 +100,7 @@ export default function AppDetailsPage() {
 
     if (memories.items.length === 0) {
       return (
-        <div className="text-zinc-400 text-center py-8">{t("appDetail.noMemories")}</div>
+        <div className="text-muted-foreground text-center py-8">{t("appDetail.noMemories")}</div>
       );
     }
 
@@ -141,7 +141,7 @@ export default function AppDetailsPage() {
 
     if (memories.items.length === 0) {
       return (
-        <div className="text-zinc-400 text-center py-8">
+        <div className="text-muted-foreground text-center py-8">
           {t("appDetail.noAccessedMemories")}
         </div>
       );
@@ -167,7 +167,7 @@ export default function AppDetailsPage() {
   };
 
   return (
-    <div className="flex-1 py-6 text-white">
+    <div className="flex-1 py-6 text-foreground">
       <div className="container flex justify-between">
         {/* Main content area */}
         <div className="flex-1 p-4 max-w-4xl animate-fade-slide-down">
@@ -176,11 +176,11 @@ export default function AppDetailsPage() {
             className="mb-6"
             onValueChange={setActiveTab}
           >
-            <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-full justify-start gap-8 p-0">
+            <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start gap-8 p-0">
               <TabsTrigger
                 value="created"
                 className={`px-0 pb-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
-                  activeTab === "created" ? "text-white" : "text-zinc-400"
+                  activeTab === "created" ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
                 {t("appDetail.created")} ({selectedApp.memories.created.total})
@@ -188,7 +188,7 @@ export default function AppDetailsPage() {
               <TabsTrigger
                 value="accessed"
                 className={`px-0 pb-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
-                  activeTab === "accessed" ? "text-white" : "text-zinc-400"
+                  activeTab === "accessed" ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
                 {t("appDetail.accessed")} ({selectedApp.memories.accessed.total})

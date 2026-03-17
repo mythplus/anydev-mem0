@@ -206,6 +206,33 @@ export const translations: Record<Locale, Record<string, string>> = {
     "state.active": "Active",
     "state.inactive": "Inactive",
 
+    // Theme
+    "theme.light": "Light Mode",
+    "theme.dark": "Dark Mode",
+
+    // Sidebar
+    "sidebar.collapse": "Collapse",
+
+    // Dashboard charts
+    "chart.memoryTrend": "Memory Trend",
+    "chart.categoryDistribution": "Category Distribution",
+    "chart.last7days": "Last 7 Days",
+    "chart.noData": "No data available",
+
+    // Knowledge graph
+    "graph.title": "Knowledge Graph",
+    "graph.noData": "No related memories to display",
+    "graph.loading": "Loading graph data...",
+
+    // Search
+    "search.suggestions": "Search Suggestions",
+    "search.recentSearches": "Recent Searches",
+    "search.noResults": "No results found",
+    "search.highlight": "Matched",
+
+    // Loading
+    "memories.loading": "Loading...",
+
     // Common
     "common.metadata": "METADATA",
   },
@@ -413,6 +440,33 @@ export const translations: Record<Locale, Record<string, string>> = {
     "state.archived": "已归档",
     "state.active": "活跃",
     "state.inactive": "未活跃",
+
+    // 主题
+    "theme.light": "浅色模式",
+    "theme.dark": "深色模式",
+
+    // 侧边栏
+    "sidebar.collapse": "收起侧边栏",
+
+    // 仪表盘图表
+    "chart.memoryTrend": "记忆趋势",
+    "chart.categoryDistribution": "分类分布",
+    "chart.last7days": "最近 7 天",
+    "chart.noData": "暂无数据",
+
+    // 知识图谱
+    "graph.title": "知识图谱",
+    "graph.noData": "暂无相关记忆可展示",
+    "graph.loading": "正在加载图谱数据...",
+
+    // 搜索
+    "search.suggestions": "搜索建议",
+    "search.recentSearches": "最近搜索",
+    "search.noResults": "未找到结果",
+    "search.highlight": "匹配",
+
+    // 加载
+    "memories.loading": "加载中...",
 
     // 通用
     "common.metadata": "元数据",

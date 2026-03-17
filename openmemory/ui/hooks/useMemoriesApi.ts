@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Memory, Client, Category } from '@/components/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { setAccessLogs, setMemoriesSuccess, setSelectedMemory, setRelatedMemories, triggerRefresh } from '@/store/memoriesSlice';
+import { setAccessLogs, setMemoriesSuccess, setSelectedMemory, setRelatedMemories, triggerRefresh, setOperationLoading } from '@/store/memoriesSlice';
 
 // Define the new simplified memory type
 export interface SimpleMemory {
@@ -187,6 +187,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       const errorMessage = err.message || 'Failed to create memory';
       setError(errorMessage);
       setIsLoading(false);
+      dispatch(setOperationLoading(false));
       throw new Error(errorMessage);
     }
   };
@@ -196,15 +197,18 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
    * DELETE /api/v1/memories/
    */
   const deleteMemories = async (memory_ids: string[]) => {
+    dispatch(setOperationLoading(true));
     try {
       await axios.delete(`${URL}/api/v1/memories/`, {
         data: { memory_ids, user_id }
       });
       dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memory_ids.includes(memory.id))));
+      // 触发更新信号，通知其他组件刷新
+      dispatch(triggerRefresh());
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to delete memories';
       setError(errorMessage);
-      setIsLoading(false);
+      dispatch(setOperationLoading(false));
       throw new Error(errorMessage);
     }
   };
@@ -301,6 +305,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     if (memoryId === "") {
       return;
     }
+    dispatch(setOperationLoading(true));
     setIsLoading(true);
     setError(null);
     try {
@@ -311,10 +316,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       });
       setIsLoading(false);
       setHasUpdates(hasUpdates + 1);
+      // 触发更新信号，通知其他组件刷新
+      dispatch(triggerRefresh());
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to update memory';
       setError(errorMessage);
       setIsLoading(false);
+      dispatch(setOperationLoading(false));
       throw new Error(errorMessage);
     }
   };
@@ -327,6 +335,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     if (memoryIds.length === 0) {
       return;
     }
+    dispatch(setOperationLoading(true));
     setIsLoading(true);
     setError(null);
     try {
@@ -355,10 +364,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
 
       setIsLoading(false);
       setHasUpdates(hasUpdates + 1);
+      // 触发更新信号，通知其他组件刷新
+      dispatch(triggerRefresh());
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to update memory state';
       setError(errorMessage);
       setIsLoading(false);
+      dispatch(setOperationLoading(false));
       throw new Error(errorMessage);
     }
   };

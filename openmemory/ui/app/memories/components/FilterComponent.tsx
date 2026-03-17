@@ -206,7 +206,7 @@ export default function FilterComponent() {
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className={`h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 ${
+            className={`h-9 px-4 border-border bg-card hover:bg-accent ${
               hasActiveFilters ? "border-primary" : ""
             }`}
           >
@@ -223,29 +223,29 @@ export default function FilterComponent() {
             )}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] bg-zinc-900 border-zinc-800 text-zinc-100">
+        <DialogContent className="sm:max-w-[425px] bg-popover border-border text-popover-foreground">
           <DialogHeader>
-            <DialogTitle className="text-zinc-100 flex justify-between items-center">
+            <DialogTitle className="text-popover-foreground flex justify-between items-center">
               <span>{t("filter.title")}</span>
             </DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="apps" className="w-full">
-            <TabsList className="grid grid-cols-3 bg-zinc-800">
+            <TabsList className="grid grid-cols-3 bg-secondary">
               <TabsTrigger
                 value="apps"
-                className="data-[state=active]:bg-zinc-700"
+                className="data-[state=active]:bg-accent"
               >
                 {t("filter.apps")}
               </TabsTrigger>
               <TabsTrigger
                 value="categories"
-                className="data-[state=active]:bg-zinc-700"
+                className="data-[state=active]:bg-accent"
               >
                 {t("filter.categories")}
               </TabsTrigger>
               <TabsTrigger
                 value="archived"
-                className="data-[state=active]:bg-zinc-700"
+                className="data-[state=active]:bg-accent"
               >
                 {t("filter.archivedTab")}
               </TabsTrigger>
@@ -261,11 +261,11 @@ export default function FilterComponent() {
                     onCheckedChange={(checked) =>
                       toggleAllApps(checked as boolean)
                     }
-                    className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   <Label
                     htmlFor="select-all-apps"
-                    className="text-sm font-normal text-zinc-300 cursor-pointer"
+                    className="text-sm font-normal text-muted-foreground cursor-pointer"
                   >
                     {t("filter.selectAll")}
                   </Label>
@@ -276,12 +276,11 @@ export default function FilterComponent() {
                       id={`app-${app.id}`}
                       checked={tempSelectedApps.includes(app.id)}
                       onCheckedChange={() => toggleAppFilter(app.id)}
-                      className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
                     <Label
                       htmlFor={`app-${app.id}`}
-                      className="text-sm font-normal text-zinc-300 cursor-pointer"
-                    >
+                      className="text-sm font-normal text-muted-foreground cursor-pointer"                    >
                       {app.name}
                     </Label>
                   </div>
@@ -300,11 +299,11 @@ export default function FilterComponent() {
                     onCheckedChange={(checked) =>
                       toggleAllCategories(checked as boolean)
                     }
-                    className="border-zinc-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
                   <Label
                     htmlFor="select-all-categories"
-                    className="text-sm font-normal text-zinc-300 cursor-pointer"
+                    className="text-sm font-normal text-muted-foreground cursor-pointer"
                   >
                     {t("filter.selectAll")}
                   </Label>
@@ -324,7 +323,7 @@ export default function FilterComponent() {
                     />
                     <Label
                       htmlFor={`category-${category.name}`}
-                      className="text-sm font-normal text-zinc-300 cursor-pointer"
+                      className="text-sm font-normal text-muted-foreground cursor-pointer"
                     >
                       {category.name}
                     </Label>
@@ -358,7 +357,7 @@ export default function FilterComponent() {
             {hasTempFilters && (
               <Button
                 onClick={handleClearFilters}
-                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                className="bg-secondary hover:bg-accent text-muted-foreground"
               >
                 {t("filter.clearAll")}
               </Button>
@@ -378,7 +377,7 @@ export default function FilterComponent() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
+            className="h-9 px-4 border-border bg-card hover:bg-accent"
           >
             {filters.sortDirection === "asc" ? (
               <SortAsc className="h-4 w-4" />
@@ -389,9 +388,9 @@ export default function FilterComponent() {
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100">
+        <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground">
           <DropdownMenuLabel>{t("filter.sortBy")}</DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-zinc-800" />
+          <DropdownMenuSeparator className="bg-border" />
           <DropdownMenuGroup>
             {columns.map((column) => (
               <DropdownMenuItem

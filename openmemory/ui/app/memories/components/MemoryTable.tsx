@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from "framer-motion";
 import Categories from "@/components/shared/categories";
 import SourceApp from "@/components/shared/source-app";
 import { Button } from "@/components/ui/button";
@@ -112,10 +113,10 @@ export function MemoryTable() {
     <div className="rounded-md border">
       <Table className="">
         <TableHeader>
-          <TableRow className="bg-zinc-800 hover:bg-zinc-800">
+          <TableRow className="bg-secondary hover:bg-secondary">
             <TableHead className="w-[50px] pl-4">
               <Checkbox
-                className="data-[state=checked]:border-primary border-zinc-500/50"
+                className="data-[state=checked]:border-primary border-muted-foreground/30"
                 checked={isAllSelected}
                 data-state={
                   isPartiallySelected
@@ -127,31 +128,31 @@ export function MemoryTable() {
                 onCheckedChange={handleSelectAll}
               />
             </TableHead>
-            <TableHead className="border-zinc-700">
+            <TableHead className="border-border">
               <div className="flex items-center min-w-[600px]">
                 <HiMiniRectangleStack className="mr-1" />
                 {t("table.memory")}
               </div>
             </TableHead>
-            <TableHead className="border-zinc-700">
+            <TableHead className="border-border">
               <div className="flex items-center">
                 <PiSwatches className="mr-1" size={15} />
                 {t("table.categories")}
               </div>
             </TableHead>
-            <TableHead className="w-[140px] border-zinc-700">
+            <TableHead className="w-[140px] border-border">
               <div className="flex items-center">
                 <GoPackage className="mr-1" />
                 {t("table.sourceApp")}
               </div>
             </TableHead>
-            <TableHead className="w-[140px] border-zinc-700">
+            <TableHead className="w-[140px] border-border">
               <div className="flex items-center w-full justify-center">
                 <CiCalendar className="mr-1" size={16} />
                 {t("table.createdOn")}
               </div>
             </TableHead>
-            <TableHead className="text-right border-zinc-700 flex justify-center">
+            <TableHead className="text-right border-border flex justify-center">
               <div className="flex items-center justify-end">
                 <MoreHorizontal className="h-4 w-4 mr-2" />
               </div>
@@ -159,18 +160,23 @@ export function MemoryTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {memories.map((memory) => (
-            <TableRow
+          <AnimatePresence>
+          {memories.map((memory, index) => (
+            <motion.tr
               key={memory.id}
-              className={`hover:bg-zinc-900/50 ${
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2, delay: index * 0.03 }}
+              className={`border-b transition-colors hover:bg-accent/50 ${
                 memory.state === "paused" || memory.state === "archived"
-                  ? "text-zinc-400"
+                  ? "text-muted-foreground"
                   : ""
               } ${isLoading ? "animate-pulse opacity-50" : ""}`}
             >
               <TableCell className="pl-4">
                 <Checkbox
-                  className="data-[state=checked]:border-primary border-zinc-500/50"
+                  className="data-[state=checked]:border-primary border-muted-foreground/30"
                   checked={selectedMemoryIds.includes(memory.id)}
                   onCheckedChange={(checked) =>
                     handleSelectMemory(memory.id, checked as boolean)
@@ -187,8 +193,8 @@ export function MemoryTable() {
                           className={`font-medium ${
                             memory.state === "paused" ||
                             memory.state === "archived"
-                              ? "text-zinc-400"
-                              : "text-white"
+                              ? "text-muted-foreground"
+                              : "text-foreground"
                           } cursor-pointer`}
                         >
                           {memory.memory}
@@ -208,7 +214,7 @@ export function MemoryTable() {
                 ) : (
                   <div
                     onClick={() => handleMemoryClick(memory.id)}
-                    className={`font-medium text-white cursor-pointer`}
+                    className={`font-medium text-foreground cursor-pointer`}
                   >
                     {memory.memory}
                   </div>
@@ -240,7 +246,7 @@ export function MemoryTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="bg-zinc-900 border-zinc-800"
+                    className="bg-popover border-border"
                   >
                     <DropdownMenuItem
                       className="cursor-pointer"
@@ -295,8 +301,9 @@ export function MemoryTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
-            </TableRow>
+            </motion.tr>
           ))}
+          </AnimatePresence>
         </TableBody>
       </Table>
     </div>

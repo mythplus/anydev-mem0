@@ -77,6 +77,8 @@ NEXT_PUBLIC_USER_ID=<user-id> # Same as the user id for environment variable in 
 
 ### 2. Build and Run the Project
 You can run the project using the following two commands:
+
+
 ```bash
 make build # builds the mcp server and ui
 make up  # runs openmemory mcp server and ui
@@ -91,7 +93,7 @@ After running these commands, you will have:
 If the UI does not start properly on [http://localhost:3000](http://localhost:3000), try running it manually:
 
 ```bash
-cd ui
+cd ui 
 pnpm install
 pnpm dev
 ```
