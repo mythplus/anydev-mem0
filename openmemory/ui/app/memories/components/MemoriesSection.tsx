@@ -3,7 +3,7 @@ import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
 import { MemoryTableSkeleton } from "@/skeleton/MemoryTableSkeleton";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Category, Client } from "../../../components/types";
@@ -32,15 +32,32 @@ export function MemoriesSection() {
   // 监听 Redux store 中的刷新触发器，当创建/删除/更新记忆后自动重新加载列表
   const refreshTrigger = useSelector((state: RootState) => state.memories.refreshTrigger);
 
+  // 监听 Redux store 中的筛选状态
+  const activeFilters = useSelector((state: RootState) => state.filters.apps);
+
+  // 使用 ref 持有最新的 filters，避免 fetchMemories 的 useCallback 依赖导致无限循环
+  const filtersRef = useRef(activeFilters);
+  filtersRef.current = activeFilters;
+
   useEffect(() => {
     const loadMemories = async () => {
       setIsLoading(true);
       try {
         const searchQuery = searchParams.get("search") || "";
+        const filters = filtersRef.current;
         const result = await fetchMemories(
           searchQuery,
           currentPage,
-          itemsPerPage
+          itemsPerPage,
+          {
+            apps: filters.selectedApps.length > 0 ? filters.selectedApps : undefined,
+            categories: filters.selectedCategories.length > 0 ? filters.selectedCategories : undefined,
+            sortColumn: filters.sortColumn,
+            sortDirection: filters.sortDirection,
+            showArchived: filters.showArchived,
+            fromDate: filters.dateRange.startDate ? Math.floor(new Date(filters.dateRange.startDate).getTime() / 1000) : null,
+            toDate: filters.dateRange.endDate ? Math.floor(new Date(filters.dateRange.endDate).getTime() / 1000) : null,
+          }
         );
         setMemories(result.memories);
         setTotalItems(result.total);
@@ -52,7 +69,7 @@ export function MemoriesSection() {
     };
 
     loadMemories();
-  }, [currentPage, itemsPerPage, fetchMemories, searchParams, refreshTrigger]);
+  }, [currentPage, itemsPerPage, fetchMemories, searchParams, refreshTrigger, activeFilters]);
 
   const setCurrentPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());

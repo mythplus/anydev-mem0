@@ -144,7 +144,10 @@ export default function FilterComponent() {
     dispatch(clearFilters());
     setLocalStartDate("");
     setLocalEndDate("");
-    await fetchMemories();
+    // clearFilters 会重置 showArchived 为 false，MemoriesSection 监听 activeFilters 变化会自动刷新
+    await fetchMemories(undefined, 1, 10, {
+      showArchived: false,
+    });
   };
 
   // 时间范围筛选回调
@@ -192,6 +195,7 @@ export default function FilterComponent() {
         categories: selectedCategoryIds,
         sortColumn: column,
         sortDirection: newDirection,
+        showArchived: filters.showArchived,
         fromDate,
         toDate,
       });

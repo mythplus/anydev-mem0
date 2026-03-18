@@ -479,8 +479,12 @@ async def archive_memories(
     request: ArchiveMemoriesRequest,
     db: Session = Depends(get_db)
 ):
+    user = db.query(User).filter(User.user_id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     for memory_id in request.memory_ids:
-        update_memory_state(db, memory_id, MemoryState.archived, request.user_id)
+        update_memory_state(db, memory_id, MemoryState.archived, user.id)
     return {"message": f"Successfully archived {len(request.memory_ids)} memories"}
 
 
@@ -585,7 +589,11 @@ async def filter_memories(
     )
 
     # Filter archived memories based on show_archived parameter
-    if not request.show_archived:
+    if request.show_archived:
+        # 只显示已归档的记忆
+        query = query.filter(Memory.state == MemoryState.archived)
+    else:
+        # 只显示未归档的记忆
         query = query.filter(Memory.state != MemoryState.archived)
 
     # Apply search filter
