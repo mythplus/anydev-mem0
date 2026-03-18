@@ -24,9 +24,19 @@ export interface EmbedderProvider {
   config: EmbedderConfig;
 }
 
+export interface VectorStoreConfig {
+  [key: string]: any;
+}
+
+export interface VectorStoreProvider {
+  provider: string;
+  config: VectorStoreConfig;
+}
+
 export interface Mem0Config {
   llm?: LLMProvider;
   embedder?: EmbedderProvider;
+  vector_store?: VectorStoreProvider | null;
 }
 
 export interface OpenMemoryConfig {
@@ -98,6 +108,9 @@ const configSlice = createSlice({
     updateMem0Config: (state, action: PayloadAction<Mem0Config>) => {
       state.mem0 = action.payload;
     },
+    updateVectorStore: (state, action: PayloadAction<VectorStoreProvider | null>) => {
+      state.mem0.vector_store = action.payload;
+    },
   },
 });
 
@@ -109,6 +122,7 @@ export const {
   updateLLM,
   updateEmbedder,
   updateMem0Config,
+  updateVectorStore,
 } = configSlice.actions;
 
 export default configSlice.reducer; 

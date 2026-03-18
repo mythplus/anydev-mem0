@@ -98,10 +98,61 @@ export function FormView({ settings, onChange }: FormViewProps) {
     })
   }
 
+  const handleVectorStoreProviderChange = (value: string) => {
+    onChange({
+      ...settings,
+      mem0: {
+        ...settings.mem0,
+        vector_store: {
+          ...settings.mem0?.vector_store,
+          provider: value,
+          config: settings.mem0?.vector_store?.config || {},
+        },
+      },
+    })
+  }
+
+  const handleVectorStoreConfigChange = (key: string, value: any) => {
+    onChange({
+      ...settings,
+      mem0: {
+        ...settings.mem0,
+        vector_store: {
+          ...settings.mem0?.vector_store,
+          config: {
+            ...settings.mem0?.vector_store?.config,
+            [key]: value,
+          },
+        },
+      },
+    })
+  }
+
+  const handleRemoveVectorStoreConfigKey = (key: string) => {
+    const newConfig = { ...settings.mem0?.vector_store?.config }
+    delete newConfig[key]
+    onChange({
+      ...settings,
+      mem0: {
+        ...settings.mem0,
+        vector_store: {
+          ...settings.mem0?.vector_store,
+          config: newConfig,
+        },
+      },
+    })
+  }
+
+  const handleAddVectorStoreConfigKey = () => {
+    const key = `key_${Date.now()}`
+    handleVectorStoreConfigChange(key, "")
+  }
+
   const needsLlmApiKey = settings.mem0?.llm?.provider?.toLowerCase() !== "ollama"
   const needsEmbedderApiKey = settings.mem0?.embedder?.provider?.toLowerCase() !== "ollama"
   const isLlmOllama = settings.mem0?.llm?.provider?.toLowerCase() === "ollama"
   const isEmbedderOllama = settings.mem0?.embedder?.provider?.toLowerCase() === "ollama"
+  const hasVectorStore = !!settings.mem0?.vector_store
 
   const LLM_PROVIDERS = {
     "OpenAI": "openai",
@@ -349,6 +400,129 @@ export function FormView({ settings, onChange }: FormViewProps) {
                 {t("form.apiKeyDesc")}
               </p>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Vector Store Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("form.vectorStoreSettings")}</CardTitle>
+          <CardDescription>{t("form.vectorStoreDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="vector-store-enabled"
+              checked={hasVectorStore}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  onChange({
+                    ...settings,
+                    mem0: {
+                      ...settings.mem0,
+                      vector_store: { provider: "qdrant", config: {} },
+                    },
+                  })
+                } else {
+                  onChange({
+                    ...settings,
+                    mem0: {
+                      ...settings.mem0,
+                      vector_store: null,
+                    },
+                  })
+                }
+              }}
+            />
+            <Label htmlFor="vector-store-enabled">{t("form.enableVectorStore")}</Label>
+          </div>
+
+          {hasVectorStore && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="vs-provider">{t("form.vectorStoreProvider")}</Label>
+                <Select
+                  value={settings.mem0?.vector_store?.provider || ""}
+                  onValueChange={handleVectorStoreProviderChange}
+                >
+                  <SelectTrigger id="vs-provider">
+                    <SelectValue placeholder={t("form.selectProvider")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["qdrant", "chroma", "pgvector", "milvus", "pinecone", "weaviate", "elasticsearch", "redis"].map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("form.vectorStoreProviderDesc")}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>{t("form.vectorStoreConfig")}</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={handleAddVectorStoreConfigKey}
+                  >
+                    + {t("form.addConfigKey")}
+                  </Button>
+                </div>
+                {Object.entries(settings.mem0?.vector_store?.config || {}).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <Input
+                      className="w-1/3"
+                      value={key}
+                      onChange={(e) => {
+                        const newKey = e.target.value
+                        if (newKey && newKey !== key) {
+                          const config = { ...settings.mem0?.vector_store?.config }
+                          const val = config[key]
+                          delete config[key]
+                          config[newKey] = val
+                          onChange({
+                            ...settings,
+                            mem0: {
+                              ...settings.mem0,
+                              vector_store: {
+                                ...settings.mem0?.vector_store,
+                                config,
+                              },
+                            },
+                          })
+                        }
+                      }}
+                      placeholder="key"
+                    />
+                    <Input
+                      className="flex-1"
+                      value={String(value ?? "")}
+                      onChange={(e) => handleVectorStoreConfigChange(key, e.target.value)}
+                      placeholder="value"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-zinc-400 hover:text-red-400"
+                      onClick={() => handleRemoveVectorStoreConfigKey(key)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+                {Object.keys(settings.mem0?.vector_store?.config || {}).length === 0 && (
+                  <p className="text-xs text-muted-foreground">{t("form.vectorStoreNoConfig")}</p>
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

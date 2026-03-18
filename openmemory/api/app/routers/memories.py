@@ -484,6 +484,33 @@ async def archive_memories(
     return {"message": f"Successfully archived {len(request.memory_ids)} memories"}
 
 
+class UpdateStateRequest(BaseModel):
+    memory_ids: List[UUID]
+    user_id: str
+    state: str  # "active" or "archived"
+
+
+# Batch update memory state (active/archived)
+@router.post("/actions/state", summary="批量变更记忆状态", description="批量将记忆标记为指定状态（active 或 archived）")
+async def batch_update_state(
+    request: UpdateStateRequest,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.user_id == request.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    valid_states = {"active": MemoryState.active, "archived": MemoryState.archived}
+    if request.state not in valid_states:
+        raise HTTPException(status_code=400, detail=f"Invalid state: {request.state}. Must be 'active' or 'archived'.")
+
+    target_state = valid_states[request.state]
+    for memory_id in request.memory_ids:
+        update_memory_state(db, memory_id, target_state, user.id)
+
+    return {"message": f"Successfully updated {len(request.memory_ids)} memories to state '{request.state}'"}
+
+
 # Get memory access logs
 @router.get("/{memory_id}/access-log", summary="获取记忆访问日志", description="获取指定记忆的访问日志记录，支持分页")
 async def get_memory_access_log(
@@ -677,6 +704,41 @@ async def filter_memories(
             for memory in items
         ]
     )
+
+
+# Get memory status change history
+@router.get("/{memory_id}/status-history", summary="获取记忆状态变更历史", description="获取指定记忆的状态变更历史记录")
+async def get_memory_status_history(
+    memory_id: UUID,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    # 确保记忆存在
+    get_memory_or_404(db, memory_id)
+
+    query = db.query(MemoryStatusHistory).filter(MemoryStatusHistory.memory_id == memory_id)
+    total = query.count()
+    histories = query.order_by(MemoryStatusHistory.changed_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+
+    # 获取变更者信息
+    result = []
+    for h in histories:
+        user = db.query(User).filter(User.id == h.changed_by).first()
+        result.append({
+            "id": str(h.id),
+            "old_state": h.old_state.value,
+            "new_state": h.new_state.value,
+            "changed_by": user.user_id if user else str(h.changed_by),
+            "changed_at": h.changed_at.isoformat() if h.changed_at else None
+        })
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "histories": result
+    }
 
 
 @router.get("/{memory_id}/related", response_model=Page[MemoryResponse], summary="获取相关记忆", description="根据记忆的分类查找相关的记忆列表")

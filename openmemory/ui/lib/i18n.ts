@@ -208,6 +208,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "form.uploading": "Uploading...",
     "form.importBtn": "Import",
 
+    // Vector Store Settings
+    "form.vectorStoreSettings": "Vector Store Settings",
+    "form.vectorStoreDesc": "Configure the vector database for memory storage and retrieval",
+    "form.enableVectorStore": "Enable custom vector store",
+    "form.vectorStoreProvider": "Vector Store Provider",
+    "form.vectorStoreProviderDesc": "Select the vector database provider. Refer to mem0 documentation for provider-specific configuration.",
+    "form.vectorStoreConfig": "Provider Configuration",
+    "form.addConfigKey": "Add Field",
+    "form.vectorStoreNoConfig": "No configuration fields added yet. Click 'Add Field' to add provider-specific settings.",
+
+    // Memory Detail - Status History
+    "memoryDetail.statusHistory": "Status History",
+    "memoryDetail.noStatusHistory": "No status changes recorded",
+    "memoryDetail.loadingStatusHistory": "Loading status history...",
+
     // Not Found
     "notFound.goHome": "Go Home",
     "notFound.pageNotFound": "Page Not Found",
@@ -426,6 +441,21 @@ export const translations: Record<Locale, Record<string, string>> = {
     "form.noFile": "未选择文件",
     "form.uploading": "上传中...",
     "form.importBtn": "导入",
+
+    // 向量存储设置
+    "form.vectorStoreSettings": "向量存储设置",
+    "form.vectorStoreDesc": "配置用于记忆存储和检索的向量数据库",
+    "form.enableVectorStore": "启用自定义向量存储",
+    "form.vectorStoreProvider": "向量存储提供商",
+    "form.vectorStoreProviderDesc": "选择向量数据库提供商。请参考 mem0 文档了解提供商特定配置。",
+    "form.vectorStoreConfig": "提供商配置",
+    "form.addConfigKey": "添加字段",
+    "form.vectorStoreNoConfig": "尚未添加配置字段。点击“添加字段”来添加提供商特定的设置。",
+
+    // 记忆详情页 - 状态历史
+    "memoryDetail.statusHistory": "状态变更历史",
+    "memoryDetail.noStatusHistory": "暂无状态变更记录",
+    "memoryDetail.loadingStatusHistory": "正在加载状态历史...",
 
     // 404页面
     "notFound.goHome": "返回首页",

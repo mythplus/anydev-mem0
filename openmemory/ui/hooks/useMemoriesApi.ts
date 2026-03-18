@@ -355,7 +355,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
 
   /**
    * 批量更新记忆状态（激活/归档）
-   * POST /api/v1/memories/actions/pause
+   * POST /api/v1/memories/actions/state
    */
   const updateMemoryState = async (memoryIds: string[], state: string): Promise<void> => {
     if (memoryIds.length === 0) {
@@ -364,9 +364,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      await axios.post(`${URL}/api/v1/memories/actions/pause`, {
+      await axios.post(`${URL}/api/v1/memories/actions/state`, {
         memory_ids: memoryIds,
-        all_for_app: true,
         state: state,
         user_id: user_id
       });
