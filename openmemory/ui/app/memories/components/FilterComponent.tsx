@@ -292,7 +292,7 @@ export default function FilterComponent() {
           </div>
 
           {/* Tab 内容区 */}
-          <div key={activeTab} className="max-h-[600px] tab-scroll-container scrollbar-thin">
+          <div className="max-h-[600px] overflow-y-auto overflow-x-hidden scrollbar-thin">
             {activeTab === "apps" && (
               <DropdownMenuGroup className="tab-content-animate">
                 {/* 全选 */}
@@ -401,6 +401,42 @@ export default function FilterComponent() {
 
             {activeTab === "dateRange" && (
               <div className="p-4 space-y-4 tab-content-animate">
+                {/* 快捷选择按钮 */}
+                <div className="flex gap-2">
+                  {[
+                    { label: t("filter.today"), days: 0 },
+                    { label: t("filter.last7Days"), days: 7 },
+                    { label: t("filter.last30Days"), days: 30 },
+                  ].map(({ label, days }) => {
+                    const today = new Date();
+                    const todayStr = today.toISOString().split("T")[0];
+                    const startDate = days === 0
+                      ? todayStr
+                      : new Date(today.getTime() - days * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+                    const isActive = localStartDate === startDate && localEndDate === todayStr;
+                    return (
+                      <button
+                        key={days}
+                        onClick={async () => {
+                          setLocalStartDate(startDate);
+                          setLocalEndDate(todayStr);
+                          const dateRange = { startDate, endDate: todayStr };
+                          dispatch(setDateRange(dateRange));
+                          await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
+                          setFilterOpen(false);
+                        }}
+                        className={`flex-1 h-8 rounded-md text-xs font-medium transition-all duration-200 border ${
+                          isActive
+                            ? "bg-primary/20 border-primary/50 text-primary"
+                            : "border-zinc-700/60 bg-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{t("filter.startDate")}</label>
                   <input
@@ -421,7 +457,10 @@ export default function FilterComponent() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={applyDateRange}
+                    onClick={async () => {
+                      await applyDateRange();
+                      setFilterOpen(false);
+                    }}
                     disabled={!localStartDate && !localEndDate}
                     className="flex-1 h-9 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 btn-press"
                   >
@@ -429,7 +468,10 @@ export default function FilterComponent() {
                   </button>
                   {(localStartDate || localEndDate || filters.dateRange.startDate || filters.dateRange.endDate) && (
                     <button
-                      onClick={clearDateRange}
+                      onClick={async () => {
+                        await clearDateRange();
+                        setFilterOpen(false);
+                      }}
                       className="h-9 px-3 rounded-md border border-zinc-700/60 text-zinc-400 text-sm hover:text-zinc-200 hover:border-zinc-500 transition-all duration-200 btn-press"
                     >
                       <X className="h-4 w-4" />

@@ -13,7 +13,7 @@ import { setShowArchived } from "@/store/filtersSlice";
 import { clearSelection, triggerRefresh } from "@/store/memoriesSlice";
 import { RootState } from "@/store/store";
 import { debounce } from "lodash";
-import { Archive, ChevronDown, Search } from "lucide-react";
+import { Archive, ChevronDown, Download, Search, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import { FiTrash2 } from "react-icons/fi";
@@ -27,6 +27,8 @@ export function MemoryFilters() {
     (state: RootState) => state.memories.selectedMemoryIds
   );
   const { deleteMemories, archiveMemories } = useMemoriesApi();
+  const memories = useSelector((state: RootState) => state.memories.memories);
+  const hasSelection = selectedMemoryIds.length > 0;
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeFilters = useSelector((state: RootState) => state.filters.apps);
@@ -52,6 +54,32 @@ export function MemoryFilters() {
     } catch (error) {
       console.error("Failed to archive memories:", error);
     }
+  };
+
+  const handleExportSelected = () => {
+    const selectedMemories = memories.filter((m) =>
+      selectedMemoryIds.includes(m.id)
+    );
+    const exportData = selectedMemories.map((m) => ({
+      id: m.id,
+      memory: m.memory,
+      categories: m.categories,
+      app_name: m.app_name,
+      state: m.state,
+      created_at: m.created_at,
+      metadata: m.metadata,
+    }));
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `memories-export-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   // add debounce
@@ -121,9 +149,20 @@ export function MemoryFilters() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 transition-all duration-200 btn-press"
+              className={`border-zinc-700/50 transition-all duration-200 btn-press ${
+                hasSelection
+                  ? "bg-primary/10 border-primary/50 hover:bg-primary/20"
+                  : "bg-zinc-900 hover:bg-zinc-800 cursor-default"
+              }`}
+              disabled={!hasSelection}
             >
-              {t("memories.actions")}
+              {t("memories.batchActions")}
+              {hasSelection && (
+                <span className="ml-1.5 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                  {selectedMemoryIds.length}
+                </span>
+              )}
+              <ChevronDown className="h-4 w-4 ml-1" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -131,12 +170,27 @@ export function MemoryFilters() {
             className="bg-zinc-900 border-zinc-800"
           >
             <DropdownMenuItem
+              onClick={() => dispatch(clearSelection())}
+              className="transition-colors duration-150"
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              {t("memories.clearSelection")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={handleArchiveSelected}
               disabled={selectedMemoryIds.length === 0}
               className="transition-colors duration-150"
             >
               <Archive className="mr-2 h-4 w-4" />
               {t("memories.archiveSelected")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleExportSelected}
+              disabled={selectedMemoryIds.length === 0}
+              className="transition-colors duration-150"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t("memories.exportSelected")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleDeleteSelected}

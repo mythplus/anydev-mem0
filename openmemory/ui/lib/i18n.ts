@@ -26,7 +26,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.searchPlaceholder": "Search memories...",
     "memories.clearFilters": "Clear Filters",
     "memories.actions": "Actions",
+    "memories.batchActions": "Batch Actions",
+    "memories.clearSelection": "Clear Selection",
     "memories.archiveSelected": "Archive Selected",
+    "memories.exportSelected": "Export Selected",
     "memories.deleteSelected": "Delete Selected",
     "memories.noMemories": "No memories found",
     "memories.adjustFilters": "Try adjusting your filters",
@@ -96,6 +99,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "filter.endDate": "End Date",
     "filter.clearDateRange": "Clear Date Range",
     "filter.applyDateRange": "Apply",
+    "filter.today": "Today",
+    "filter.last7Days": "Last 7 Days",
+    "filter.last30Days": "Last 30 Days",
 
     // Apps page
     "apps.searchPlaceholder": "Search Apps...",
@@ -239,7 +245,10 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.searchPlaceholder": "搜索记忆...",
     "memories.clearFilters": "清除筛选",
     "memories.actions": "操作",
+    "memories.batchActions": "多选操作",
+    "memories.clearSelection": "取消选中",
     "memories.archiveSelected": "归档选中",
+    "memories.exportSelected": "导出选中",
     "memories.deleteSelected": "删除选中",
     "memories.noMemories": "未找到记忆",
     "memories.adjustFilters": "请尝试调整筛选条件",
@@ -252,7 +261,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.items": "条",
 
     // 记忆表格
-    "table.memory": "记忆",
+    "table.memory": "记忆内容",
     "table.categories": "分类",
     "table.sourceApp": "来源应用",
     "table.createdOn": "创建时间",
@@ -309,6 +318,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     "filter.endDate": "结束日期",
     "filter.clearDateRange": "清除时间范围",
     "filter.applyDateRange": "应用",
+    "filter.today": "今天",
+    "filter.last7Days": "近7天",
+    "filter.last30Days": "近30天",
 
     // 应用页面
     "apps.searchPlaceholder": "搜索应用...",
