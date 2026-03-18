@@ -55,28 +55,28 @@ const UpdateMemory = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800 z-50">
+      <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800 z-50 shadow-2xl shadow-black/30">
         <DialogHeader>
-          <DialogTitle>{t("updateMemory.title")}</DialogTitle>
-          <DialogDescription>{t("updateMemory.description")}</DialogDescription>
+          <DialogTitle className="text-lg">{t("updateMemory.title")}</DialogTitle>
+          <DialogDescription className="text-zinc-400">{t("updateMemory.description")}</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="memory">{t("updateMemory.label")}</Label>
+            <Label htmlFor="memory" className="text-sm font-medium">{t("updateMemory.label")}</Label>
             <Textarea
               ref={textRef}
               id="memory"
-              className="bg-zinc-950 border-zinc-800 min-h-[150px]"
+              className="bg-zinc-950 border-zinc-800 min-h-[150px] focus:border-primary/40 transition-all duration-200 resize-none scrollbar-thin"
               defaultValue={memoryContent}
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="btn-press transition-all duration-200">
             {t("updateMemory.cancel")}
           </Button>
           <Button
-            className="w-[140px]"
+            className="w-[140px] btn-press transition-all duration-200"
             disabled={isLoading}
             onClick={() => handleUpdateMemory(textRef?.current?.value || "")}
           >

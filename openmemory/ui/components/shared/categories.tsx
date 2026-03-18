@@ -158,7 +158,7 @@ const Categories = ({
     .filter((cat, index, self) => self.indexOf(cat) === index);
 
   const baseBadgeStyle =
-    "backdrop-blur-sm transition-colors hover:bg-opacity-20";
+    "backdrop-blur-sm transition-all duration-200 hover:bg-opacity-20 badge-hover cursor-default";
   const pausedStyle =
     "text-zinc-500 bg-zinc-800/40 border-zinc-700/40 hover:bg-zinc-800/60";
 
@@ -172,7 +172,7 @@ const Categories = ({
             isPaused
               ? pausedStyle
               : "text-zinc-400 bg-zinc-500/10 border-zinc-500/20"
-          } ${baseBadgeStyle}`}
+          } ${baseBadgeStyle} italic`}
         >
           null
         </Badge>
@@ -216,9 +216,10 @@ const Categories = ({
               </Badge>
             </PopoverTrigger>
             <PopoverContent
-              className="w-auto p-2 border bg-[#27272A] border-zinc-700/60 rounded-2xl"
+              className="w-auto p-2 border bg-[#27272A] border-zinc-700/60 rounded-xl shadow-xl shadow-black/20"
               onMouseEnter={() => setIsOpen(true)}
               onMouseLeave={() => setIsOpen(false)}
+              sideOffset={6}
             >
               <div className="flex flex-col gap-2">
                 {validCategories.slice(1).map((cat, i) => (

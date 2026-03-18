@@ -73,9 +73,9 @@ export function MemoriesSection() {
       <div className="w-full bg-transparent">
         <MemoryTableSkeleton />
         <div className="flex items-center justify-between mt-4">
-          <div className="h-8 w-32 bg-zinc-800 rounded animate-pulse" />
-          <div className="h-8 w-48 bg-zinc-800 rounded animate-pulse" />
-          <div className="h-8 w-32 bg-zinc-800 rounded animate-pulse" />
+          <div className="h-8 w-32 rounded skeleton-shimmer" />
+          <div className="h-8 w-48 rounded skeleton-shimmer" />
+          <div className="h-8 w-32 rounded skeleton-shimmer" />
         </div>
       </div>
     );
@@ -105,8 +105,8 @@ export function MemoriesSection() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="rounded-full bg-zinc-800 p-3 mb-4">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="rounded-full bg-zinc-800/60 p-4 mb-5 empty-state-bounce">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"

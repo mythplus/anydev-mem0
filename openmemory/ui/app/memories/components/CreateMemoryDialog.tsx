@@ -92,29 +92,30 @@ export function CreateMemoryDialog() {
           {t("nav.createMemory")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800">
+      <DialogContent className="sm:max-w-[525px] bg-zinc-900 border-zinc-800 shadow-2xl shadow-black/30">
         <DialogHeader>
-          <DialogTitle>{t("createMemory.title")}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg">{t("createMemory.title")}</DialogTitle>
+          <DialogDescription className="text-zinc-400">
             {t("createMemory.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="memory">{t("createMemory.label")}</Label>
+            <Label htmlFor="memory" className="text-sm font-medium">{t("createMemory.label")}</Label>
             <Textarea
               ref={textRef}
               id="memory"
               placeholder={t("createMemory.placeholder")}
-              className="bg-zinc-950 border-zinc-800 min-h-[150px]"
+              className="bg-zinc-950 border-zinc-800 min-h-[150px] focus:border-primary/40 transition-all duration-200 resize-none scrollbar-thin"
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={handleCancel}
+            className="btn-press transition-all duration-200"
           >
             {t("createMemory.cancel")}
           </Button>
@@ -122,6 +123,7 @@ export function CreateMemoryDialog() {
             type="button"
             disabled={isLoading}
             onClick={() => handleCreateMemory(textRef?.current?.value || "")}
+            className="btn-press transition-all duration-200"
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -77,22 +77,22 @@ export function MemoryFilters() {
 
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-4">
+    <div className="flex flex-col md:flex-row gap-3 mb-4">
       <div className="relative flex-1">
-        <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 transition-colors duration-200" />
         <Input
           ref={inputRef}
           placeholder={t("memories.searchPlaceholder")}
-          className="pl-8 bg-zinc-950 border-zinc-800 max-w-[500px]"
+          className="pl-9 bg-zinc-950 border-zinc-800 max-w-[500px] focus:border-primary/40 transition-all duration-200"
           onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
-      <div className="flex gap-2 shrink-0 flex-wrap">
+      <div className="flex gap-2 shrink-0 flex-wrap items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
+              className="h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 transition-all duration-200 btn-press"
             >
               {showArchived ? t("filter.archived") : t("filter.notArchived")}
               <ChevronDown className="h-4 w-4 ml-1" />
@@ -121,7 +121,7 @@ export function MemoryFilters() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
+              className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 transition-all duration-200 btn-press"
             >
               {t("memories.actions")}
             </Button>
@@ -133,6 +133,7 @@ export function MemoryFilters() {
             <DropdownMenuItem
               onClick={handleArchiveSelected}
               disabled={selectedMemoryIds.length === 0}
+              className="transition-colors duration-150"
             >
               <Archive className="mr-2 h-4 w-4" />
               {t("memories.archiveSelected")}
@@ -140,7 +141,7 @@ export function MemoryFilters() {
             <DropdownMenuItem
               onClick={handleDeleteSelected}
               disabled={selectedMemoryIds.length === 0}
-              className="text-red-500"
+              className="text-red-500 transition-colors duration-150 hover:bg-red-500/10"
             >
               <FiTrash2 className="mr-2 h-4 w-4" />
               {t("memories.deleteSelected")}

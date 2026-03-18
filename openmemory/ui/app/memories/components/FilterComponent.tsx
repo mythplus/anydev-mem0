@@ -230,13 +230,13 @@ export default function FilterComponent() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-64 bg-zinc-900 border-zinc-800 text-zinc-100 p-0"
+          className="w-72 bg-zinc-900 border-zinc-800 text-zinc-100 p-0 shadow-xl shadow-black/20 rounded-lg overflow-hidden"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           {/* Tab 切换栏 */}
-          <div className="flex border-b border-zinc-800">
+          <div className="flex border-b border-zinc-800/80">
             <button
-              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-all duration-200 relative ${
                 activeTab === "apps"
                   ? "text-primary"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -245,16 +245,16 @@ export default function FilterComponent() {
             >
               {t("filter.apps")}
               {appFilterCount > 0 && (
-                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-semibold">
                   {appFilterCount}
                 </span>
               )}
               {activeTab === "apps" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full tab-indicator" />
               )}
             </button>
             <button
-              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-all duration-200 relative ${
                 activeTab === "categories"
                   ? "text-primary"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -263,16 +263,16 @@ export default function FilterComponent() {
             >
               {t("filter.categories")}
               {categoryFilterCount > 0 && (
-                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-semibold">
                   {categoryFilterCount}
                 </span>
               )}
               {activeTab === "categories" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full tab-indicator" />
               )}
             </button>
             <button
-              className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors relative ${
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-all duration-200 relative ${
                 activeTab === "dateRange"
                   ? "text-primary"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -281,20 +281,20 @@ export default function FilterComponent() {
             >
               {t("filter.dateRange")}
               {dateFilterCount > 0 && (
-                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-semibold">
                   {dateFilterCount}
                 </span>
               )}
               {activeTab === "dateRange" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full tab-indicator" />
               )}
             </button>
           </div>
 
           {/* Tab 内容区 */}
-          <div className="max-h-[600px] overflow-y-auto">
+          <div key={activeTab} className="max-h-[600px] tab-scroll-container scrollbar-thin">
             {activeTab === "apps" && (
-              <DropdownMenuGroup>
+              <DropdownMenuGroup className="tab-content-animate">
                 {/* 全选 */}
                 <DropdownMenuItem
                   className="cursor-pointer flex justify-between items-center px-4 py-2"
@@ -350,7 +350,7 @@ export default function FilterComponent() {
             )}
 
             {activeTab === "categories" && (
-              <DropdownMenuGroup>
+              <DropdownMenuGroup className="tab-content-animate">
                 {/* 全选 */}
                 <DropdownMenuItem
                   className="cursor-pointer flex justify-between items-center px-4 py-2"
@@ -400,37 +400,37 @@ export default function FilterComponent() {
             )}
 
             {activeTab === "dateRange" && (
-              <div className="p-4 space-y-4">
+              <div className="p-4 space-y-4 tab-content-animate">
                 <div className="space-y-2">
-                  <label className="text-sm text-zinc-400">{t("filter.startDate")}</label>
+                  <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{t("filter.startDate")}</label>
                   <input
                     type="date"
                     value={localStartDate}
                     onChange={(e) => setLocalStartDate(e.target.value)}
-                    className="w-full h-9 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 px-3 rounded-md border border-zinc-700/60 bg-zinc-800/80 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-zinc-400">{t("filter.endDate")}</label>
+                  <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{t("filter.endDate")}</label>
                   <input
                     type="date"
                     value={localEndDate}
                     onChange={(e) => setLocalEndDate(e.target.value)}
-                    className="w-full h-9 px-3 rounded-md border border-zinc-700 bg-zinc-800 text-zinc-100 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 px-3 rounded-md border border-zinc-700/60 bg-zinc-800/80 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={applyDateRange}
                     disabled={!localStartDate && !localEndDate}
-                    className="flex-1 h-9 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 h-9 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 btn-press"
                   >
                     {t("filter.applyDateRange")}
                   </button>
                   {(localStartDate || localEndDate || filters.dateRange.startDate || filters.dateRange.endDate) && (
                     <button
                       onClick={clearDateRange}
-                      className="h-9 px-3 rounded-md border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 hover:border-zinc-500 transition-colors"
+                      className="h-9 px-3 rounded-md border border-zinc-700/60 text-zinc-400 text-sm hover:text-zinc-200 hover:border-zinc-500 transition-all duration-200 btn-press"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -456,7 +456,7 @@ export default function FilterComponent() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
+            className="h-9 px-4 border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800 transition-all duration-200 btn-press"
           >
             {filters.sortDirection === "asc" ? (
               <SortAsc className="h-4 w-4" />
@@ -467,15 +467,15 @@ export default function FilterComponent() {
             <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100">
-          <DropdownMenuLabel>{t("filter.sortBy")}</DropdownMenuLabel>
+        <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-800 text-zinc-100 shadow-xl shadow-black/20">
+          <DropdownMenuLabel className="text-zinc-400 text-xs uppercase tracking-wider">{t("filter.sortBy")}</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-800" />
           <DropdownMenuGroup>
             {columns.map((column) => (
               <DropdownMenuItem
                 key={column.value}
                 onClick={() => setSorting(column.value)}
-                className="cursor-pointer flex justify-between items-center"
+                className="cursor-pointer flex justify-between items-center transition-colors duration-150"
               >
                 {column.label}
                 {filters.sortColumn === column.value &&

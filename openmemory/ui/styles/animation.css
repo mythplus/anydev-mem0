@@ -1,7 +1,10 @@
+/* ============================================
+   入场动画 - 页面元素从上方淡入滑下
+   ============================================ */
 @keyframes fadeSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-16px);
   }
   to {
     opacity: 1;
@@ -11,17 +14,238 @@
 
 .animate-fade-slide-down {
   opacity: 0;
-  animation: fadeSlideDown 0.5s ease-out forwards;
+  animation: fadeSlideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .delay-1 {
-  animation-delay: 0.07s;
+  animation-delay: 0.06s;
 }
 
 .delay-2 {
-  animation-delay: 0.14s;
+  animation-delay: 0.12s;
 }
 
 .delay-3 {
-  animation-delay: 0.21s;
+  animation-delay: 0.18s;
+}
+
+/* ============================================
+   表格行交错入场动画
+   ============================================ */
+@keyframes tableRowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-row-animate {
+  opacity: 0;
+  animation: tableRowFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 为每一行生成递增延迟 (最多支持20行) */
+.table-row-animate:nth-child(1) { animation-delay: 0.02s; }
+.table-row-animate:nth-child(2) { animation-delay: 0.04s; }
+.table-row-animate:nth-child(3) { animation-delay: 0.06s; }
+.table-row-animate:nth-child(4) { animation-delay: 0.08s; }
+.table-row-animate:nth-child(5) { animation-delay: 0.10s; }
+.table-row-animate:nth-child(6) { animation-delay: 0.12s; }
+.table-row-animate:nth-child(7) { animation-delay: 0.14s; }
+.table-row-animate:nth-child(8) { animation-delay: 0.16s; }
+.table-row-animate:nth-child(9) { animation-delay: 0.18s; }
+.table-row-animate:nth-child(10) { animation-delay: 0.20s; }
+.table-row-animate:nth-child(11) { animation-delay: 0.22s; }
+.table-row-animate:nth-child(12) { animation-delay: 0.24s; }
+.table-row-animate:nth-child(13) { animation-delay: 0.26s; }
+.table-row-animate:nth-child(14) { animation-delay: 0.28s; }
+.table-row-animate:nth-child(15) { animation-delay: 0.30s; }
+.table-row-animate:nth-child(16) { animation-delay: 0.32s; }
+.table-row-animate:nth-child(17) { animation-delay: 0.34s; }
+.table-row-animate:nth-child(18) { animation-delay: 0.36s; }
+.table-row-animate:nth-child(19) { animation-delay: 0.38s; }
+.table-row-animate:nth-child(20) { animation-delay: 0.40s; }
+
+/* ============================================
+   表格行 hover 高亮动画
+   ============================================ */
+.table-row-hover {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.table-row-hover:hover {
+  background-color: rgba(113, 113, 122, 0.08) !important;
+  box-shadow: inset 0 0 0 1px rgba(113, 113, 122, 0.06);
+}
+
+/* ============================================
+   按钮/Badge 交互动画
+   ============================================ */
+.btn-press {
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.15s ease;
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Badge 悬浮微放大 */
+.badge-hover {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+}
+
+.badge-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   筛选下拉菜单 Tab 切换下划线动画
+   ============================================ */
+.tab-indicator {
+  transition: left 0.25s cubic-bezier(0.22, 1, 0.36, 1), width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================================
+   内容淡入切换动画（Tab内容区）
+   ============================================ */
+@keyframes tabContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content-animate {
+  animation: tabContentFadeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============================================
+   Tab 内容滚动容器 - 延迟显示滚动条，避免切换时闪烁
+   ============================================ */
+@keyframes delayedOverflowY {
+  0% {
+    overflow-y: hidden;
+  }
+  99% {
+    overflow-y: hidden;
+  }
+  100% {
+    overflow-y: auto;
+  }
+}
+
+.tab-scroll-container {
+  overflow-y: hidden;
+  overflow-x: hidden;
+  animation: delayedOverflowY 0.25s forwards;
+}
+
+/* ============================================
+   对话框增强动画
+   ============================================ */
+@keyframes dialogScaleIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialogScaleOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+/* ============================================
+   骨架屏脉冲动画增强
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(113, 113, 122, 0.1) 25%,
+    rgba(113, 113, 122, 0.2) 50%,
+    rgba(113, 113, 122, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Checkbox 勾选动画
+   ============================================ */
+.checkbox-animate {
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease;
+}
+
+.checkbox-animate:active {
+  transform: scale(0.9);
+}
+
+/* ============================================
+   操作菜单项 hover 动画
+   ============================================ */
+.menu-item-hover {
+  transition: background-color 0.15s ease, padding-left 0.15s ease;
+}
+
+.menu-item-hover:hover {
+  padding-left: 20px;
+}
+
+/* ============================================
+   空状态图标弹跳动画
+   ============================================ */
+@keyframes gentleBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.empty-state-bounce {
+  animation: gentleBounce 2s ease-in-out infinite;
+}
+
+/* ============================================
+   分页按钮过渡
+   ============================================ */
+.pagination-btn {
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.pagination-btn:active:not(:disabled) {
+  transform: scale(0.95);
 }

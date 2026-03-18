@@ -199,14 +199,15 @@ export function MemoryTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {memories.map((memory) => (
+          {memories.map((memory, index) => (
             <TableRow
               key={memory.id}
-              className={`hover:bg-zinc-900/50 ${
+              className={`table-row-animate table-row-hover ${
                 memory.state === "archived"
                   ? "text-zinc-400"
                   : ""
               } ${isLoading ? "animate-pulse opacity-50" : ""}`}
+              style={{ animationDelay: `${index * 0.03}s` }}
             >
               <TableCell className="pl-4">
                 <Checkbox
@@ -217,15 +218,15 @@ export function MemoryTable() {
                   }
                 />
               </TableCell>
-              <TableCell className="align-top">
-                <div className="max-h-[80px] overflow-y-auto break-all whitespace-pre-wrap pr-1 scrollbar-thin">
+              <TableCell className="align-top py-3">
+                <div className="max-h-[80px] overflow-y-auto break-all whitespace-pre-wrap pr-2 scrollbar-thin">
                   {memory.state === "archived" ? (
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
                           <div
                             onClick={() => handleMemoryClick(memory.id)}
-                            className="font-medium text-zinc-400 cursor-pointer"
+                            className="font-medium text-zinc-400 cursor-pointer transition-colors duration-200 hover:text-zinc-300 leading-relaxed"
                           >
                             {memory.memory}
                           </div>
@@ -244,7 +245,7 @@ export function MemoryTable() {
                   ) : (
                     <div
                       onClick={() => handleMemoryClick(memory.id)}
-                      className="font-medium text-white cursor-pointer"
+                      className="font-medium text-white cursor-pointer transition-colors duration-200 hover:text-primary/90 leading-relaxed"
                     >
                       {memory.memory}
                     </div>
@@ -269,7 +270,7 @@ export function MemoryTable() {
               <TableCell className="text-right flex justify-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 transition-all duration-200 hover:bg-zinc-800 hover:scale-110 active:scale-95 rounded-full">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -278,7 +279,7 @@ export function MemoryTable() {
                     className="bg-zinc-900 border-zinc-800"
                   >
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
                       onClick={() => {
                         if (memory.state !== "archived") {
                           handleArchiveMemory(memory.id);
@@ -295,7 +296,7 @@ export function MemoryTable() {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
                       onClick={() => handleEditMemory(memory.id, memory.memory)}
                     >
                       <Edit className="mr-2 h-4 w-4" />
@@ -303,7 +304,7 @@ export function MemoryTable() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="cursor-pointer text-red-500 focus:text-red-500"
+                      className="cursor-pointer text-red-500 focus:text-red-500 transition-colors duration-150 hover:bg-red-500/10"
                       onClick={() => handleDeleteMemory(memory.id, memory.memory)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
