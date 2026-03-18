@@ -67,7 +67,7 @@ def get_default_configuration():
             "embedder": {
                 "provider": "ollama",
                 "config": {
-                    "model": "nomic-embed-text",
+                    "model": "qwen3-embedding:0.6b",
                     "ollama_base_url": ollama_base_url
                 }
             },

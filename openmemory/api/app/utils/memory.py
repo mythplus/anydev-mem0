@@ -137,11 +137,11 @@ def get_default_memory_config():
     """Get default memory client configuration with sensible defaults."""
     # Detect vector store based on environment variables
     # 注意：embedding_model_dims 必须与 embedder 模型的输出维度一致
-    # nomic-embed-text 输出 768 维，OpenAI text-embedding-3-small 输出 1536 维
+    # qwen3-embedding:0.6b 输出 1024 维，OpenAI text-embedding-3-small 输出 1536 维
     vector_store_config = {
         "collection_name": "openmemory",
         "host": "mem0_store",
-        "embedding_model_dims": 768,
+        "embedding_model_dims": 1024,
     }
     
     # Check for different vector store configurations based on environment variables
@@ -196,7 +196,7 @@ def get_default_memory_config():
             "url": milvus_url,
             "token": os.environ.get('MILVUS_TOKEN', ''),  # Always include, empty string for local setup
             "db_name": os.environ.get('MILVUS_DB_NAME', ''),
-            "embedding_model_dims": 768,  # nomic-embed-text 输出 768 维
+            "embedding_model_dims": 1024,  # qwen3-embedding:0.6b 输出 1024 维
             "metric_type": "COSINE"  # Using COSINE for better semantic similarity
         }
     elif os.environ.get('ELASTICSEARCH_HOST') and os.environ.get('ELASTICSEARCH_PORT'):
@@ -240,7 +240,7 @@ def get_default_memory_config():
             "url": milvus_url,
             "token": "",
             "db_name": "",
-            "embedding_model_dims": 768,
+            "embedding_model_dims": 1024,
             "metric_type": "COSINE"
         }
     
@@ -266,7 +266,7 @@ def get_default_memory_config():
         "embedder": {
             "provider": "ollama",
             "config": {
-                "model": "nomic-embed-text",
+                "model": "qwen3-embedding:0.6b",
                 "ollama_base_url": ollama_base_url
             }
         },
