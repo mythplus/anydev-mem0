@@ -26,7 +26,7 @@ export function MemoryFilters() {
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
-  const { deleteMemories, archiveMemories } = useMemoriesApi();
+  const { deleteMemories, archiveMemories, updateMemoryState } = useMemoriesApi();
   const memories = useSelector((state: RootState) => state.memories.memories);
   const hasSelection = selectedMemoryIds.length > 0;
   const router = useRouter();
@@ -53,6 +53,16 @@ export function MemoryFilters() {
       dispatch(triggerRefresh());
     } catch (error) {
       console.error("Failed to archive memories:", error);
+    }
+  };
+
+  const handleUnarchiveSelected = async () => {
+    try {
+      await updateMemoryState(selectedMemoryIds, "active");
+      dispatch(clearSelection());
+      dispatch(triggerRefresh());
+    } catch (error) {
+      console.error("Failed to unarchive memories:", error);
     }
   };
 
@@ -177,12 +187,12 @@ export function MemoryFilters() {
               {t("memories.clearSelection")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleArchiveSelected}
+              onClick={showArchived ? handleUnarchiveSelected : handleArchiveSelected}
               disabled={selectedMemoryIds.length === 0}
               className="transition-colors duration-150"
             >
               <Archive className="mr-2 h-4 w-4" />
-              {t("memories.archiveSelected")}
+              {showArchived ? t("memories.unarchiveSelected") : t("memories.archiveSelected")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleExportSelected}

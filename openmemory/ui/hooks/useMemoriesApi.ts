@@ -376,8 +376,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         return memory;
       })));
 
-      // If archive, delete the memory
+      // If archive, delete the memory from current list
       if (state === "archived") {
+        dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
+      }
+
+      // If unarchive (set to active), also remove from current archived list
+      if (state === "active") {
         dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
       }
 
