@@ -13,6 +13,9 @@ export function AppGrid() {
   const apps = useSelector((state: RootState) => state.apps.apps);
   const filters = useSelector((state: RootState) => state.apps.filters);
 
+  // 监听记忆变更触发器，同步更新应用页面的记忆数量
+  const refreshTrigger = useSelector((state: RootState) => state.memories.refreshTrigger);
+
   useEffect(() => {
     fetchApps({
       name: filters.searchQuery,
@@ -20,7 +23,7 @@ export function AppGrid() {
       sort_by: filters.sortBy,
       sort_direction: filters.sortDirection,
     });
-  }, [fetchApps, filters]);
+  }, [fetchApps, filters, refreshTrigger]);
 
   if (isLoading) {
     return (

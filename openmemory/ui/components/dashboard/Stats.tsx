@@ -17,9 +17,12 @@ const Stats = () => {
   );
   const { fetchStats } = useStats();
 
+  // 监听记忆变更触发器，同步更新统计数据
+  const refreshTrigger = useSelector((state: RootState) => state.memories.refreshTrigger);
+
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [refreshTrigger]);
 
   return (
     <div className="bg-zinc-900 rounded-lg border border-zinc-800">

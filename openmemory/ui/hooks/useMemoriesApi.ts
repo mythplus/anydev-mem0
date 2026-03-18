@@ -4,6 +4,7 @@ import { Memory, Client, Category } from '@/components/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { setAccessLogs, setMemoriesSuccess, setSelectedMemory, setRelatedMemories, triggerRefresh } from '@/store/memoriesSlice';
+import { setTotalMemories, setTotalApps, setApps } from '@/store/profileSlice';
 
 // Define the new simplified memory type
 export interface SimpleMemory {
@@ -110,6 +111,21 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
   const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
 
   /**
+   * 刷新全局统计数据（记忆总数、应用总数等），用于记忆增删改后同步更新仪表盘和应用页面的数据
+   */
+  const refreshStats = useCallback(async () => {
+    try {
+      const response = await axios.get(`${URL}/api/v1/stats?user_id=${user_id}`);
+      dispatch(setTotalMemories(response.data.total_memories));
+      dispatch(setTotalApps(response.data.total_apps));
+      dispatch(setApps(response.data.apps));
+    } catch (err) {
+      // 统计刷新失败不应阻断主流程，静默忽略
+      console.warn('Failed to refresh stats:', err);
+    }
+  }, [user_id, dispatch]);
+
+  /**
    * 获取记忆列表（支持分页、搜索、过滤和排序）
    * POST /api/v1/memories/filter
    */
@@ -190,6 +206,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       // 触发更新信号，通知其他组件刷新
       dispatch(triggerRefresh());
+      // 同步更新全局统计数据
+      refreshStats();
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to create memory';
       setError(errorMessage);
@@ -208,6 +226,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         data: { memory_ids, user_id }
       });
       dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memory_ids.includes(memory.id))));
+      // 同步更新全局统计数据
+      refreshStats();
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to delete memories';
       setError(errorMessage);
@@ -345,6 +365,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
       setIsLoading(false);
       setHasUpdates(hasUpdates + 1);
+      // 同步更新全局统计数据
+      refreshStats();
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to archive memories';
       setError(errorMessage);
@@ -393,6 +415,8 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
 
       setIsLoading(false);
       setHasUpdates(hasUpdates + 1);
+      // 同步更新全局统计数据
+      refreshStats();
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to update memory state';
       setError(errorMessage);
