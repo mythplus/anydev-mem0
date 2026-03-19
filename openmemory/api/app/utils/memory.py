@@ -231,11 +231,13 @@ def get_default_memory_config():
             "distance_strategy": "cosine"
         }
     else:
-        # Default fallback to Milvus Lite（本地文件模式，无需独立服务）
+        # Default fallback to Milvus Standalone（Docker 独立服务，端口 19530）
         vector_store_provider = "milvus"
+        milvus_url = os.environ.get('MILVUS_URL', 'http://localhost:19530')
         vector_store_config = {
             "collection_name": "openmemory",
-            "url": "./milvus_openmemory.db",
+            "url": milvus_url,
+            "token": "",
             "embedding_model_dims": 2560,
             "metric_type": "COSINE"
         }
