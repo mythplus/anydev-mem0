@@ -31,28 +31,26 @@ MEMGRAPH_USERNAME = os.environ.get("MEMGRAPH_USERNAME", "memgraph")
 MEMGRAPH_PASSWORD = os.environ.get("MEMGRAPH_PASSWORD", "mem0graph")
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
-HISTORY_DB_PATH = os.environ.get("HISTORY_DB_PATH", "/app/history/history.db")
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+HISTORY_DB_PATH = os.environ.get("HISTORY_DB_PATH", "./history/history.db")
 
 DEFAULT_CONFIG = {
     "version": "v1.1",
     "vector_store": {
-        "provider": "pgvector",
+        "provider": "milvus",
         "config": {
-            "host": POSTGRES_HOST,
-            "port": int(POSTGRES_PORT),
-            "dbname": POSTGRES_DB,
-            "user": POSTGRES_USER,
-            "password": POSTGRES_PASSWORD,
             "collection_name": POSTGRES_COLLECTION_NAME,
+            "embedding_model_dims": 2560,
+            "url": "./milvus_data.db",
+            "metric_type": "COSINE",
         },
     },
     "graph_store": {
         "provider": "neo4j",
         "config": {"url": NEO4J_URI, "username": NEO4J_USERNAME, "password": NEO4J_PASSWORD},
     },
-    "llm": {"provider": "ollama", "config": {"model": "qwen3:0.6b", "temperature": 0.2, "ollama_base_url": OLLAMA_BASE_URL}},
-    "embedder": {"provider": "ollama", "config": {"model": "nomic-embed-text", "ollama_base_url": OLLAMA_BASE_URL}},
+"llm": {"provider": "ollama", "config": {"model": "qwen3.5:4b", "temperature": 0.2, "ollama_base_url": OLLAMA_BASE_URL}},
+"embedder": {"provider": "ollama", "config": {"model": "qwen3-embedding:4b", "ollama_base_url": OLLAMA_BASE_URL}},
     "history_db_path": HISTORY_DB_PATH,
 }
 

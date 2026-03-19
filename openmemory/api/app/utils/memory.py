@@ -20,7 +20,7 @@ Example configuration that will be automatically adjusted:
     "llm": {
         "provider": "ollama",
         "config": {
-"model": "qwen3:0.6b",
+            "model": "qwen3.5:4b",
             "ollama_base_url": "http://localhost:11434"  # Auto-adjusted in Docker
         }
     }
@@ -137,11 +137,11 @@ def get_default_memory_config():
     """Get default memory client configuration with sensible defaults."""
     # Detect vector store based on environment variables
     # 注意：embedding_model_dims 必须与 embedder 模型的输出维度一致
-    # qwen3-embedding:0.6b 输出 1024 维，OpenAI text-embedding-3-small 输出 1536 维
+    # qwen3-embedding:4b 输出 2560 维，OpenAI text-embedding-3-small 输出 1536 维
     vector_store_config = {
         "collection_name": "openmemory",
         "host": "mem0_store",
-        "embedding_model_dims": 1024,
+        "embedding_model_dims": 2560,
     }
     
     # Check for different vector store configurations based on environment variables
@@ -196,7 +196,7 @@ def get_default_memory_config():
             "url": milvus_url,
             "token": os.environ.get('MILVUS_TOKEN', ''),  # Always include, empty string for local setup
             "db_name": os.environ.get('MILVUS_DB_NAME', ''),
-            "embedding_model_dims": 1024,  # qwen3-embedding:0.6b 输出 1024 维
+            "embedding_model_dims": 2560,  # qwen3-embedding:4b 输出 2560 维
             "metric_type": "COSINE"  # Using COSINE for better semantic similarity
         }
     elif os.environ.get('ELASTICSEARCH_HOST') and os.environ.get('ELASTICSEARCH_PORT'):
@@ -231,23 +231,19 @@ def get_default_memory_config():
             "distance_strategy": "cosine"
         }
     else:
-        # Default fallback to Milvus
+        # Default fallback to Milvus Lite（本地文件模式，无需独立服务）
         vector_store_provider = "milvus"
-        milvus_host = vector_store_config.get("host", "mem0_store")
-        milvus_url = f"http://{milvus_host}:19530"
         vector_store_config = {
             "collection_name": "openmemory",
-            "url": milvus_url,
-            "token": "",
-            "db_name": "",
-            "embedding_model_dims": 1024,
+            "url": "./milvus_openmemory.db",
+            "embedding_model_dims": 2560,
             "metric_type": "COSINE"
         }
     
     print(f"Auto-detected vector store: {vector_store_provider} with config: {vector_store_config}")
     
     # 获取 Ollama 基础 URL（优先从环境变量读取）
-    ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://host.docker.internal:11434')
+    ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')
     
     return {
         "vector_store": {
@@ -257,8 +253,8 @@ def get_default_memory_config():
         "llm": {
             "provider": "ollama",
             "config": {
-"model": "qwen3:0.6b",
-                "temperature": 0.1,
+                "model": "qwen3.5:4b",
+                "temperature": 0.2,
                 "max_tokens": 2000,
                 "ollama_base_url": ollama_base_url
             }
@@ -266,7 +262,7 @@ def get_default_memory_config():
         "embedder": {
             "provider": "ollama",
             "config": {
-                "model": "qwen3-embedding:0.6b",
+                "model": "qwen3-embedding:4b",
                 "ollama_base_url": ollama_base_url
             }
         },
