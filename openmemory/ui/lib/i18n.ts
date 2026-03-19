@@ -264,7 +264,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.batchActions": "多选操作",
     "memories.clearSelection": "取消选中",
 "memories.archiveSelected": "归档选中",
-    "memories.unarchiveSelected": "取消归档选中",
+    "memories.unarchiveSelected": "取消归档",
     "memories.exportSelected": "导出选中",
     "memories.deleteSelected": "删除选中",
     "memories.noMemories": "未找到记忆",
