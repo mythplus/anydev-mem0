@@ -66,7 +66,7 @@ export function MemoriesSection() {
             sortDirection: filters.sortDirection,
             showArchived: filters.showArchived,
             fromDate: filters.dateRange.startDate ? Math.floor(new Date(filters.dateRange.startDate).getTime() / 1000) : null,
-            toDate: filters.dateRange.endDate ? Math.floor(new Date(filters.dateRange.endDate).getTime() / 1000) : null,
+            toDate: filters.dateRange.endDate ? Math.floor(new Date(filters.dateRange.endDate).getTime() / 1000) + 86399 : null,
           }
         );
         // 竞态检查：只有最新请求的结果才更新状态
