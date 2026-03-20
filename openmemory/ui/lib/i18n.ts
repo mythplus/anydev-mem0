@@ -32,6 +32,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.unarchiveSelected": "Unarchive Selected",
     "memories.exportSelected": "Export Selected",
     "memories.deleteSelected": "Delete Selected",
+    "memories.batchDeleteTitle": "Confirm Batch Delete",
+    "memories.batchDeleteDesc": "Are you sure you want to delete {count} selected memories? This action cannot be undone.",
     "memories.noMemories": "No memories found",
     "memories.adjustFilters": "Try adjusting your filters",
     "memories.createFirst": "Create your first memory to see it here",
@@ -235,6 +237,9 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // Common
     "common.metadata": "METADATA",
+
+    // Pagination
+    "pagination.page": "Page",
   },
   zh: {
     // 导航栏
@@ -267,6 +272,8 @@ export const translations: Record<Locale, Record<string, string>> = {
     "memories.unarchiveSelected": "取消归档",
     "memories.exportSelected": "导出选中",
     "memories.deleteSelected": "删除选中",
+    "memories.batchDeleteTitle": "确认批量删除",
+    "memories.batchDeleteDesc": "确定要删除选中的 {count} 条记忆吗？此操作不可撤销。",
     "memories.noMemories": "未找到记忆",
     "memories.adjustFilters": "请尝试调整筛选条件",
     "memories.createFirst": "创建你的第一条记忆",
@@ -470,5 +477,8 @@ export const translations: Record<Locale, Record<string, string>> = {
 
     // 通用
     "common.metadata": "元数据",
+
+    // 分页
+    "pagination.page": "第",
   },
 };

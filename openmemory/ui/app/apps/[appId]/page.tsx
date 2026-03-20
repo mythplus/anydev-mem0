@@ -59,20 +59,22 @@ export default function AppDetailsPage() {
 
   if (!selectedApp.details) {
     return (
-      <div className="flex-1 py-6 text-white">
-        <div className="container flex justify-between">
-          <div className="flex-1 p-4 max-w-4xl animate-fade-slide-down">
-            <div className="mb-6">
-              <div className="h-10 w-64 bg-zinc-800 rounded animate-pulse mb-6" />
-              <div className="space-y-6">
-                {[...Array(3)].map((_, i) => (
-                  <MemoryCardSkeleton key={i} />
-                ))}
+      <div className="flex-1 py-4 sm:py-6 text-white">
+        <div className="container px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
+            <div className="flex-1 min-w-0 animate-fade-slide-down">
+              <div className="mb-6">
+                <div className="h-10 w-64 bg-zinc-800 rounded animate-pulse mb-6" />
+                <div className="space-y-6">
+                  {[...Array(3)].map((_, i) => (
+                    <MemoryCardSkeleton key={i} />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="p-14 animate-fade-slide-down delay-2">
-            <AppDetailCardSkeleton />
+            <div className="lg:w-[320px] xl:w-[360px] shrink-0 animate-fade-slide-down delay-2">
+              <AppDetailCardSkeleton />
+            </div>
           </div>
         </div>
       </div>
@@ -167,53 +169,57 @@ export default function AppDetailsPage() {
   };
 
   return (
-    <div className="flex-1 py-6 text-white">
-      <div className="container flex justify-between">
-        {/* Main content area */}
-        <div className="flex-1 p-4 max-w-4xl animate-fade-slide-down">
-          <Tabs
-            defaultValue="created"
-            className="mb-6"
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-full justify-start gap-8 p-0">
-              <TabsTrigger
+    <div className="flex-1 py-4 sm:py-6 text-white">
+      <div className="container px-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-6">
+          {/* Main content area */}
+          <div className="flex-1 min-w-0 animate-fade-slide-down">
+            <Tabs
+              defaultValue="created"
+              className="mb-6"
+              onValueChange={setActiveTab}
+            >
+              <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-full justify-start gap-4 sm:gap-8 p-0">
+                <TabsTrigger
+                  value="created"
+                  className={`px-0 pb-2 rounded-none text-sm sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
+                    activeTab === "created" ? "text-white" : "text-zinc-400"
+                  }`}
+                >
+                  {t("appDetail.created")} ({selectedApp.memories.created.total})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="accessed"
+                  className={`px-0 pb-2 rounded-none text-sm sm:text-base data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
+                    activeTab === "accessed" ? "text-white" : "text-zinc-400"
+                  }`}
+                >
+                  {t("appDetail.accessed")} ({selectedApp.memories.accessed.total})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent
                 value="created"
-                className={`px-0 pb-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
-                  activeTab === "created" ? "text-white" : "text-zinc-400"
-                }`}
+                className="mt-4 sm:mt-6 space-y-4 sm:space-y-6 animate-fade-slide-down delay-1"
               >
-                {t("appDetail.created")} ({selectedApp.memories.created.total})
-              </TabsTrigger>
-              <TabsTrigger
+                {renderCreatedMemories()}
+              </TabsContent>
+
+              <TabsContent
                 value="accessed"
-                className={`px-0 pb-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none ${
-                  activeTab === "accessed" ? "text-white" : "text-zinc-400"
-                }`}
+                className="mt-4 sm:mt-6 space-y-4 sm:space-y-6 animate-fade-slide-down delay-1"
               >
-                {t("appDetail.accessed")} ({selectedApp.memories.accessed.total})
-              </TabsTrigger>
-            </TabsList>
+                {renderAccessedMemories()}
+              </TabsContent>
+            </Tabs>
+          </div>
 
-            <TabsContent
-              value="created"
-              className="mt-6 space-y-6 animate-fade-slide-down delay-1"
-            >
-              {renderCreatedMemories()}
-            </TabsContent>
-
-            <TabsContent
-              value="accessed"
-              className="mt-6 space-y-6 animate-fade-slide-down delay-1"
-            >
-              {renderAccessedMemories()}
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Sidebar */}
-        <div className="p-14 animate-fade-slide-down delay-2">
-          <AppDetailCard appId={appId} selectedApp={selectedApp} />
+          {/* Sidebar — 移动端排在上方/下方，lg 以上固定右侧 */}
+          <div className="lg:w-[320px] xl:w-[360px] shrink-0 animate-fade-slide-down delay-2">
+            <div className="lg:sticky lg:top-6">
+              <AppDetailCard appId={appId} selectedApp={selectedApp} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

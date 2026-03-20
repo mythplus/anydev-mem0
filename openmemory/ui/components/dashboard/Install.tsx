@@ -98,30 +98,32 @@ export const Install = () => {
       </div>
 
       <Tabs defaultValue="claude" className="w-full">
-        <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-full justify-start gap-0 p-0 grid grid-cols-9">
-          {allTabs.map(({ key, label, icon }) => (
-            <TabsTrigger
-              key={key}
-              value={key}
-              className={`flex-1 px-0 pb-2 rounded-none ${getColorGradient(
-                key
-              )} data-[state=active]:border-b-2 data-[state=active]:shadow-none text-zinc-400 data-[state=active]:text-white flex items-center justify-center gap-2 text-sm`}
-            >
-              {icon.startsWith("/") ? (
-                <div>
-                  <div className="w-6 h-6 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
-                    <Image src={icon} alt={label} width={40} height={40} />
+        <div className="overflow-x-auto scrollbar-thin -mx-1 px-1">
+          <TabsList className="bg-transparent border-b border-zinc-800 rounded-none w-max min-w-full justify-start gap-0 p-0 flex">
+            {allTabs.map(({ key, label, icon }) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className={`flex-shrink-0 px-2 sm:px-3 pb-2 rounded-none ${getColorGradient(
+                  key
+                )} data-[state=active]:border-b-2 data-[state=active]:shadow-none text-zinc-400 data-[state=active]:text-white flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm`}
+              >
+                {icon.startsWith("/") ? (
+                  <div>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden">
+                      <Image src={icon} alt={label} width={40} height={40} />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="h-6">
-                  <span className="relative top-1">{icon}</span>
-                </div>
-              )}
-              <span>{label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+                ) : (
+                  <div className="h-5 sm:h-6">
+                    <span className="relative top-0.5 sm:top-1">{icon}</span>
+                  </div>
+                )}
+                <span className="hidden sm:inline">{label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         {/* MCP Tab Content */}
         <TabsContent value="mcp" className="mt-6">

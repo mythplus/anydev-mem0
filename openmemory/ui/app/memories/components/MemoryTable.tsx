@@ -147,10 +147,130 @@ export function MemoryTable() {
     router.push(`/memory/${id}`);
   };
 
+  // 操作菜单（桌面端表格行 & 移动端卡片共用）
+  const ActionsMenu = ({ memory }: { memory: typeof memories[0] }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 transition-all duration-200 hover:bg-zinc-800 hover:scale-110 active:scale-95 rounded-full">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="bg-zinc-900 border-zinc-800"
+      >
+        <DropdownMenuItem
+          className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
+          onClick={() => {
+            if (memory.state !== "archived") {
+              handleArchiveMemory(memory.id);
+            } else {
+              handleUnarchiveMemory(memory.id);
+            }
+          }}
+        >
+          <Archive className="mr-2 h-4 w-4" />
+          {memory?.state !== "archived" ? (
+            <>{t("table.archive")}</>
+          ) : (
+            <>{t("table.unarchive")}</>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
+          onClick={() => handleEditMemory(memory.id, memory.memory)}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {t("table.edit")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="cursor-pointer text-red-500 focus:text-red-500 transition-colors duration-150 hover:bg-red-500/10"
+          onClick={() => handleDeleteMemory(memory.id, memory.memory)}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t("table.delete")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <>
-    <div className="rounded-md border overflow-x-auto">
-      <Table className="min-w-[800px] table-fixed">
+    {/* ========== 移动端卡片视图 (< md) ========== */}
+    <div className="md:hidden space-y-3">
+      {/* 全选栏 */}
+      <div className="flex items-center gap-3 px-1">
+        <Checkbox
+          className="data-[state=checked]:border-primary border-zinc-500/50"
+          checked={isAllSelected}
+          data-state={
+            isPartiallySelected
+              ? "indeterminate"
+              : isAllSelected
+              ? "checked"
+              : "unchecked"
+          }
+          onCheckedChange={handleSelectAll}
+        />
+        <span className="text-xs text-zinc-400">
+          {isAllSelected ? t("memories.clearSelection") : t("filter.selectAll")}
+        </span>
+      </div>
+
+      {memories.map((memory, index) => (
+        <div
+          key={memory.id}
+          className={`rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 space-y-2.5 table-row-animate ${
+            memory.state === "archived" ? "opacity-70" : ""
+          } ${isLoading ? "animate-pulse opacity-50" : ""}`}
+          style={{ animationDelay: `${index * 0.03}s` }}
+        >
+          {/* 卡片顶部：复选框 + 操作菜单 */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+              <Checkbox
+                className="data-[state=checked]:border-primary border-zinc-500/50 mt-0.5 shrink-0"
+                checked={selectedMemoryIds.includes(memory.id)}
+                onCheckedChange={(checked) =>
+                  handleSelectMemory(memory.id, checked as boolean)
+                }
+              />
+              <div
+                onClick={() => handleMemoryClick(memory.id)}
+                className={`text-sm leading-relaxed break-all line-clamp-3 cursor-pointer transition-colors duration-200 ${
+                  memory.state === "archived"
+                    ? "text-zinc-400 hover:text-zinc-300"
+                    : "text-white font-medium hover:text-primary/90"
+                }`}
+              >
+                {memory.memory}
+              </div>
+            </div>
+            <ActionsMenu memory={memory} />
+          </div>
+
+          {/* 卡片底部：元信息 */}
+          <div className="flex items-center gap-2 flex-wrap pl-7">
+            <Categories
+              categories={memory.categories}
+              isPaused={memory.state === "archived"}
+              concat={true}
+            />
+            <span className="text-zinc-600">·</span>
+            <SourceApp source={memory.app_name} />
+            <span className="text-zinc-600">·</span>
+            <span className="text-xs text-zinc-500">
+              {formatDate(memory.created_at, locale)}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* ========== 桌面端表格视图 (>= md) ========== */}
+    <div className="hidden md:block rounded-md border border-zinc-800 overflow-x-auto scrollbar-thin">
+      <Table className="min-w-[700px] table-fixed">
         <TableHeader>
           <TableRow className="bg-zinc-800 hover:bg-zinc-800">
             <TableHead className="w-[50px] pl-4">
@@ -268,50 +388,7 @@ export function MemoryTable() {
                 {formatDate(memory.created_at, locale)}
               </TableCell>
               <TableCell className="text-right flex justify-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 transition-all duration-200 hover:bg-zinc-800 hover:scale-110 active:scale-95 rounded-full">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="bg-zinc-900 border-zinc-800"
-                  >
-                    <DropdownMenuItem
-                      className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
-                      onClick={() => {
-                        if (memory.state !== "archived") {
-                          handleArchiveMemory(memory.id);
-                        } else {
-                          handleUnarchiveMemory(memory.id);
-                        }
-                      }}
-                    >
-                      <Archive className="mr-2 h-4 w-4" />
-                      {memory?.state !== "archived" ? (
-                        <>{t("table.archive")}</>
-                      ) : (
-                        <>{t("table.unarchive")}</>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800"
-                      onClick={() => handleEditMemory(memory.id, memory.memory)}
-                    >
-                      <Edit className="mr-2 h-4 w-4" />
-                      {t("table.edit")}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="cursor-pointer text-red-500 focus:text-red-500 transition-colors duration-150 hover:bg-red-500/10"
-                      onClick={() => handleDeleteMemory(memory.id, memory.memory)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      {t("table.delete")}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <ActionsMenu memory={memory} />
               </TableCell>
             </TableRow>
           ))}
@@ -321,7 +398,7 @@ export function MemoryTable() {
 
     {/* 删除确认对话框 */}
     <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-      <AlertDialogContent className="bg-zinc-900 border-zinc-800">
+      <AlertDialogContent className="bg-zinc-900 border-zinc-800 max-w-[calc(100vw-2rem)] sm:max-w-lg">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">
             {t("table.deleteConfirmTitle")}
@@ -337,7 +414,7 @@ export function MemoryTable() {
             </p>
           </div>
         )}
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
           <AlertDialogCancel
             onClick={cancelDelete}
             className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white"

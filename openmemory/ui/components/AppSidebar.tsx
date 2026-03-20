@@ -29,7 +29,8 @@ export function AppSidebar() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === href;
-    return pathname.startsWith(href.substring(0, 5));
+    // 精确匹配：pathname 必须完全等于 href 或以 href/ 开头
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   // 导航菜单项

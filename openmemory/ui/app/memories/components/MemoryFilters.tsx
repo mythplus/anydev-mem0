@@ -1,4 +1,14 @@
 "use client";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -15,7 +25,7 @@ import { RootState } from "@/store/store";
 import { debounce } from "lodash";
 import { Archive, ChevronDown, Download, Search, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import FilterComponent from "./FilterComponent";
@@ -35,6 +45,7 @@ export function MemoryFilters() {
   const showArchived = useSelector((state: RootState) => state.filters.apps.showArchived);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
   const handleDeleteSelected = async () => {
     try {
@@ -44,6 +55,7 @@ export function MemoryFilters() {
     } catch (error) {
       console.error("Failed to delete memories:", error);
     }
+    setBatchDeleteOpen(false);
   };
 
   const handleArchiveSelected = async () => {
@@ -121,7 +133,7 @@ export function MemoryFilters() {
         <Input
           ref={inputRef}
           placeholder={t("memories.searchPlaceholder")}
-          className="pl-9 bg-zinc-950 border-zinc-800 max-w-[500px] focus:border-primary/40 transition-all duration-200"
+          className="pl-9 bg-zinc-950 border-zinc-800 w-full sm:max-w-[500px] focus:border-primary/40 transition-all duration-200"
           onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
@@ -203,7 +215,7 @@ export function MemoryFilters() {
               {t("memories.exportSelected")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleDeleteSelected}
+              onClick={() => setBatchDeleteOpen(true)}
               disabled={selectedMemoryIds.length === 0}
               className="text-red-500 transition-colors duration-150 hover:bg-red-500/10"
             >
@@ -213,6 +225,31 @@ export function MemoryFilters() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* 批量删除确认弹窗 */}
+      <AlertDialog open={batchDeleteOpen} onOpenChange={setBatchDeleteOpen}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800 max-w-[calc(100vw-2rem)] sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              {t("memories.batchDeleteTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              {t("memories.batchDeleteDesc").replace("{count}", String(selectedMemoryIds.length))}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white">
+              {t("table.deleteCancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSelected}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {t("table.deleteConfirmBtn")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

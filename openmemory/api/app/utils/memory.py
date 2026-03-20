@@ -151,12 +151,21 @@ def get_default_memory_config():
             "host": os.environ.get('CHROMA_HOST'),
             "port": int(os.environ.get('CHROMA_PORT'))
         })
-    elif os.environ.get('QDRANT_HOST') and os.environ.get('QDRANT_PORT'):
+    elif (os.environ.get('QDRANT_HOST') and os.environ.get('QDRANT_PORT')) or os.environ.get('QDRANT_PATH'):
         vector_store_provider = "qdrant"
-        vector_store_config.update({
-            "host": os.environ.get('QDRANT_HOST'),
-            "port": int(os.environ.get('QDRANT_PORT'))
-        })
+        if os.environ.get('QDRANT_PATH'):
+            # 本地文件模式，无需外部 Qdrant 服务
+            vector_store_config = {
+                "collection_name": "openmemory",
+                "path": os.environ.get('QDRANT_PATH'),
+                "embedding_model_dims": 1024,
+                "on_disk": True,
+            }
+        else:
+            vector_store_config.update({
+                "host": os.environ.get('QDRANT_HOST'),
+                "port": int(os.environ.get('QDRANT_PORT'))
+            })
     elif os.environ.get('WEAVIATE_CLUSTER_URL') or (os.environ.get('WEAVIATE_HOST') and os.environ.get('WEAVIATE_PORT')):
         vector_store_provider = "weaviate"
         # Prefer an explicit cluster URL if provided; otherwise build from host/port

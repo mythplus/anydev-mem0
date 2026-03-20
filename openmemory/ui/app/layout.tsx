@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Providers } from "./providers";
 
 export const metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({
               </SidebarInset>
             </SidebarProvider>
             <Toaster />
+            <SonnerToaster />
           </ThemeProvider>
         </Providers>
       </body>
