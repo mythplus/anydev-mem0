@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/lib/LanguageContext";
-import { Settings, PanelLeft } from "lucide-react";
+import { Settings, PanelLeft, FileDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,6 +49,11 @@ export function AppSidebar() {
       href: "/apps",
       icon: RiApps2AddFill,
       label: t("nav.apps"),
+    },
+    {
+      href: "/exports",
+      icon: FileDown,
+      label: t("nav.exports"),
     },
     {
       href: "/settings",

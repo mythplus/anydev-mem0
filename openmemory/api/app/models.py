@@ -31,6 +31,14 @@ class MemoryState(enum.Enum):
     active = "active"
     archived = "archived"
     deleted = "deleted"
+    paused = "paused"
+
+
+class ExportState(enum.Enum):
+    pending = "pending"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
 
 
 class User(Base):
@@ -184,6 +192,28 @@ class MemoryAccessLog(Base):
     __table_args__ = (
         Index('idx_access_memory_time', 'memory_id', 'accessed_at'),
         Index('idx_access_app_time', 'app_id', 'accessed_at'),
+    )
+
+
+class MemoryExport(Base):
+    """记忆导出记录模型，记录每次导出任务的状态和元数据"""
+    __tablename__ = "memory_exports"
+    id = Column(UUID, primary_key=True, default=lambda: uuid.uuid4())
+    user_id = Column(UUID, ForeignKey("users.id"), nullable=False, index=True)
+    state = Column(Enum(ExportState), default=ExportState.pending, nullable=False, index=True)
+    entity_count = Column(Integer, default=0, nullable=False)
+    file_path = Column(String, nullable=True)  # 导出文件的存储路径
+    file_size = Column(Integer, nullable=True)  # 文件大小（字节）
+    error_message = Column(String, nullable=True)  # 失败时的错误信息
+    started_at = Column(DateTime, default=get_current_utc_time, index=True)
+    completed_at = Column(DateTime, nullable=True)
+    metadata_ = Column('metadata', JSON, default=dict)  # 存储导出参数（如 app_id、日期范围等）
+
+    user = relationship("User")
+
+    __table_args__ = (
+        Index('idx_export_user_state', 'user_id', 'state'),
+        Index('idx_export_started', 'started_at'),
     )
 
 def categorize_memory(memory: Memory, db: Session) -> None:

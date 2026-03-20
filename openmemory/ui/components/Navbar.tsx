@@ -7,7 +7,7 @@ import { useConfig } from "@/hooks/useConfig";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useStats } from "@/hooks/useStats";
 import { useLanguage } from "@/lib/LanguageContext";
-import { Settings } from "lucide-react";
+import { Settings, FileDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -130,6 +130,18 @@ export function Navbar() {
             >
               <RiApps2AddFill />
               {t("nav.apps")}
+            </Button>
+          </Link>
+          <Link href="/exports">
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-2 border-none ${
+                isActive("/exports") ? activeClass : inactiveClass
+              }`}
+            >
+              <FileDown className="size-4" />
+              {t("nav.exports")}
             </Button>
           </Link>
           <Link href="/settings">

@@ -15,13 +15,19 @@ from sqlalchemy import and_
 from app.database import get_db
 from app.models import (
     User, App, Memory, MemoryState, Category, memory_categories, 
-    MemoryStatusHistory, AccessControl
+    MemoryStatusHistory, AccessControl, MemoryExport, ExportState
 )
 from app.utils.memory import get_memory_client
 
+import os
+import tempfile
 from uuid import uuid4
 
 router = APIRouter(prefix="/api/v1/backup", tags=["备份管理 Backup"])
+
+# 导出文件存储目录
+EXPORT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "exports")
+os.makedirs(EXPORT_DIR, exist_ok=True)
 
 class ExportRequest(BaseModel):
     user_id: str
@@ -462,6 +468,196 @@ async def import_backup(
         return {"message": f'Import completed into user "{user_id}"'}
 
     return {"message": f'Import completed into user "{user_id}"'}
+
+
+# ===================== 导出记录管理 API =====================
+
+from sqlalchemy import String as SAString
+
+
+def _export_record_to_dict(record: MemoryExport) -> Dict[str, Any]:
+    """将导出记录模型转换为响应字典"""
+    return {
+        "id": str(record.id),
+        "state": record.state.value,
+        "entity_count": record.entity_count or 0,
+        "file_size": record.file_size,
+        "error_message": record.error_message,
+        "started_at": _iso(record.started_at),
+        "completed_at": _iso(record.completed_at),
+        "metadata_": record.metadata_ or {},
+    }
+
+
+@router.get("/exports", summary="获取导出记录列表", description="获取用户的所有导出记录，支持搜索和分页")
+async def list_exports(
+    user_id: str = Query(..., description="用户ID"),
+    search: Optional[str] = Query(None, description="按ID搜索"),
+    page: int = Query(1, ge=1, description="页码"),
+    size: int = Query(20, ge=1, le=100, description="每页条数"),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    q = db.query(MemoryExport).filter(MemoryExport.user_id == user.id)
+
+    if search:
+        # 支持按 ID 模糊搜索
+        q = q.filter(MemoryExport.id.cast(SAString).ilike(f"%{search}%"))
+
+    total = q.count()
+    records = q.order_by(MemoryExport.started_at.desc()).offset((page - 1) * size).limit(size).all()
+
+    return {
+        "items": [_export_record_to_dict(r) for r in records],
+        "total": total,
+        "page": page,
+        "size": size,
+        "pages": (total + size - 1) // size if size > 0 else 0,
+    }
+
+
+class CreateExportRequest(BaseModel):
+    """创建导出请求"""
+    user_id: str
+    app_id: Optional[UUID] = None
+    from_date: Optional[int] = None
+    to_date: Optional[int] = None
+
+
+@router.post("/exports", summary="创建导出任务", description="创建一个新的记忆导出任务，导出完成后可下载ZIP文件")
+async def create_export(req: CreateExportRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == req.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 创建导出记录
+    export_record = MemoryExport(
+        id=uuid4(),
+        user_id=user.id,
+        state=ExportState.processing,
+        metadata_={
+            "app_id": str(req.app_id) if req.app_id else None,
+            "from_date": req.from_date,
+            "to_date": req.to_date,
+        }
+    )
+    db.add(export_record)
+    db.commit()
+    db.refresh(export_record)
+
+    try:
+        # 执行导出
+        export_req = ExportRequest(
+            user_id=req.user_id,
+            app_id=req.app_id,
+            from_date=req.from_date,
+            to_date=req.to_date,
+            include_vectors=True
+        )
+        sqlite_payload = _export_sqlite(db=db, req=export_req)
+        memories_blob = _export_logical_memories_gz(
+            db=db,
+            user_id=req.user_id,
+            app_id=req.app_id,
+            from_date=req.from_date,
+            to_date=req.to_date,
+        )
+
+        # 统计导出的记忆数量
+        entity_count = len(sqlite_payload.get("memories", []))
+
+        # 写入 ZIP 文件
+        file_name = f"memories_export_{str(export_record.id)[:8]}.zip"
+        file_path = os.path.join(EXPORT_DIR, file_name)
+
+        with zipfile.ZipFile(file_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("memories.json", json.dumps(sqlite_payload, indent=2))
+            zf.writestr("memories.jsonl.gz", memories_blob)
+
+        file_size = os.path.getsize(file_path)
+
+        # 更新导出记录
+        export_record.state = ExportState.completed
+        export_record.entity_count = entity_count
+        export_record.file_path = file_path
+        export_record.file_size = file_size
+        export_record.completed_at = datetime.now(timezone.utc)
+        db.commit()
+        db.refresh(export_record)
+
+    except Exception as e:
+        export_record.state = ExportState.failed
+        export_record.error_message = str(e)
+        export_record.completed_at = datetime.now(timezone.utc)
+        db.commit()
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+    return _export_record_to_dict(export_record)
+
+
+@router.get("/exports/{export_id}/download", summary="下载导出文件", description="下载指定导出任务生成的ZIP文件")
+async def download_export(
+    export_id: UUID,
+    user_id: str = Query(..., description="用户ID"),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    record = db.query(MemoryExport).filter(
+        MemoryExport.id == export_id,
+        MemoryExport.user_id == user.id
+    ).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Export record not found")
+
+    if record.state != ExportState.completed:
+        raise HTTPException(status_code=400, detail="Export not completed yet")
+
+    if not record.file_path or not os.path.exists(record.file_path):
+        raise HTTPException(status_code=404, detail="Export file not found")
+
+    file_name = os.path.basename(record.file_path)
+    return StreamingResponse(
+        open(record.file_path, "rb"),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{file_name}"'},
+    )
+
+
+@router.delete("/exports/{export_id}", summary="删除导出记录", description="删除指定的导出记录及其关联文件")
+async def delete_export(
+    export_id: UUID,
+    user_id: str = Query(..., description="用户ID"),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    record = db.query(MemoryExport).filter(
+        MemoryExport.id == export_id,
+        MemoryExport.user_id == user.id
+    ).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Export record not found")
+
+    # 删除关联文件
+    if record.file_path and os.path.exists(record.file_path):
+        try:
+            os.remove(record.file_path)
+        except Exception:
+            pass
+
+    db.delete(record)
+    db.commit()
+
+    return {"message": "Export record deleted successfully"}
+
 
 
     
