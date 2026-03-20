@@ -148,6 +148,7 @@ export function MemoryFilters() {
   }, []);
 
   const handleArchiveFilterChange = useCallback(async (archived: boolean) => {
+    dispatch(clearSelection());
     dispatch(setShowArchived(archived));
     dispatch(triggerRefresh());
   }, [dispatch]);

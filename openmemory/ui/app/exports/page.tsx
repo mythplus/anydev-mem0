@@ -1,15 +1,50 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useExportsApi, ExportRecord } from "@/hooks/useExportsApi";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RefreshCcw, Plus, Download, Trash2, MoreHorizontal, Search, FileDown } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  RefreshCcw,
+  Plus,
+  Download,
+  Trash2,
+  MoreHorizontal,
+  Search,
+  FileDown,
+} from "lucide-react";
 import "@/styles/animation.css";
 
 function formatFileSize(bytes: number | null): string {
@@ -24,10 +59,16 @@ function formatDateTime(isoStr: string | null, locale: string): string {
   try {
     const date = new Date(isoStr);
     return date.toLocaleString(locale === "zh" ? "zh-CN" : "en-US", {
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
-  } catch { return isoStr; }
+  } catch {
+    return isoStr;
+  }
 }
 
 function StateBadge({ state }: { state: string }) {
@@ -44,16 +85,30 @@ function StateBadge({ state }: { state: string }) {
     failed: "\u5931\u8d25",
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${colorMap[state] || "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"}`}>
-      {state === "processing" && <span className="mr-1.5 h-2 w-2 rounded-full bg-blue-400 animate-pulse" />}
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+        colorMap[state] || "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
+      }`}
+    >
+      {state === "processing" && (
+        <span className="mr-1.5 h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+      )}
       {labelMap[state] || state}
     </span>
   );
 }
+
 export default function ExportsPage() {
   const { t, locale } = useLanguage();
   const { toast } = useToast();
-  const { fetchExports, createExport, downloadExport, deleteExport, isLoading } = useExportsApi();
+  const {
+    fetchExports,
+    createExport,
+    downloadExport,
+    deleteExport,
+    isLoading,
+  } = useExportsApi();
+
   const [exports, setExports] = useState<ExportRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,18 +117,33 @@ export default function ExportsPage() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const loadExports = useCallback(async (search?: string) => {
-    try {
-      const data = await fetchExports(search, 1, 100);
-      setExports(data.items);
-      setTotal(data.total);
-    } catch (err) { console.error("Failed to load exports:", err); }
-  }, [fetchExports]);
+  const loadExports = useCallback(
+    async (search?: string) => {
+      try {
+        const data = await fetchExports(search, 1, 100);
+        setExports(data.items);
+        setTotal(data.total);
+      } catch (err) {
+        console.error("Failed to load exports:", err);
+      }
+    },
+    [fetchExports]
+  );
 
-  useEffect(() => { loadExports(); }, [loadExports]);
+  useEffect(() => {
+    loadExports();
+  }, [loadExports]);
 
-  const handleSearch = useCallback(() => { loadExports(searchQuery || undefined); }, [loadExports, searchQuery]);
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => { if (e.key === "Enter") handleSearch(); }, [handleSearch]);
+  const handleSearch = useCallback(() => {
+    loadExports(searchQuery || undefined);
+  }, [loadExports, searchQuery]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") handleSearch();
+    },
+    [handleSearch]
+  );
 
   const handleCreateExport = useCallback(async () => {
     setIsCreating(true);
@@ -83,16 +153,26 @@ export default function ExportsPage() {
       await loadExports(searchQuery || undefined);
     } catch (err: any) {
       toast({ title: t("exports.createError"), description: err.message, variant: "destructive" });
-    } finally { setIsCreating(false); }
+    } finally {
+      setIsCreating(false);
+    }
   }, [createExport, loadExports, searchQuery, toast, t]);
 
-  const handleDownload = useCallback(async (id: string) => {
-    try { await downloadExport(id); } catch (err: any) {
-      toast({ title: t("exports.downloadError"), description: err.message, variant: "destructive" });
-    }
-  }, [downloadExport, toast, t]);
+  const handleDownload = useCallback(
+    async (id: string) => {
+      try {
+        await downloadExport(id);
+      } catch (err: any) {
+        toast({ title: t("exports.downloadError"), description: err.message, variant: "destructive" });
+      }
+    },
+    [downloadExport, toast, t]
+  );
 
-  const handleDeleteClick = useCallback((id: string) => { setPendingDeleteId(id); setDeleteDialogOpen(true); }, []);
+  const handleDeleteClick = useCallback((id: string) => {
+    setPendingDeleteId(id);
+    setDeleteDialogOpen(true);
+  }, []);
 
   const confirmDelete = useCallback(async () => {
     if (!pendingDeleteId) return;
@@ -102,10 +182,16 @@ export default function ExportsPage() {
       await loadExports(searchQuery || undefined);
     } catch (err: any) {
       toast({ title: t("exports.deleteError"), description: err.message, variant: "destructive" });
-    } finally { setDeleteDialogOpen(false); setPendingDeleteId(null); }
+    } finally {
+      setDeleteDialogOpen(false);
+      setPendingDeleteId(null);
+    }
   }, [pendingDeleteId, deleteExport, loadExports, searchQuery, toast, t]);
 
-  const handleRefresh = useCallback(() => { loadExports(searchQuery || undefined); }, [loadExports, searchQuery]);
+  const handleRefresh = useCallback(() => {
+    loadExports(searchQuery || undefined);
+  }, [loadExports, searchQuery]);
+
   return (
     <div>
       <main className="flex-1 py-6">
@@ -129,7 +215,15 @@ export default function ExportsPage() {
           <div className="mb-4 animate-fade-slide-down delay-1">
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
-              <input ref={searchInputRef} type="text" placeholder={t("exports.searchPlaceholder")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleKeyDown} className="w-full pl-10 pr-4 py-2 rounded-md border border-zinc-700 bg-zinc-900/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder={t("exports.searchPlaceholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-4 py-2 rounded-md border border-zinc-700 bg-zinc-900/50 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+              />
             </div>
           </div>
           <div className="animate-fade-slide-down delay-2">
@@ -150,19 +244,45 @@ export default function ExportsPage() {
                     {exports.map((record, index) => (
                       <TableRow key={record.id} className="table-row-animate table-row-hover" style={{ animationDelay: `${index * 0.03}s` }}>
                         <TableCell className="font-mono text-xs text-zinc-400">
-                          <TooltipProvider><Tooltip delayDuration={0}><TooltipTrigger asChild><span className="cursor-default">{record.id.slice(0, 8)}...</span></TooltipTrigger><TooltipContent><p className="font-mono text-xs">{record.id}</p></TooltipContent></Tooltip></TooltipProvider>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={0}>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default">{record.id.slice(0, 8)}...</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="font-mono text-xs">{record.id}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </TableCell>
                         <TableCell><StateBadge state={record.state} /></TableCell>
-                        <TableCell className="text-zinc-300">{record.entity_count}{record.file_size != null && <span className="text-xs text-zinc-500 ml-1">({formatFileSize(record.file_size)})</span>}</TableCell>
+                        <TableCell className="text-zinc-300">
+                          {record.entity_count}
+                          {record.file_size != null && (
+                            <span className="text-xs text-zinc-500 ml-1">({formatFileSize(record.file_size)})</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-sm text-zinc-400">{formatDateTime(record.started_at, locale)}</TableCell>
                         <TableCell className="text-sm text-zinc-400">{formatDateTime(record.completed_at, locale)}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-800 rounded-full"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 transition-all duration-200 hover:bg-zinc-800 hover:scale-110 active:scale-95 rounded-full">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
-                              {record.state === "completed" && <DropdownMenuItem className="cursor-pointer hover:bg-zinc-800" onClick={() => handleDownload(record.id)}><Download className="mr-2 h-4 w-4" />{t("exports.download")}</DropdownMenuItem>}
+                              {record.state === "completed" && (
+                                <DropdownMenuItem className="cursor-pointer transition-colors duration-150 hover:bg-zinc-800" onClick={() => handleDownload(record.id)}>
+                                  <Download className="mr-2 h-4 w-4" />
+                                  {t("exports.download")}
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500 hover:bg-red-500/10" onClick={() => handleDeleteClick(record.id)}><Trash2 className="mr-2 h-4 w-4" />{t("exports.delete")}</DropdownMenuItem>
+                              <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500 transition-colors duration-150 hover:bg-red-500/10" onClick={() => handleDeleteClick(record.id)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t("exports.delete")}
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -173,10 +293,15 @@ export default function ExportsPage() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="rounded-full bg-zinc-800/60 p-5 mb-5"><FileDown className="h-8 w-8 text-zinc-400" /></div>
+                <div className="rounded-full bg-zinc-800/60 p-5 mb-5">
+                  <FileDown className="h-8 w-8 text-zinc-400" />
+                </div>
                 <h3 className="text-lg font-medium text-zinc-300">{t("exports.noExports")}</h3>
                 <p className="text-zinc-500 mt-2 mb-5 max-w-sm">{t("exports.noExportsDesc")}</p>
-                <Button size="sm" onClick={handleCreateExport} disabled={isCreating} className="bg-primary hover:bg-primary/90 text-white gap-1.5"><Plus className="size-4" />{t("exports.create")}</Button>
+                <Button size="sm" onClick={handleCreateExport} disabled={isCreating} className="bg-primary hover:bg-primary/90 text-white gap-1.5">
+                  <Plus className="size-4" />
+                  {t("exports.create")}
+                </Button>
               </div>
             )}
           </div>
