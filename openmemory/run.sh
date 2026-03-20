@@ -56,7 +56,7 @@ export FRONTEND_PORT
 
 # Parse vector store selection (env var or flag). Default: qdrant
 VECTOR_STORE="${VECTOR_STORE:-qdrant}"
-EMBEDDING_DIMS="${EMBEDDING_DIMS:-1536}"
+EMBEDDING_DIMS="${EMBEDDING_DIMS:-1024}"
 
 for arg in "$@"; do
   case $arg in

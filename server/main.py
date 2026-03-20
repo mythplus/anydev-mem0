@@ -40,7 +40,7 @@ DEFAULT_CONFIG = {
         "provider": "milvus",
         "config": {
             "collection_name": POSTGRES_COLLECTION_NAME,
-            "embedding_model_dims": 2560,
+            "embedding_model_dims": 1024,
             "url": "./milvus_data.db",
             "metric_type": "COSINE",
         },
@@ -49,8 +49,8 @@ DEFAULT_CONFIG = {
         "provider": "neo4j",
         "config": {"url": NEO4J_URI, "username": NEO4J_USERNAME, "password": NEO4J_PASSWORD},
     },
-"llm": {"provider": "ollama", "config": {"model": "qwen3.5:4b", "temperature": 0.2, "ollama_base_url": OLLAMA_BASE_URL}},
-"embedder": {"provider": "ollama", "config": {"model": "qwen3-embedding:4b", "ollama_base_url": OLLAMA_BASE_URL}},
+"llm": {"provider": "ollama", "config": {"model": "qwen3:0.6b", "temperature": 0.2, "ollama_base_url": OLLAMA_BASE_URL}},
+"embedder": {"provider": "ollama", "config": {"model": "qwen3-embedding:0.6b", "ollama_base_url": OLLAMA_BASE_URL}},
     "history_db_path": HISTORY_DB_PATH,
 }
 
