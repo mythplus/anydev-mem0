@@ -63,6 +63,7 @@ export const useExportsApi = () => {
     app_id?: string;
     from_date?: number;
     to_date?: number;
+    memory_ids?: string[];
   }): Promise<ExportRecord> => {
     setIsLoading(true);
     setError(null);
@@ -74,6 +75,7 @@ export const useExportsApi = () => {
           app_id: options?.app_id || undefined,
           from_date: options?.from_date || undefined,
           to_date: options?.to_date || undefined,
+          memory_ids: options?.memory_ids || undefined,
         }
       );
       setIsLoading(false);

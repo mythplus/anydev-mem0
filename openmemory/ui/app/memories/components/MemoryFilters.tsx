@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
+import { useExportsApi } from "@/hooks/useExportsApi";
+import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/LanguageContext";
 import { setShowArchived } from "@/store/filtersSlice";
 import { clearSelection, triggerRefresh } from "@/store/memoriesSlice";
@@ -33,10 +35,12 @@ import FilterComponent from "./FilterComponent";
 export function MemoryFilters() {
   const dispatch = useDispatch();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const selectedMemoryIds = useSelector(
     (state: RootState) => state.memories.selectedMemoryIds
   );
   const { deleteMemories, archiveMemories, updateMemoryState } = useMemoriesApi();
+  const { createExport, downloadExport } = useExportsApi();
   const memories = useSelector((state: RootState) => state.memories.memories);
   const hasSelection = selectedMemoryIds.length > 0;
   const router = useRouter();
@@ -82,31 +86,28 @@ export function MemoryFilters() {
     }
   }, [updateMemoryState, selectedMemoryIds, dispatch]);
 
-  const handleExportSelected = useCallback(() => {
-    const selectedMemories = memories.filter((m) =>
-      selectedMemoryIds.includes(m.id)
-    );
-    const exportData = selectedMemories.map((m) => ({
-      id: m.id,
-      memory: m.memory,
-      categories: m.categories,
-      app_name: m.app_name,
-      state: m.state,
-      created_at: m.created_at,
-      metadata: m.metadata,
-    }));
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `memories-export-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [memories, selectedMemoryIds]);
+  const handleExportSelected = useCallback(async () => {
+    if (selectedMemoryIds.length === 0) return;
+    try {
+      // 通过后端 API 创建导出记录，传入选中的记忆 ID
+      const record = await createExport({ memory_ids: selectedMemoryIds });
+      toast({
+        title: t("exports.createSuccess"),
+        description: t("exports.createSuccessDesc"),
+      });
+      // 导出完成后自动下载
+      if (record.state === "completed") {
+        await downloadExport(record.id);
+      }
+      dispatch(clearSelection());
+    } catch (err: any) {
+      toast({
+        title: t("exports.createError"),
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  }, [selectedMemoryIds, createExport, downloadExport, dispatch, toast, t]);
 
   // 用 useMemo 包裹 debounce，避免每次渲染都重新创建
   // 内部通过 ref 访问 searchParams，避免 stale closure

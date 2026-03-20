@@ -35,6 +35,7 @@ class ExportRequest(BaseModel):
     from_date: Optional[int] = None
     to_date: Optional[int] = None
     include_vectors: bool = True
+    memory_ids: Optional[List[str]] = None  # 指定导出的记忆ID列表
 
 def _iso(dt: Optional[datetime]) -> Optional[str]: 
     if isinstance(dt, datetime): 
@@ -75,6 +76,9 @@ def _export_sqlite(db: Session, req: ExportRequest) -> Dict[str, Any]:
             * ( [Memory.app_id == req.app_id] if req.app_id else [] ),
         )
     )
+    # 按指定的 memory_ids 筛选
+    if req.memory_ids:
+        mem_q = mem_q.filter(Memory.id.in_([UUID(mid) for mid in req.memory_ids]))
 
     memories = mem_q.all()
     memory_ids = [m.id for m in memories]
@@ -186,8 +190,9 @@ def _export_logical_memories_gz(
         user_id: str, 
         app_id: Optional[UUID] = None, 
         from_date: Optional[int] = None, 
-        to_date: Optional[int] = None
-) -> bytes: 
+        to_date: Optional[int] = None,
+        memory_ids: Optional[List[str]] = None
+) -> bytes:
     """
     Export a provider-agnostic backup of memories so they can be restored to any vector DB
     by re-embedding content. One JSON object per line, gzip-compressed.
@@ -225,6 +230,9 @@ def _export_logical_memories_gz(
     )
     if app_id:
         q = q.filter(Memory.app_id == app_id)
+    # 按指定的 memory_ids 筛选
+    if memory_ids:
+        q = q.filter(Memory.id.in_([UUID(mid) for mid in memory_ids]))
 
     buf = io.BytesIO()
     with gzip.GzipFile(fileobj=buf, mode="wb") as gz: 
@@ -525,6 +533,7 @@ class CreateExportRequest(BaseModel):
     app_id: Optional[UUID] = None
     from_date: Optional[int] = None
     to_date: Optional[int] = None
+    memory_ids: Optional[List[str]] = None  # 指定导出的记忆ID列表
 
 
 @router.post("/exports", summary="创建导出任务", description="创建一个新的记忆导出任务，导出完成后可下载ZIP文件")
@@ -542,6 +551,7 @@ async def create_export(req: CreateExportRequest, db: Session = Depends(get_db))
             "app_id": str(req.app_id) if req.app_id else None,
             "from_date": req.from_date,
             "to_date": req.to_date,
+            "memory_ids": req.memory_ids,
         }
     )
     db.add(export_record)
@@ -555,7 +565,8 @@ async def create_export(req: CreateExportRequest, db: Session = Depends(get_db))
             app_id=req.app_id,
             from_date=req.from_date,
             to_date=req.to_date,
-            include_vectors=True
+            include_vectors=True,
+            memory_ids=req.memory_ids,
         )
         sqlite_payload = _export_sqlite(db=db, req=export_req)
         memories_blob = _export_logical_memories_gz(
@@ -564,6 +575,7 @@ async def create_export(req: CreateExportRequest, db: Session = Depends(get_db))
             app_id=req.app_id,
             from_date=req.from_date,
             to_date=req.to_date,
+            memory_ids=req.memory_ids,
         )
 
         # 统计导出的记忆数量
