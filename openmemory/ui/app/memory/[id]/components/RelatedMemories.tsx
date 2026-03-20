@@ -31,7 +31,7 @@ export function RelatedMemories({ memoryId }: RelatedMemoriesProps) {
     };
 
     loadRelatedMemories();
-  }, []);
+  }, [memoryId, fetchRelatedMemories]);
 
   if (isLoading) {
     return (

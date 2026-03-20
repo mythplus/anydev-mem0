@@ -3,7 +3,7 @@ import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
 import { MemoryTableSkeleton } from "@/skeleton/MemoryTableSkeleton";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { Category, Client } from "../../../components/types";
@@ -20,7 +20,9 @@ export function MemoriesSection() {
   const [memories, setMemories] = useState<any[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  // 区分首次加载和后续加载：首次用 skeleton，后续只显示轻量 overlay
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
   const currentPage = Number(searchParams.get("page")) || 1;
   const itemsPerPage = Number(searchParams.get("size")) || 10;
@@ -29,19 +31,27 @@ export function MemoriesSection() {
   );
   const [selectedClient, setSelectedClient] = useState<Client | "all">("all");
 
+  // 竞态控制：只处理最新请求的结果
+  const fetchIdRef = useRef(0);
+
   // 监听 Redux store 中的刷新触发器，当创建/删除/更新记忆后自动重新加载列表
   const refreshTrigger = useSelector((state: RootState) => state.memories.refreshTrigger);
 
   // 监听 Redux store 中的筛选状态
   const activeFilters = useSelector((state: RootState) => state.filters.apps);
 
+  // 将 activeFilters 序列化为稳定的字符串，避免对象引用变化导致 useEffect 无限触发
+  const filtersKey = useMemo(() => JSON.stringify(activeFilters), [activeFilters]);
+
   // 使用 ref 持有最新的 filters，避免 fetchMemories 的 useCallback 依赖导致无限循环
   const filtersRef = useRef(activeFilters);
   filtersRef.current = activeFilters;
 
   useEffect(() => {
+    const currentFetchId = ++fetchIdRef.current;
+
     const loadMemories = async () => {
-      setIsLoading(true);
+      setIsFetching(true);
       try {
         const searchQuery = searchParams.get("search") || "";
         const filters = filtersRef.current;
@@ -59,33 +69,44 @@ export function MemoriesSection() {
             toDate: filters.dateRange.endDate ? Math.floor(new Date(filters.dateRange.endDate).getTime() / 1000) : null,
           }
         );
-        setMemories(result.memories);
-        setTotalItems(result.total);
-        setTotalPages(result.pages);
+        // 竞态检查：只有最新请求的结果才更新状态
+        if (currentFetchId === fetchIdRef.current) {
+          setMemories(result.memories);
+          setTotalItems(result.total);
+          setTotalPages(result.pages);
+        }
       } catch (error) {
-        console.error("Failed to fetch memories:", error);
+        if (currentFetchId === fetchIdRef.current) {
+          console.error("Failed to fetch memories:", error);
+        }
       }
-      setIsLoading(false);
+      if (currentFetchId === fetchIdRef.current) {
+        setIsFetching(false);
+        setIsInitialLoad(false);
+      }
     };
 
     loadMemories();
-  }, [currentPage, itemsPerPage, fetchMemories, searchParams, refreshTrigger, activeFilters]);
+    // 使用 filtersKey (JSON字符串) 代替 activeFilters (对象引用)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, itemsPerPage, fetchMemories, searchParams, refreshTrigger, filtersKey]);
 
-  const setCurrentPage = (page: number) => {
+  const setCurrentPage = useCallback((page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
     params.set("size", itemsPerPage.toString());
     router.push(`?${params.toString()}`);
-  };
+  }, [searchParams, itemsPerPage, router]);
 
-  const handlePageSizeChange = (size: number) => {
+  const handlePageSizeChange = useCallback((size: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1"); // Reset to page 1 when changing page size
+    params.set("page", "1");
     params.set("size", size.toString());
     router.push(`?${params.toString()}`);
-  };
+  }, [searchParams, router]);
 
-  if (isLoading) {
+  // 首次加载：显示 skeleton
+  if (isInitialLoad) {
     return (
       <div className="w-full bg-transparent">
         <MemoryTableSkeleton />
@@ -103,7 +124,20 @@ export function MemoriesSection() {
       <div>
         {memories.length > 0 ? (
           <>
-            <MemoryTable />
+            {/* 后续加载：保留旧表格，叠加半透明 loading 层 */}
+            <div className="relative">
+              {isFetching && (
+                <div className="absolute inset-0 z-10 bg-background/40 backdrop-blur-[1px] flex items-center justify-center rounded-md loading-overlay">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/90 border border-zinc-700/50 shadow-lg">
+                    <div className="h-4 w-4 rounded-full border-2 border-zinc-600 border-t-primary animate-spin" />
+                    <span className="text-xs text-zinc-400">{t("memories.loading") || "加载中..."}</span>
+                  </div>
+                </div>
+              )}
+              <div className={isFetching ? "pointer-events-none select-none" : ""}>
+                <MemoryTable />
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3">
               <PageSizeSelector
                 pageSize={itemsPerPage}

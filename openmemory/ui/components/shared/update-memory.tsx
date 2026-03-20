@@ -13,9 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
+import { triggerRefresh } from "@/store/memoriesSlice";
 import { Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 interface UpdateMemoryProps {
@@ -31,25 +33,31 @@ const UpdateMemory = ({
   open,
   onOpenChange,
 }: UpdateMemoryProps) => {
-  const { updateMemory, isLoading, fetchMemories, fetchMemoryById } =
+  const { updateMemory, fetchMemoryById } =
     useMemoriesApi();
+  const [isUpdating, setIsUpdating] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const pathname = usePathname();
+  const dispatch = useDispatch();
   const { t } = useLanguage();
 
   const handleUpdateMemory = async (text: string) => {
+    setIsUpdating(true);
     try {
       await updateMemory(memoryId, text);
       toast.success("Memory updated successfully");
       onOpenChange(false);
       if (pathname.includes("memories")) {
-        await fetchMemories();
+        // 通过 triggerRefresh 通知 MemoriesSection 重新加载，而不是直接调 fetchMemories
+        dispatch(triggerRefresh());
       } else {
         await fetchMemoryById(memoryId);
       }
     } catch (error) {
       console.error(error);
       toast.error("Failed to update memory");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -77,10 +85,10 @@ const UpdateMemory = ({
           </Button>
           <Button
             className="w-[140px] btn-press transition-all duration-200"
-            disabled={isLoading}
+            disabled={isUpdating}
             onClick={() => handleUpdateMemory(textRef?.current?.value || "")}
           >
-            {isLoading ? (
+            {isUpdating ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
               t("updateMemory.save")

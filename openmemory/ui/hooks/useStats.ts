@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
@@ -41,7 +41,7 @@ export const useStats = (): UseMemoriesApiReturn => {
    * 获取全局统计数据（总记忆数、总应用数、应用列表）
    * GET /api/v1/stats
    */
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -51,13 +51,14 @@ export const useStats = (): UseMemoriesApiReturn => {
       dispatch(setTotalMemories(response.data.total_memories));
       dispatch(setTotalApps(response.data.total_apps));
       dispatch(setApps(response.data.apps));
+      setIsLoading(false);
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to fetch stats';
       setError(errorMessage);
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch]);
 
   return { fetchStats, isLoading, error };
 };

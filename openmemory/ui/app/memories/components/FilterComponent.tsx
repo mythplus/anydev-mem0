@@ -1,10 +1,9 @@
 "use client";
 
-import { ChevronDown, Filter, SortAsc, SortDesc, Check, X, Calendar } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Filter, SortAsc, SortDesc, Check, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -17,9 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAppsApi } from "@/hooks/useAppsApi";
 import { useFiltersApi } from "@/hooks/useFiltersApi";
-import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useLanguage } from "@/lib/LanguageContext";
-import { constants as appConstants, Icon } from "@/components/shared/source-app";
+import { constants as appConstants } from "@/components/shared/source-app";
 import {
     clearFilters,
     setSelectedApps,
@@ -49,7 +47,6 @@ export default function FilterComponent() {
   const dispatch = useDispatch();
   const { fetchApps } = useAppsApi();
   const { fetchCategories, updateSort } = useFiltersApi();
-  const { fetchMemories } = useMemoriesApi();
   const { t } = useLanguage();
   const columns = getColumns(t);
 
@@ -67,142 +64,72 @@ export default function FilterComponent() {
   const [localStartDate, setLocalStartDate] = useState<string>("");
   const [localEndDate, setLocalEndDate] = useState<string>("");
 
+  // 只在首次打开筛选面板时加载 apps/categories 数据，避免页面加载时就发请求
+  const hasFetchedRef = useRef(false);
   useEffect(() => {
-    fetchApps();
-    fetchCategories();
-  }, [fetchApps, fetchCategories]);
-
-  useEffect(() => {
-    handleClearFilters();
-  }, []);
-
-  // 应用筛选相关的回调
-  const applyWithFilters = async (
-    selectedApps: string[],
-    selectedCategories: string[],
-    dateRange?: { startDate: string | null; endDate: string | null }
-  ) => {
-    const selectedCategoryIds = categories
-      .filter((cat) => selectedCategories.includes(cat.name))
-      .map((cat) => cat.id);
-    const selectedAppIds = apps
-      .filter((app) => selectedApps.includes(app.id))
-      .map((app) => app.id);
-
-    const effectiveDateRange = dateRange || filters.dateRange;
-    const fromDate = effectiveDateRange.startDate
-      ? Math.floor(new Date(effectiveDateRange.startDate).getTime() / 1000)
-      : null;
-    const toDate = effectiveDateRange.endDate
-      ? Math.floor(new Date(effectiveDateRange.endDate + "T23:59:59").getTime() / 1000)
-      : null;
-
-    try {
-      await fetchMemories(undefined, 1, 10, {
-        apps: selectedAppIds,
-        categories: selectedCategoryIds,
-        sortColumn: filters.sortColumn,
-        sortDirection: filters.sortDirection,
-        showArchived: filters.showArchived,
-        fromDate,
-        toDate,
-      });
-    } catch (error) {
-      console.error("Failed to apply filters:", error);
+    if (filterOpen && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchApps();
+      fetchCategories();
     }
-  };
+  }, [filterOpen, fetchApps, fetchCategories]);
 
-  const toggleAppFilter = async (appId: string) => {
+  // 筛选变更 -> 只更新 Redux 状态 -> MemoriesSection 自动监听 activeFilters 变化来刷新
+  // 不再在这里直接调 fetchMemories，彻底消除重复请求
+
+  const toggleAppFilter = useCallback((appId: string) => {
     const newSelected = filters.selectedApps.includes(appId)
       ? filters.selectedApps.filter((a) => a !== appId)
       : [...filters.selectedApps, appId];
     dispatch(setSelectedApps(newSelected));
-    await applyWithFilters(newSelected, filters.selectedCategories);
-  };
+  }, [filters.selectedApps, dispatch]);
 
-  const toggleAllApps = async (selectAll: boolean) => {
+  const toggleAllApps = useCallback((selectAll: boolean) => {
     const newSelected = selectAll ? apps.map((app) => app.id) : [];
     dispatch(setSelectedApps(newSelected));
-    await applyWithFilters(newSelected, filters.selectedCategories);
-  };
+  }, [apps, dispatch]);
 
-  const toggleCategoryFilter = async (categoryName: string) => {
+  const toggleCategoryFilter = useCallback((categoryName: string) => {
     const newSelected = filters.selectedCategories.includes(categoryName)
       ? filters.selectedCategories.filter((c) => c !== categoryName)
       : [...filters.selectedCategories, categoryName];
     dispatch(setSelectedCategories(newSelected));
-    await applyWithFilters(filters.selectedApps, newSelected);
-  };
+  }, [filters.selectedCategories, dispatch]);
 
-  const toggleAllCategories = async (selectAll: boolean) => {
+  const toggleAllCategories = useCallback((selectAll: boolean) => {
     const newSelected = selectAll ? categories.map((cat) => cat.name) : [];
     dispatch(setSelectedCategories(newSelected));
-    await applyWithFilters(filters.selectedApps, newSelected);
-  };
+  }, [categories, dispatch]);
 
-  const handleClearFilters = async () => {
+  const handleClearFilters = useCallback(() => {
     dispatch(clearFilters());
     setLocalStartDate("");
     setLocalEndDate("");
-    // clearFilters 会重置 showArchived 为 false，MemoriesSection 监听 activeFilters 变化会自动刷新
-    await fetchMemories(undefined, 1, 10, {
-      showArchived: false,
-    });
-  };
+  }, [dispatch]);
 
-  // 时间范围筛选回调
-  const applyDateRange = async () => {
+  // 时间范围筛选回调 - 只更新 Redux 状态
+  const applyDateRange = useCallback(() => {
     const dateRange = {
       startDate: localStartDate || null,
       endDate: localEndDate || null,
     };
     dispatch(setDateRange(dateRange));
-    await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
-  };
+  }, [localStartDate, localEndDate, dispatch]);
 
-  const clearDateRange = async () => {
+  const clearDateRange = useCallback(() => {
     setLocalStartDate("");
     setLocalEndDate("");
     const dateRange = { startDate: null, endDate: null };
     dispatch(setDateRange(dateRange));
-    await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
-  };
+  }, [dispatch]);
 
-  const setSorting = async (column: string) => {
+  const setSorting = useCallback((column: string) => {
     const newDirection =
       filters.sortColumn === column && filters.sortDirection === "asc"
         ? "desc"
         : "asc";
     updateSort(column, newDirection);
-
-    const selectedCategoryIds = categories
-      .filter((cat) => filters.selectedCategories.includes(cat.name))
-      .map((cat) => cat.id);
-    const selectedAppIds = apps
-      .filter((app) => filters.selectedApps.includes(app.id))
-      .map((app) => app.id);
-
-    const fromDate = filters.dateRange.startDate
-      ? Math.floor(new Date(filters.dateRange.startDate).getTime() / 1000)
-      : null;
-    const toDate = filters.dateRange.endDate
-      ? Math.floor(new Date(filters.dateRange.endDate + "T23:59:59").getTime() / 1000)
-      : null;
-
-    try {
-      await fetchMemories(undefined, 1, 10, {
-        apps: selectedAppIds,
-        categories: selectedCategoryIds,
-        sortColumn: column,
-        sortDirection: newDirection,
-        showArchived: filters.showArchived,
-        fromDate,
-        toDate,
-      });
-    } catch (error) {
-      console.error("Failed to apply sorting:", error);
-    }
-  };
+  }, [filters.sortColumn, filters.sortDirection, updateSort]);
 
   const appFilterCount = filters.selectedApps.length;
   const categoryFilterCount = filters.selectedCategories.length;
@@ -421,12 +348,10 @@ export default function FilterComponent() {
                     return (
                       <button
                         key={days}
-                        onClick={async () => {
+                        onClick={() => {
                           setLocalStartDate(startDate);
                           setLocalEndDate(todayStr);
-                          const dateRange = { startDate, endDate: todayStr };
-                          dispatch(setDateRange(dateRange));
-                          await applyWithFilters(filters.selectedApps, filters.selectedCategories, dateRange);
+                          dispatch(setDateRange({ startDate, endDate: todayStr }));
                           setFilterOpen(false);
                         }}
                         className={`flex-1 h-8 rounded-md text-xs font-medium transition-all duration-200 border ${
@@ -461,8 +386,8 @@ export default function FilterComponent() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={async () => {
-                      await applyDateRange();
+                    onClick={() => {
+                      applyDateRange();
                       setFilterOpen(false);
                     }}
                     disabled={!localStartDate && !localEndDate}
@@ -472,8 +397,8 @@ export default function FilterComponent() {
                   </button>
                   {(localStartDate || localEndDate || filters.dateRange.startDate || filters.dateRange.endDate) && (
                     <button
-                      onClick={async () => {
-                        await clearDateRange();
+                      onClick={() => {
+                        clearDateRange();
                         setFilterOpen(false);
                       }}
                       className="h-9 px-3 rounded-md border border-zinc-700/60 text-zinc-400 text-sm hover:text-zinc-200 hover:border-zinc-500 transition-all duration-200 btn-press"

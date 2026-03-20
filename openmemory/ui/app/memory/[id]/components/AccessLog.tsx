@@ -37,7 +37,7 @@ export function AccessLog({ memoryId }: AccessLogProps) {
     };
 
     loadAccessLogs();
-  }, []);
+  }, [memoryId, fetchAccessLogs]);
 
   if (isLoading) {
     return (

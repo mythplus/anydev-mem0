@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Memory, Client, Category } from '@/components/types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -192,7 +192,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
    * 创建新记忆
    * POST /api/v1/memories/
    */
-  const createMemory = async (text: string): Promise<void> => {
+  const createMemory = useCallback(async (text: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
@@ -214,18 +214,24 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch, refreshStats]);
+
+  // 用 ref 持有最新的 memories 引用，防止 useCallback 中的 stale closure
+  const memoriesRef = useRef(memories);
+  memoriesRef.current = memories;
+  const selectedMemoryRef = useRef(selectedMemory);
+  selectedMemoryRef.current = selectedMemory;
 
   /**
    * 批量删除记忆
    * DELETE /api/v1/memories/
    */
-  const deleteMemories = async (memory_ids: string[]) => {
+  const deleteMemories = useCallback(async (memory_ids: string[]) => {
     try {
       await axios.delete(`${URL}/api/v1/memories/`, {
         data: { memory_ids, user_id }
       });
-      dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memory_ids.includes(memory.id))));
+      dispatch(setMemoriesSuccess(memoriesRef.current.filter((memory: Memory) => !memory_ids.includes(memory.id))));
       // 同步更新全局统计数据
       refreshStats();
     } catch (err: any) {
@@ -234,13 +240,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch, refreshStats]);
 
   /**
    * 根据 ID 获取单条记忆详情
    * GET /api/v1/memories/:memoryId
    */
-  const fetchMemoryById = async (memoryId: string): Promise<void> => {
+  const fetchMemoryById = useCallback(async (memoryId: string): Promise<void> => {
     if (memoryId === "") {
       return;
     }
@@ -258,13 +264,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch]);
 
   /**
    * 获取记忆的访问日志
    * GET /api/v1/memories/:memoryId/access-log
    */
-  const fetchAccessLogs = async (memoryId: string, page: number = 1, pageSize: number = 10): Promise<void> => {
+  const fetchAccessLogs = useCallback(async (memoryId: string, page: number = 1, pageSize: number = 10): Promise<void> => {
     if (memoryId === "") {
       return;
     }
@@ -282,13 +288,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [dispatch]);
 
   /**
    * 获取与指定记忆相关的记忆列表
    * GET /api/v1/memories/:memoryId/related
    */
-  const fetchRelatedMemories = async (memoryId: string): Promise<void> => {
+  const fetchRelatedMemories = useCallback(async (memoryId: string): Promise<void> => {
     if (memoryId === "") {
       return;
     }
@@ -318,13 +324,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch]);
 
   /**
    * 更新记忆内容
    * PUT /api/v1/memories/:memoryId
    */
-  const updateMemory = async (memoryId: string, content: string): Promise<void> => {
+  const updateMemory = useCallback(async (memoryId: string, content: string): Promise<void> => {
     if (memoryId === "") {
       return;
     }
@@ -337,20 +343,20 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         user_id: user_id
       });
       setIsLoading(false);
-      setHasUpdates(hasUpdates + 1);
+      setHasUpdates(prev => prev + 1);
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to update memory';
       setError(errorMessage);
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id]);
 
   /**
    * 批量归档记忆
    * POST /api/v1/memories/actions/archive
    */
-  const archiveMemories = async (memoryIds: string[]): Promise<void> => {
+  const archiveMemories = useCallback(async (memoryIds: string[]): Promise<void> => {
     if (memoryIds.length === 0) {
       return;
     }
@@ -362,9 +368,9 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         user_id: user_id
       });
       // 从本地列表中移除归档的记忆
-      dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
+      dispatch(setMemoriesSuccess(memoriesRef.current.filter((memory: Memory) => !memoryIds.includes(memory.id))));
       setIsLoading(false);
-      setHasUpdates(hasUpdates + 1);
+      setHasUpdates(prev => prev + 1);
       // 同步更新全局统计数据
       refreshStats();
     } catch (err: any) {
@@ -373,13 +379,13 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch, refreshStats]);
 
   /**
    * 批量更新记忆状态（激活/归档）
    * POST /api/v1/memories/actions/state
    */
-  const updateMemoryState = async (memoryIds: string[], state: string): Promise<void> => {
+  const updateMemoryState = useCallback(async (memoryIds: string[], state: string): Promise<void> => {
     if (memoryIds.length === 0) {
       return;
     }
@@ -391,30 +397,29 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
         state: state,
         user_id: user_id
       });
-      dispatch(setMemoriesSuccess(memories.map((memory: Memory) => {
-        if (memoryIds.includes(memory.id)) {
-          return { ...memory, state: state as "active" | "archived" | "deleted" };
-        }
-        return memory;
-      })));
 
-      // If archive, delete the memory from current list
-      if (state === "archived") {
-        dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
-      }
+      const currentMemories = memoriesRef.current;
+      const currentSelected = selectedMemoryRef.current;
 
-      // If unarchive (set to active), also remove from current archived list
-      if (state === "active") {
-        dispatch(setMemoriesSuccess(memories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
+      // If archive or unarchive, remove from current list
+      if (state === "archived" || state === "active") {
+        dispatch(setMemoriesSuccess(currentMemories.filter((memory: Memory) => !memoryIds.includes(memory.id))));
+      } else {
+        dispatch(setMemoriesSuccess(currentMemories.map((memory: Memory) => {
+          if (memoryIds.includes(memory.id)) {
+            return { ...memory, state: state as "active" | "archived" | "deleted" };
+          }
+          return memory;
+        })));
       }
 
       // if selected memory, update it
-      if (selectedMemory?.id && memoryIds.includes(selectedMemory.id)) {
-        dispatch(setSelectedMemory({ ...selectedMemory, state: state as "active" | "archived" | "deleted" }));
+      if (currentSelected?.id && memoryIds.includes(currentSelected.id)) {
+        dispatch(setSelectedMemory({ ...currentSelected, state: state as "active" | "archived" | "deleted" }));
       }
 
       setIsLoading(false);
-      setHasUpdates(hasUpdates + 1);
+      setHasUpdates(prev => prev + 1);
       // 同步更新全局统计数据
       refreshStats();
     } catch (err: any) {
@@ -423,7 +428,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
       setIsLoading(false);
       throw new Error(errorMessage);
     }
-  };
+  }, [user_id, dispatch, refreshStats]);
 
   return {
     fetchMemories,

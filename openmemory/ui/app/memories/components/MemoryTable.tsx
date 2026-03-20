@@ -52,7 +52,7 @@ import {
     Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { GoPackage } from "react-icons/go";
 import { HiMiniRectangleStack } from "react-icons/hi2";
@@ -69,52 +69,63 @@ export function MemoryTable() {
   );
   const memories = useSelector((state: RootState) => state.memories.memories);
 
-  const { deleteMemories, updateMemoryState, archiveMemories, isLoading } = useMemoriesApi();
+  const { deleteMemories, updateMemoryState, archiveMemories } = useMemoriesApi();
 
   // 删除确认对话框状态
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingDeleteMemory, setPendingDeleteMemory] = useState<{ id: string; content: string } | null>(null);
+  // 操作中的记忆 ID 集合（用于对单条记忆显示操作状态而非整个表格闪烁）
+  const [operatingIds, setOperatingIds] = useState<Set<string>>(new Set());
 
-  const handleDeleteMemory = (id: string, content: string) => {
+  const handleDeleteMemory = useCallback((id: string, content: string) => {
     setPendingDeleteMemory({ id, content });
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     if (pendingDeleteMemory) {
-      deleteMemories([pendingDeleteMemory.id]);
+      setOperatingIds(prev => new Set(prev).add(pendingDeleteMemory.id));
+      deleteMemories([pendingDeleteMemory.id]).finally(() => {
+        setOperatingIds(prev => {
+          const next = new Set(prev);
+          next.delete(pendingDeleteMemory.id);
+          return next;
+        });
+      });
     }
     setDeleteDialogOpen(false);
     setPendingDeleteMemory(null);
-  };
+  }, [pendingDeleteMemory, deleteMemories]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setDeleteDialogOpen(false);
     setPendingDeleteMemory(null);
-  };
+  }, []);
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
       dispatch(selectAllMemories());
     } else {
       dispatch(clearSelection());
     }
-  };
+  }, [dispatch]);
 
-  const handleSelectMemory = (id: string, checked: boolean) => {
+  const handleSelectMemory = useCallback((id: string, checked: boolean) => {
     if (checked) {
       dispatch(selectMemory(id));
     } else {
       dispatch(deselectMemory(id));
     }
-  };
+  }, [dispatch]);
+
   const { handleOpenUpdateMemoryDialog } = useUI();
 
-  const handleEditMemory = (memory_id: string, memory_content: string) => {
+  const handleEditMemory = useCallback((memory_id: string, memory_content: string) => {
     handleOpenUpdateMemoryDialog(memory_id, memory_content);
-  };
+  }, [handleOpenUpdateMemoryDialog]);
 
-  const handleArchiveMemory = async (id: string) => {
+  const handleArchiveMemory = useCallback(async (id: string) => {
+    setOperatingIds(prev => new Set(prev).add(id));
     try {
       await archiveMemories([id]);
     } catch (error) {
@@ -123,10 +134,17 @@ export function MemoryTable() {
         description: "Failed to archive memory",
         variant: "destructive",
       });
+    } finally {
+      setOperatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
-  };
+  }, [archiveMemories, toast]);
 
-  const handleUnarchiveMemory = async (id: string) => {
+  const handleUnarchiveMemory = useCallback(async (id: string) => {
+    setOperatingIds(prev => new Set(prev).add(id));
     try {
       await updateMemoryState([id], "active");
     } catch (error) {
@@ -135,17 +153,23 @@ export function MemoryTable() {
         description: "Failed to unarchive memory",
         variant: "destructive",
       });
+    } finally {
+      setOperatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
-  };
+  }, [updateMemoryState, toast]);
 
   const isAllSelected =
     memories.length > 0 && selectedMemoryIds.length === memories.length;
   const isPartiallySelected =
     selectedMemoryIds.length > 0 && selectedMemoryIds.length < memories.length;
 
-  const handleMemoryClick = (id: string) => {
+  const handleMemoryClick = useCallback((id: string) => {
     router.push(`/memory/${id}`);
-  };
+  }, [router]);
 
   // 操作菜单（桌面端表格行 & 移动端卡片共用）
   const ActionsMenu = ({ memory }: { memory: typeof memories[0] }) => (
@@ -223,7 +247,7 @@ export function MemoryTable() {
           key={memory.id}
           className={`rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 space-y-2.5 table-row-animate ${
             memory.state === "archived" ? "opacity-70" : ""
-          } ${isLoading ? "animate-pulse opacity-50" : ""}`}
+          } ${operatingIds.has(memory.id) ? "animate-pulse opacity-50" : ""}`}
           style={{ animationDelay: `${index * 0.03}s` }}
         >
           {/* 卡片顶部：复选框 + 操作菜单 */}
@@ -326,7 +350,7 @@ export function MemoryTable() {
                 memory.state === "archived"
                   ? "text-zinc-400"
                   : ""
-              } ${isLoading ? "animate-pulse opacity-50" : ""}`}
+              } ${operatingIds.has(memory.id) ? "animate-pulse opacity-50" : ""}`}
               style={{ animationDelay: `${index * 0.03}s` }}
             >
               <TableCell className="pl-4">

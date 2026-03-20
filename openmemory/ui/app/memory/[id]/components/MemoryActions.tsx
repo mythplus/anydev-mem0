@@ -11,6 +11,7 @@ import { useMemoriesApi } from "@/hooks/useMemoriesApi";
 import { useUI } from "@/hooks/useUI";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Archive, ChevronDown, Pencil, Play } from "lucide-react";
+import { useCallback, useState } from "react";
 
 interface MemoryActionsProps {
   memoryId: string;
@@ -24,16 +25,22 @@ export function MemoryActions({
   memoryState,
 }: MemoryActionsProps) {
   const { handleOpenUpdateMemoryDialog } = useUI();
-  const { updateMemoryState, isLoading } = useMemoriesApi();
+  const { updateMemoryState } = useMemoriesApi();
   const { t } = useLanguage();
+  const [isOperating, setIsOperating] = useState(false);
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     handleOpenUpdateMemoryDialog(memoryId, memoryContent);
-  };
+  }, [memoryId, memoryContent, handleOpenUpdateMemoryDialog]);
 
-  const handleStateChange = (newState: string) => {
-    updateMemoryState([memoryId], newState);
-  };
+  const handleStateChange = useCallback(async (newState: string) => {
+    setIsOperating(true);
+    try {
+      await updateMemoryState([memoryId], newState);
+    } finally {
+      setIsOperating(false);
+    }
+  }, [memoryId, updateMemoryState]);
 
   const getStateLabel = () => {
     switch (memoryState) {
@@ -58,7 +65,7 @@ export function MemoryActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            disabled={isLoading}
+            disabled={isOperating}
             variant="outline"
             size="sm"
             className="shadow-md bg-zinc-900 border border-zinc-700/50 hover:bg-zinc-950 text-zinc-400"
@@ -90,7 +97,7 @@ export function MemoryActions({
       </DropdownMenu>
 
       <Button
-        disabled={isLoading}
+        disabled={isOperating}
         variant="outline"
         size="sm"
         onClick={handleEdit}

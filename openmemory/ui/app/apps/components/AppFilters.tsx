@@ -17,9 +17,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useAppsApi } from "@/hooks/useAppsApi";
 import { useLanguage } from "@/lib/LanguageContext";
-import { AppFiltersSkeleton } from "@/skeleton/AppFiltersSkeleton";
 import {
     setActiveFilter,
     setSearchQuery,
@@ -29,7 +27,7 @@ import {
 import { RootState } from "@/store/store";
 import debounce from "lodash/debounce";
 import { ChevronDown, Search, SortAsc, SortDesc } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 function getSortOptions(t: (key: string) => string) {
@@ -44,43 +42,46 @@ export function AppFilters() {
   const dispatch = useDispatch();
   const filters = useSelector((state: RootState) => state.apps.filters);
   const [localSearch, setLocalSearch] = useState(filters.searchQuery);
-  const { isLoading } = useAppsApi();
   const { t } = useLanguage();
   const sortOptions = getSortOptions(t);
 
-  const debouncedSearch = useCallback(
-    debounce((query: string) => {
+  // 使用 useMemo 而不是 useCallback 创建 debounce 函数，确保只创建一次
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => {
       dispatch(setSearchQuery(query));
-    }, 300),
+    }, 350),
     [dispatch]
   );
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 组件卸载时清理 debounce
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setLocalSearch(query);
     debouncedSearch(query);
-  };
+  }, [debouncedSearch]);
 
-  const handleActiveFilterChange = (value: string) => {
+  const handleActiveFilterChange = useCallback((value: string) => {
     dispatch(setActiveFilter(value === "all" ? "all" : value === "true"));
-  };
+  }, [dispatch]);
 
-  const setSorting = (sortBy: "name" | "memories" | "memories_accessed") => {
+  const setSorting = useCallback((sortBy: "name" | "memories" | "memories_accessed") => {
     const newDirection =
       filters.sortBy === sortBy && filters.sortDirection === "asc"
         ? "desc"
         : "asc";
     dispatch(setSortBy(sortBy));
     dispatch(setSortDirection(newDirection));
-  };
+  }, [dispatch, filters.sortBy, filters.sortDirection]);
 
   useEffect(() => {
     setLocalSearch(filters.searchQuery);
   }, [filters.searchQuery]);
-
-  if (isLoading) {
-    return <AppFiltersSkeleton />;
-  }
 
   return (
     <div className="flex items-center gap-2">

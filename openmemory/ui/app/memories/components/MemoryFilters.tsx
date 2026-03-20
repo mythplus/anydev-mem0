@@ -25,7 +25,7 @@ import { RootState } from "@/store/store";
 import { debounce } from "lodash";
 import { Archive, ChevronDown, Download, Search, XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import FilterComponent from "./FilterComponent";
@@ -47,7 +47,11 @@ export function MemoryFilters() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
 
-  const handleDeleteSelected = async () => {
+  // 用 ref 持有最新的 searchParams，避免 debouncedSearch 的 stale closure
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+
+  const handleDeleteSelected = useCallback(async () => {
     try {
       await deleteMemories(selectedMemoryIds);
       dispatch(clearSelection());
@@ -56,9 +60,9 @@ export function MemoryFilters() {
       console.error("Failed to delete memories:", error);
     }
     setBatchDeleteOpen(false);
-  };
+  }, [deleteMemories, selectedMemoryIds, dispatch]);
 
-  const handleArchiveSelected = async () => {
+  const handleArchiveSelected = useCallback(async () => {
     try {
       await archiveMemories(selectedMemoryIds);
       dispatch(clearSelection());
@@ -66,9 +70,9 @@ export function MemoryFilters() {
     } catch (error) {
       console.error("Failed to archive memories:", error);
     }
-  };
+  }, [archiveMemories, selectedMemoryIds, dispatch]);
 
-  const handleUnarchiveSelected = async () => {
+  const handleUnarchiveSelected = useCallback(async () => {
     try {
       await updateMemoryState(selectedMemoryIds, "active");
       dispatch(clearSelection());
@@ -76,9 +80,9 @@ export function MemoryFilters() {
     } catch (error) {
       console.error("Failed to unarchive memories:", error);
     }
-  };
+  }, [updateMemoryState, selectedMemoryIds, dispatch]);
 
-  const handleExportSelected = () => {
+  const handleExportSelected = useCallback(() => {
     const selectedMemories = memories.filter((m) =>
       selectedMemoryIds.includes(m.id)
     );
@@ -102,12 +106,35 @@ export function MemoryFilters() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }, [memories, selectedMemoryIds]);
 
-  // add debounce
-  const handleSearch = debounce(async (query: string) => {
-    router.push(`/memories?search=${query}`);
-  }, 500);
+  // 用 useMemo 包裹 debounce，避免每次渲染都重新创建
+  // 内部通过 ref 访问 searchParams，避免 stale closure
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query: string) => {
+        const params = new URLSearchParams(searchParamsRef.current.toString());
+        if (query) {
+          params.set("search", query);
+        } else {
+          params.delete("search");
+        }
+        params.set("page", "1"); // 搜索时回到第一页
+        router.push(`/memories?${params.toString()}`);
+      }, 350),
+    [router] // router 引用稳定，searchParams 通过 ref 访问
+  );
+
+  // 组件卸载时取消未执行的 debounce
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     // if the url has a search param, set the input value to the search param
@@ -134,7 +161,7 @@ export function MemoryFilters() {
           ref={inputRef}
           placeholder={t("memories.searchPlaceholder")}
           className="pl-9 bg-zinc-950 border-zinc-800 w-full sm:max-w-[500px] focus:border-primary/40 transition-all duration-200"
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={handleSearchChange}
         />
       </div>
       <div className="flex gap-2 shrink-0 flex-wrap items-center">

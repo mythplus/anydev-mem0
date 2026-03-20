@@ -11,12 +11,14 @@ import { Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
 import { FiRefreshCcw } from "react-icons/fi";
 import { HiHome, HiMiniRectangleStack } from "react-icons/hi2";
 import { RiApps2AddFill } from "react-icons/ri";
 
 export function Navbar() {
   const pathname = usePathname();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const memoriesApi = useMemoriesApi();
   const appsApi = useAppsApi();
@@ -25,65 +27,58 @@ export function Navbar() {
 
   const { t } = useLanguage();
 
-  // Define route matchers with typed parameter extraction
-  const routeBasedFetchMapping: {
-    match: RegExp;
-    getFetchers: (params: Record<string, string>) => (() => Promise<any>)[];
-  }[] = [
-    {
-      match: /^\/memory\/([^/]+)$/,
-      getFetchers: ({ memory_id }) => [
-        () => memoriesApi.fetchMemoryById(memory_id),
-        () => memoriesApi.fetchAccessLogs(memory_id),
-        () => memoriesApi.fetchRelatedMemories(memory_id),
-      ],
-    },
-    {
-      match: /^\/apps\/([^/]+)$/,
-      getFetchers: ({ app_id }) => [
-        () => appsApi.fetchAppMemories(app_id),
-        () => appsApi.fetchAppAccessedMemories(app_id),
-        () => appsApi.fetchAppDetails(app_id),
-      ],
-    },
-    {
-      match: /^\/memories$/,
-      getFetchers: () => [memoriesApi.fetchMemories],
-    },
-    {
-      match: /^\/apps$/,
-      getFetchers: () => [appsApi.fetchApps],
-    },
-    {
-      match: /^\/$/,
-      getFetchers: () => [statsApi.fetchStats, memoriesApi.fetchMemories],
-    },
-    {
-      match: /^\/settings$/,
-      getFetchers: () => [configApi.fetchConfig],
-    },
-  ];
+  // 用 ref 持有 API 函数的最新引用，避免 useMemo/useCallback 依赖导致频繁重建
+  const memoriesApiRef = useRef(memoriesApi);
+  memoriesApiRef.current = memoriesApi;
+  const appsApiRef = useRef(appsApi);
+  appsApiRef.current = appsApi;
+  const statsApiRef = useRef(statsApi);
+  statsApiRef.current = statsApi;
+  const configApiRef = useRef(configApi);
+  configApiRef.current = configApi;
 
-  const getFetchersForPath = (path: string) => {
-    for (const route of routeBasedFetchMapping) {
-      const match = path.match(route.match);
-      if (match) {
-        if (route.match.source.includes("memory")) {
-          return route.getFetchers({ memory_id: match[1] });
-        }
-        if (route.match.source.includes("app")) {
-          return route.getFetchers({ app_id: match[1] });
-        }
-        return route.getFetchers({});
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const fetchers: (() => Promise<any>)[] = [];
+      const api = memoriesApiRef.current;
+      const apps = appsApiRef.current;
+      const stats = statsApiRef.current;
+      const config = configApiRef.current;
+
+      // 根据当前路由决定刷新哪些数据
+      const memoryMatch = pathname.match(/^\/memory\/([^/]+)$/);
+      const appMatch = pathname.match(/^\/apps\/([^/]+)$/);
+
+      if (memoryMatch) {
+        const memory_id = memoryMatch[1];
+        fetchers.push(
+          () => api.fetchMemoryById(memory_id),
+          () => api.fetchAccessLogs(memory_id),
+          () => api.fetchRelatedMemories(memory_id),
+        );
+      } else if (appMatch) {
+        const app_id = appMatch[1];
+        fetchers.push(
+          () => apps.fetchAppMemories(app_id),
+          () => apps.fetchAppAccessedMemories(app_id),
+          () => apps.fetchAppDetails(app_id),
+        );
+      } else if (pathname === "/memories") {
+        fetchers.push(() => api.fetchMemories());
+      } else if (pathname === "/apps") {
+        fetchers.push(() => apps.fetchApps());
+      } else if (pathname === "/") {
+        fetchers.push(() => stats.fetchStats(), () => api.fetchMemories());
+      } else if (pathname === "/settings") {
+        fetchers.push(() => config.fetchConfig());
       }
-    }
-    return [];
-  };
 
-  const handleRefresh = async () => {
-    const fetchers = getFetchersForPath(pathname);
-    await Promise.allSettled(fetchers.map((fn) => fn()));
-  };
+      await Promise.allSettled(fetchers.map((fn) => fn()));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [pathname]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === href;
@@ -153,11 +148,12 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <Button
             onClick={handleRefresh}
+            disabled={isRefreshing}
             variant="outline"
             size="sm"
             className="border-zinc-700/50 bg-zinc-900 hover:bg-zinc-800"
           >
-            <FiRefreshCcw className="transition-transform duration-300 group-hover:rotate-180" />
+            <FiRefreshCcw className={`transition-transform duration-300 ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180'}`} />
             {t("nav.refresh")}
           </Button>
           <CreateMemoryDialog />

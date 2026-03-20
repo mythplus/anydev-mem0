@@ -1,92 +1,95 @@
 /* ============================================
    入场动画 - 页面元素从上方淡入滑下
+   使用 translate3d 强制 GPU 合成，减少主线程压力
    ============================================ */
 @keyframes fadeSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-16px);
+    transform: translate3d(0, -16px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-fade-slide-down {
   opacity: 0;
-  animation: fadeSlideDown 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  animation: fadeSlideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .delay-1 {
-  animation-delay: 0.06s;
+  animation-delay: 0.05s;
 }
 
 .delay-2 {
-  animation-delay: 0.12s;
+  animation-delay: 0.1s;
 }
 
 .delay-3 {
-  animation-delay: 0.18s;
+  animation-delay: 0.15s;
 }
 
 /* ============================================
-   表格行交错入场动画
+   表格行交错入场动画 - GPU 加速版
    ============================================ */
 @keyframes tableRowFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate3d(0, 6px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .table-row-animate {
   opacity: 0;
-  animation: tableRowFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  animation: tableRowFadeIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 为每一行生成递增延迟 (最多支持20行) */
-.table-row-animate:nth-child(1) { animation-delay: 0.02s; }
-.table-row-animate:nth-child(2) { animation-delay: 0.04s; }
-.table-row-animate:nth-child(3) { animation-delay: 0.06s; }
-.table-row-animate:nth-child(4) { animation-delay: 0.08s; }
-.table-row-animate:nth-child(5) { animation-delay: 0.10s; }
-.table-row-animate:nth-child(6) { animation-delay: 0.12s; }
-.table-row-animate:nth-child(7) { animation-delay: 0.14s; }
-.table-row-animate:nth-child(8) { animation-delay: 0.16s; }
-.table-row-animate:nth-child(9) { animation-delay: 0.18s; }
-.table-row-animate:nth-child(10) { animation-delay: 0.20s; }
-.table-row-animate:nth-child(11) { animation-delay: 0.22s; }
-.table-row-animate:nth-child(12) { animation-delay: 0.24s; }
-.table-row-animate:nth-child(13) { animation-delay: 0.26s; }
-.table-row-animate:nth-child(14) { animation-delay: 0.28s; }
-.table-row-animate:nth-child(15) { animation-delay: 0.30s; }
-.table-row-animate:nth-child(16) { animation-delay: 0.32s; }
-.table-row-animate:nth-child(17) { animation-delay: 0.34s; }
-.table-row-animate:nth-child(18) { animation-delay: 0.36s; }
-.table-row-animate:nth-child(19) { animation-delay: 0.38s; }
-.table-row-animate:nth-child(20) { animation-delay: 0.40s; }
+/* 为每一行生成递增延迟 (最多支持20行，间隔缩短以加快视觉完成) */
+.table-row-animate:nth-child(1) { animation-delay: 0.015s; }
+.table-row-animate:nth-child(2) { animation-delay: 0.03s; }
+.table-row-animate:nth-child(3) { animation-delay: 0.045s; }
+.table-row-animate:nth-child(4) { animation-delay: 0.06s; }
+.table-row-animate:nth-child(5) { animation-delay: 0.075s; }
+.table-row-animate:nth-child(6) { animation-delay: 0.09s; }
+.table-row-animate:nth-child(7) { animation-delay: 0.105s; }
+.table-row-animate:nth-child(8) { animation-delay: 0.12s; }
+.table-row-animate:nth-child(9) { animation-delay: 0.135s; }
+.table-row-animate:nth-child(10) { animation-delay: 0.15s; }
+.table-row-animate:nth-child(11) { animation-delay: 0.165s; }
+.table-row-animate:nth-child(12) { animation-delay: 0.18s; }
+.table-row-animate:nth-child(13) { animation-delay: 0.195s; }
+.table-row-animate:nth-child(14) { animation-delay: 0.21s; }
+.table-row-animate:nth-child(15) { animation-delay: 0.225s; }
+.table-row-animate:nth-child(16) { animation-delay: 0.24s; }
+.table-row-animate:nth-child(17) { animation-delay: 0.255s; }
+.table-row-animate:nth-child(18) { animation-delay: 0.27s; }
+.table-row-animate:nth-child(19) { animation-delay: 0.285s; }
+.table-row-animate:nth-child(20) { animation-delay: 0.3s; }
 
 /* ============================================
-   表格行 hover 高亮动画
+   表格行 hover 高亮动画 - 只修改 background-color（合成层优化）
    ============================================ */
 .table-row-hover {
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.18s ease;
 }
 
 .table-row-hover:hover {
   background-color: rgba(113, 113, 122, 0.08) !important;
-  box-shadow: inset 0 0 0 1px rgba(113, 113, 122, 0.06);
 }
 
 /* ============================================
-   按钮/Badge 交互动画
+   按钮/Badge 交互动画 - GPU 加速
    ============================================ */
 .btn-press {
-  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.15s ease;
+  will-change: transform;
+  transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .btn-press:active {
@@ -95,12 +98,12 @@
 
 /* Badge 悬浮微放大 */
 .badge-hover {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+  will-change: transform;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .badge-hover:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* ============================================
@@ -111,21 +114,22 @@
 }
 
 /* ============================================
-   内容淡入切换动画（Tab内容区）
+   内容淡入切换动画（Tab内容区）- GPU 加速
    ============================================ */
 @keyframes tabContentFadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translate3d(0, 3px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .tab-content-animate {
-  animation: tabContentFadeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity;
+  animation: tabContentFadeIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ============================================
@@ -248,4 +252,40 @@
 
 .pagination-btn:active:not(:disabled) {
   transform: scale(0.95);
+}
+
+/* ============================================
+   Loading Overlay 淡入动画
+   用于后续加载时的半透明遮罩，避免生硬切换
+   ============================================ */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-overlay {
+  animation: overlayFadeIn 0.15s ease-out forwards;
+}
+
+/* ============================================
+   Toast 通知入场动画 - 从右侧滑入
+   ============================================ */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.toast-animate {
+  will-change: transform, opacity;
+  animation: toastSlideIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

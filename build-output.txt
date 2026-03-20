@@ -1,0 +1,30 @@
+﻿   鈻?Next.js 15.2.4
+   - Environments: .env
+
+   Creating an optimized production build ...
+ 鉁?Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/7) ...
+node.exe : Could not find files for /_error in .next/build-manifest.json
+所在位置 行:1 字符: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Could not find ...d-manifest.json:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+Could not find files for /_error in .next/build-manifest.json
+[Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoi
+d leaking sensitive details. A digest property is included on this error instance which may provide additional details 
+about the nature of the error.] {
+  digest: '2957204305'
+}
+Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid
+ leaking sensitive details. A digest property is included on this error instance which may provide additional details a
+bout the nature of the error.
+Export encountered an error on /_not-found/page: /_not-found, exiting the build.
+ 猕?Next.js build worker exited with code: 1 and signal: null

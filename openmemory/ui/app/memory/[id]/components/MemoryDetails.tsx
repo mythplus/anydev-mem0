@@ -8,7 +8,7 @@ import { RootState } from "@/store/store";
 import { ArrowLeft, Check, Copy } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { AccessLog } from "./AccessLog";
 import { MemoryActions } from "./MemoryActions";
@@ -28,17 +28,24 @@ export function MemoryDetails({ memory_id }: MemoryDetailsProps) {
   );
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     if (memory?.id) {
       await navigator.clipboard.writeText(memory.id);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  };
+  }, [memory?.id]);
 
+  // 监听 hasUpdates 变化（edit 操作后），自动重新拉取记忆详情
+  const isFirstRender = useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    // hasUpdates 变化说明有记忆被更新了，重新获取最新数据
     fetchMemoryById(memory_id);
-  }, []);
+  }, [hasUpdates, memory_id, fetchMemoryById]);
 
   return (
     <div className="container mx-auto py-6 px-4">
