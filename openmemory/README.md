@@ -71,7 +71,7 @@ USER=<user-id> # The User Id you want to associate the memories with
 - #### Example `/ui/.env`
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8765
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765
 NEXT_PUBLIC_USER_ID=<user-id> # Same as the user id for environment variable in api
 ```
 
@@ -83,12 +83,12 @@ make up  # runs openmemory mcp server and ui
 ```
 
 After running these commands, you will have:
-- OpenMemory MCP server running at: http://localhost:8765 (API documentation available at http://localhost:8765/docs)
-- OpenMemory UI running at: http://localhost:3000
+- OpenMemory MCP server running at: http://21.6.186.148:8765 (API documentation available at http://21.6.186.148:8765/docs)
+- OpenMemory UI running at: http://21.6.186.148:3000
 
-#### UI not working on `localhost:3000`?
+#### UI not working on `21.6.186.148:3000`?
 
-If the UI does not start properly on [http://localhost:3000](http://localhost:3000), try running it manually:
+If the UI does not start properly on [http://21.6.186.148:3000](http://21.6.186.148:3000), try running it manually:
 
 ```bash
 cd ui
@@ -101,7 +101,7 @@ pnpm dev
 Use the following one step command to configure OpenMemory Local MCP to a client. The general command format is as follows:
 
 ```bash
-npx @openmemory/install local http://localhost:8765/mcp/<client-name>/sse/<user-id> --client <client-name>
+npx @openmemory/install local http://21.6.186.148:8765/mcp/<client-name>/sse/<user-id> --client <client-name>
 ```
 
 Replace `<client-name>` with the desired client name and `<user-id>` with the value specified in your environment variables.

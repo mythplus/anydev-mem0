@@ -23,7 +23,7 @@ Once you run this command, edit the file `api/.env` and enter the `OPENAI_API_KE
 make up
 ```
 
-The API will be available at `http://localhost:8765`
+The API will be available at `http://21.6.186.148:8765`
 
 ### Common Docker Commands
 
@@ -37,8 +37,8 @@ The API will be available at `http://localhost:8765`
 ## API Documentation
 
 Once the server is running, you can access the API documentation at:
-- Swagger UI: `http://localhost:8765/docs`
-- ReDoc: `http://localhost:8765/redoc`
+- Swagger UI: `http://21.6.186.148:8765/docs`
+- ReDoc: `http://21.6.186.148:8765/redoc`
 
 ## Project Structure
 

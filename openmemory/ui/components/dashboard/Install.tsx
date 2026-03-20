@@ -49,7 +49,7 @@ export const Install = () => {
   const { t } = useLanguage();
   const user = process.env.NEXT_PUBLIC_USER_ID || "user";
 
-  const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
+  const URL = process.env.NEXT_PUBLIC_API_URL || "http://21.6.186.148:8765";
 
   const handleCopy = async (tab: string, isMcp: boolean = false) => {
     const text = isMcp

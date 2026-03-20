@@ -102,7 +102,7 @@ memory = Memory()
 
 # With custom configuration
 config = MemoryConfig(
-    vector_store={"provider": "qdrant", "config": {"host": "localhost"}},
+    vector_store={"provider": "qdrant", "config": {"host": "21.6.186.148"}},
     llm={"provider": "openai", "config": {"model": "gpt-4.1-nano-2025-04-14"}},
     embedder={"provider": "openai", "config": {"model": "text-embedding-3-small"}}
 )
@@ -360,7 +360,7 @@ config = MemoryConfig(
         "provider": "ollama",
         "config": {
             "model": "llama3.1:8b",
-            "ollama_base_url": "http://localhost:11434"
+            "ollama_base_url": "http://21.6.186.148:11434"
         }
     },
     embedder={
@@ -385,7 +385,7 @@ config = MemoryConfig(
     graph_store={
         "provider": "neo4j",
         "config": {
-            "url": "bolt://localhost:7687",
+            "url": "bolt://21.6.186.148:7687",
             "username": "neo4j",
             "password": "password",
             "database": "neo4j"
@@ -523,7 +523,7 @@ const memory = new Memory({
   },
   vectorStore: {
     provider: 'qdrant',
-    config: { host: 'localhost', port: 6333 }
+    config: { host: '21.6.186.148', port: 6333 }
   },
   llm: {
     provider: 'openai',
@@ -596,7 +596,7 @@ config = MemoryConfig(
     graph_store={
         "provider": "neo4j",
         "config": {
-            "url": "bolt://localhost:7687",
+            "url": "bolt://21.6.186.148:7687",
             "username": "neo4j",
             "password": "password"
         }
@@ -1268,7 +1268,7 @@ async def delete_memory(memory_id: str):
        vector_store={
            "provider": "qdrant",
            "config": {
-               "host": "localhost",
+               "host": "21.6.186.148",
                "port": 6333,
                "collection_name": "memories",
                "embedding_model_dims": 1536,

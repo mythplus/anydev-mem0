@@ -216,9 +216,9 @@ pip install mem0ai[graph,vector_stores,llms,extras]
 
 | 服务 | 状态 | 地址 | 说明 |
 |------|------|------|------|
-| **API 后端** | ✅ 已部署 | http://localhost:8765 | FastAPI + MCP Server，后台运行中 |
-| **前端 UI** | ✅ 已部署 | http://localhost:3000 | Next.js 生产模式，后台运行中 |
-| **API 文档** | ✅ 可用 | http://localhost:8765/docs | Swagger UI |
+| **API 后端** | ✅ 已部署 | http://21.6.186.148:8765 | FastAPI + MCP Server，后台运行中 |
+| **前端 UI** | ✅ 已部署 | http://21.6.186.148:3000 | Next.js 生产模式，后台运行中 |
+| **API 文档** | ✅ 可用 | http://21.6.186.148:8765/docs | Swagger UI |
 | **向量数据库** | ⚠️ 需配置 | - | 默认 Qdrant 未部署，需另行配置 |
 
 ### 部署环境信息
@@ -263,9 +263,9 @@ nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8765 --reload > server.l
 ```
 
 启动成功后：
-- **API 服务**：http://localhost:8765
-- **API 文档（Swagger）**：http://localhost:8765/docs
-- **API 文档（ReDoc）**：http://localhost:8765/redoc
+- **API 服务**：http://21.6.186.148:8765
+- **API 文档（Swagger）**：http://21.6.186.148:8765/docs
+- **API 文档（ReDoc）**：http://21.6.186.148:8765/redoc
 
 > ⚠️ **注意**：本地模式下默认使用 SQLite 存储元数据。向量存储需要额外配置（默认使用 Qdrant，需确保 Qdrant 服务可用，或通过 API 配置其他向量数据库）。
 
@@ -273,14 +273,14 @@ nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8765 --reload > server.l
 
 通过 API 配置向量存储（以 Qdrant 为例）：
 ```bash
-curl -X PUT http://localhost:8765/api/v1/config/mem0/vector_store \
+curl -X PUT http://21.6.186.148:8765/api/v1/config/mem0/vector_store \
   -H 'Content-Type: application/json' \
   -d '{
     "provider": "qdrant",
     "config": {
       "collection_name": "openmemory",
       "embedding_model_dims": 1536,
-      "host": "localhost",
+      "host": "21.6.186.148",
       "port": 6333
     }
   }'
@@ -294,7 +294,7 @@ curl -X PUT http://localhost:8765/api/v1/config/mem0/vector_store \
 
 #### 前提条件
 
-- 已按方式一启动 API 后端（http://localhost:8765）
+- 已按方式一启动 API 后端（http://21.6.186.148:8765）
 - 已安装 Node.js 18+ 和 pnpm
 
 #### 步骤 1：安装 Node.js 和 pnpm
@@ -332,7 +332,7 @@ cp openmemory/ui/.env.example openmemory/ui/.env
 
 编辑 `openmemory/ui/.env`：
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8765
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765
 NEXT_PUBLIC_USER_ID=user
 ```
 
@@ -349,7 +349,7 @@ pnpm install
 
 ```bash
 # 构建生产版本
-NEXT_PUBLIC_API_URL=http://localhost:8765 NEXT_PUBLIC_USER_ID=user pnpm build
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765 NEXT_PUBLIC_USER_ID=user pnpm build
 
 # 以生产模式启动（前台运行）
 pnpm start -p 3000 -H 0.0.0.0
@@ -358,15 +358,15 @@ pnpm start -p 3000 -H 0.0.0.0
 nohup pnpm start -p 3000 -H 0.0.0.0 > frontend.log 2>&1 &
 
 # 或以开发模式启动（支持热重载，适合开发调试）
-NEXT_PUBLIC_API_URL=http://localhost:8765 NEXT_PUBLIC_USER_ID=user pnpm dev
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765 NEXT_PUBLIC_USER_ID=user pnpm dev
 ```
 
 启动成功后：
-- **前端 UI**：http://localhost:3000
-- **Dashboard**：http://localhost:3000（首页即为 Dashboard）
-- **记忆管理**：http://localhost:3000/memories
-- **应用管理**：http://localhost:3000/apps
-- **系统设置**：http://localhost:3000/settings
+- **前端 UI**：http://21.6.186.148:3000
+- **Dashboard**：http://21.6.186.148:3000（首页即为 Dashboard）
+- **记忆管理**：http://21.6.186.148:3000/memories
+- **应用管理**：http://21.6.186.148:3000/apps
+- **系统设置**：http://21.6.186.148:3000/settings
 
 #### 停止前端服务
 
@@ -400,7 +400,7 @@ USER=your_username
 
 **ui/.env**:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8765
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765
 NEXT_PUBLIC_USER_ID=your_username
 ```
 
@@ -417,9 +417,9 @@ make up
 ```
 
 启动成功后：
-- **API 服务**：http://localhost:8765
-- **前端 UI**：http://localhost:3000
-- **API 文档**：http://localhost:8765/docs
+- **API 服务**：http://21.6.186.148:8765
+- **前端 UI**：http://21.6.186.148:3000
+- **API 文档**：http://21.6.186.148:8765/docs
 
 #### 常用管理命令
 
@@ -474,7 +474,7 @@ curl -sL https://raw.githubusercontent.com/mem0ai/mem0/main/openmemory/run.sh | 
 ### 示例：创建记忆
 
 ```bash
-curl -X POST http://localhost:8765/api/v1/memories/ \
+curl -X POST http://21.6.186.148:8765/api/v1/memories/ \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "root",
@@ -500,7 +500,7 @@ curl -X POST http://localhost:8765/api/v1/memories/ \
 
 MCP Server SSE 连接地址：
 ```
-http://localhost:8765/mcp/<client-name>/sse/<user-id>
+http://21.6.186.148:8765/mcp/<client-name>/sse/<user-id>
 ```
 
 ### Cursor 配置
@@ -510,7 +510,7 @@ http://localhost:8765/mcp/<client-name>/sse/<user-id>
 {
   "mcpServers": {
     "openmemory": {
-      "url": "http://localhost:8765/mcp/cursor/sse/your_username"
+      "url": "http://21.6.186.148:8765/mcp/cursor/sse/your_username"
     }
   }
 }
@@ -523,7 +523,7 @@ http://localhost:8765/mcp/<client-name>/sse/<user-id>
 {
   "mcpServers": {
     "openmemory": {
-      "url": "http://localhost:8765/mcp/claude/sse/your_username"
+      "url": "http://21.6.186.148:8765/mcp/claude/sse/your_username"
     }
   }
 }
@@ -532,7 +532,7 @@ http://localhost:8765/mcp/<client-name>/sse/<user-id>
 ### 一键安装命令
 
 ```bash
-npx @openmemory/install local http://localhost:8765/mcp/<client-name>/sse/<user-id> --client <client-name>
+npx @openmemory/install local http://21.6.186.148:8765/mcp/<client-name>/sse/<user-id> --client <client-name>
 ```
 
 ---
@@ -671,8 +671,8 @@ cd openmemory && make down
 ### Q: 前端页面显示空白或数据加载失败？
 
 **A:** 请检查以下几点：
-1. 确认 API 后端已启动且可访问：`curl http://localhost:8765/docs`
-2. 确认前端 `.env` 中的 `NEXT_PUBLIC_API_URL` 配置正确（默认为 `http://localhost:8765`）
+1. 确认 API 后端已启动且可访问：`curl http://21.6.186.148:8765/docs`
+2. 确认前端 `.env` 中的 `NEXT_PUBLIC_API_URL` 配置正确（默认为 `http://21.6.186.148:8765`）
 3. 确认 `NEXT_PUBLIC_USER_ID` 与 API 后端 `.env` 中的 `USER` 值一致
 4. 如果修改了 `.env`，需要重新执行 `pnpm build` 后再启动（环境变量在构建时注入）
 

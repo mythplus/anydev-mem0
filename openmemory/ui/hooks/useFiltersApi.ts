@@ -32,7 +32,7 @@ export const useFiltersApi = (): UseFiltersApiReturn => {
   const dispatch = useDispatch<AppDispatch>();
   const user_id = useSelector((state: RootState) => state.profile.userId);
 
-  const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
+  const URL = process.env.NEXT_PUBLIC_API_URL || "http://21.6.186.148:8765";
 
   /**
    * 获取记忆分类列表

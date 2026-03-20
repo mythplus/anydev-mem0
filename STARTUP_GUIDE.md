@@ -151,14 +151,14 @@ pnpm build
 
 ```env
 # Ollama 本地模型配置（非 Docker 模式）
-OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_BASE_URL=http://21.6.186.148:11434
 # 使用 SQLite 本地数据库（无需 PostgreSQL）
 DATABASE_URL=sqlite:///./openmemory.db
 # 用户标识
 USER=default_user
 
 # Milvus 向量数据库配置（独立服务）
-MILVUS_URL=http://localhost:19530
+MILVUS_URL=http://21.6.186.148:19530
 ```
 
 #### ② Server 模块环境变量
@@ -170,7 +170,7 @@ MILVUS_URL=http://localhost:19530
 OPENAI_API_KEY=
 
 # Neo4j 图数据库配置 (已启用)
-NEO4J_URI=bolt://localhost:7687
+NEO4J_URI=bolt://21.6.186.148:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=mem0graph
 
@@ -179,7 +179,7 @@ NEO4J_PASSWORD=mem0graph
 POSTGRES_COLLECTION_NAME=memories
 
 # Ollama 配置 (本地服务)
-OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_BASE_URL=http://21.6.186.148:11434
 
 # 历史记录数据库路径
 HISTORY_DB_PATH=./history/history.db
@@ -190,7 +190,7 @@ HISTORY_DB_PATH=./history/history.db
 文件路径: `openmemory/ui/.env`
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8765
+NEXT_PUBLIC_API_URL=http://21.6.186.148:8765
 NEXT_PUBLIC_USER_ID=default_user
 ```
 
@@ -218,7 +218,7 @@ ss -tlnp | grep 19530
 
 ```bash
 # 检查 Ollama 是否已运行
-curl -s http://localhost:11434/api/tags | head -20
+curl -s http://21.6.186.148:11434/api/tags | head -20
 
 # 如果未运行，启动 Ollama
 ollama serve &
@@ -257,7 +257,7 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8765
 nohup python -m uvicorn main:app --host 0.0.0.0 --port 8765 > /tmp/openmemory-api.log 2>&1 &
 
 # 验证启动成功
-curl -s http://localhost:8765/docs | head -5
+curl -s http://21.6.186.148:8765/docs | head -5
 ```
 
 ### 步骤 5：启动前端 UI
@@ -285,9 +285,9 @@ nohup pnpm start > /tmp/openmemory-ui.log 2>&1 &
 | **Swagger API 文档** | `http://<服务器IP>:8765/docs` | OpenMemory API 交互式文档 |
 | **ReDoc API 文档** | `http://<服务器IP>:8765/redoc` | OpenMemory API 阅读式文档 |
 | **Neo4j Browser** | `http://<服务器IP>:7474` | Neo4j 图数据库管理界面 |
-| **Ollama API** | `http://localhost:11434` | Ollama 本地 API（仅本机访问） |
+| **Ollama API** | `http://21.6.186.148:11434` | Ollama 本地 API（仅本机访问） |
 
-> 💡 如果在本机访问，将 `<服务器IP>` 替换为 `localhost`。
+> 💡 如果在本机访问，将 `<服务器IP>` 替换为 `21.6.186.148`。
 
 ---
 
@@ -315,7 +315,7 @@ fi
 
 # 2. 检查并启动 Ollama
 echo "[2/5] 检查 Ollama..."
-if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+if curl -s http://21.6.186.148:11434/api/tags > /dev/null 2>&1; then
     echo "  ✅ Ollama 已运行"
 else
     echo "  ⏳ 启动 Ollama..."
@@ -359,9 +359,9 @@ fi
 
 echo ""
 echo "========== 启动完成 =========="
-echo "前端界面:       http://localhost:3000"
-echo "API 文档:       http://localhost:8765/docs"
-echo "Neo4j Browser:  http://localhost:7474"
+echo "前端界面:       http://21.6.186.148:3000"
+echo "API 文档:       http://21.6.186.148:8765/docs"
+echo "Neo4j Browser:  http://21.6.186.148:7474"
 echo "================================"
 ```
 
@@ -429,7 +429,7 @@ tail -f /opt/neo4j/logs/neo4j.log
 
 ```bash
 # 检查 Ollama 服务状态
-curl http://localhost:11434/api/tags
+curl http://21.6.186.148:11434/api/tags
 
 # 重新下载模型
 ollama pull qwen3.5:4b
@@ -453,11 +453,11 @@ cypher-shell -u neo4j -p mem0graph "RETURN 1"
 
 ```bash
 # 确认 API 服务正在运行
-curl http://localhost:8765/docs
+curl http://21.6.186.148:8765/docs
 
 # 检查前端 .env 配置
 cat /data/workspace/anydev-mem0/openmemory/ui/.env
-# 确保 NEXT_PUBLIC_API_URL=http://localhost:8765
+# 确保 NEXT_PUBLIC_API_URL=http://21.6.186.148:8765
 ```
 
 ### 7.6 数据库迁移（首次或更新后）

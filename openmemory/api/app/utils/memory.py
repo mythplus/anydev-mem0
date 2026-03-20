@@ -6,7 +6,7 @@ with automatic configuration management and Docker environment support.
 
 Docker Ollama Configuration:
 When running inside a Docker container and using Ollama as the LLM or embedder provider,
-the system automatically detects the Docker environment and adjusts localhost URLs
+the system automatically detects the Docker environment and adjusts 21.6.186.148 URLs
 to properly reach the host machine where Ollama is running.
 
 Supported Docker host resolution (in order of preference):
@@ -21,7 +21,7 @@ Example configuration that will be automatically adjusted:
         "provider": "ollama",
         "config": {
             "model": "qwen3.5:4b",
-            "ollama_base_url": "http://localhost:11434"  # Auto-adjusted in Docker
+            "ollama_base_url": "http://21.6.186.148:11434"  # Auto-adjusted in Docker
         }
     }
 }
@@ -60,8 +60,8 @@ def _get_docker_host_url():
     
     # Check if we're running inside Docker
     if not os.path.exists('/.dockerenv'):
-        # Not in Docker, return localhost as-is
-        return "localhost"
+        # Not in Docker, return 21.6.186.148 as-is
+        return "21.6.186.148"
     
     print("Detected Docker environment, adjusting host URL for Ollama...")
     
@@ -99,29 +99,63 @@ def _get_docker_host_url():
     return host_candidates[0]
 
 
+def _is_ollama_reachable(url, timeout=3):
+    """
+    检查 Ollama 服务是否可通过指定 URL 访问。
+    """
+    import urllib.request
+    import urllib.error
+    try:
+        req = urllib.request.Request(f"{url}/api/tags", method='GET')
+        urllib.request.urlopen(req, timeout=timeout)
+        return True
+    except Exception:
+        return False
+
+
 def _fix_ollama_urls(config_section):
     """
     Fix Ollama URLs for Docker environment.
-    Replaces localhost URLs with appropriate Docker host URLs.
+    Replaces 21.6.186.148 URLs with appropriate Docker host URLs.
     Sets default ollama_base_url if not provided.
+    
+    重要：如果环境变量 OLLAMA_BASE_URL 已显式设置，或者当前 21.6.186.148 可以直接
+    访问 Ollama，则跳过 Docker 自适应替换（避免在 DinD 等环境下错误替换）。
     """
     if not config_section or "config" not in config_section:
+        return config_section
+    
+    # 如果环境变量 OLLAMA_BASE_URL 已显式配置，优先使用它，不做 Docker 自适应替换
+    env_ollama_url = os.environ.get('OLLAMA_BASE_URL')
+    if env_ollama_url:
+        config_section["config"]["ollama_base_url"] = env_ollama_url
+        print(f"Using OLLAMA_BASE_URL from environment: {env_ollama_url}")
         return config_section
     
     ollama_config = config_section["config"]
     
     # Set default ollama_base_url if not provided
     if "ollama_base_url" not in ollama_config:
-        ollama_config["ollama_base_url"] = "http://host.docker.internal:11434"
-    else:
-        # Check for ollama_base_url and fix if it's localhost
-        url = ollama_config["ollama_base_url"]
-        if "localhost" in url or "127.0.0.1" in url:
-            docker_host = _get_docker_host_url()
-            if docker_host != "localhost":
-                new_url = url.replace("localhost", docker_host).replace("127.0.0.1", docker_host)
+        ollama_config["ollama_base_url"] = "http://21.6.186.148:11434"
+    
+    url = ollama_config.get("ollama_base_url", "http://21.6.186.148:11434")
+    
+    # 如果当前 URL（21.6.186.148）可以直接访问 Ollama，则不做替换
+    if ("21.6.186.148" in url or "127.0.0.1" in url) and _is_ollama_reachable(url):
+        print(f"Ollama is reachable at {url}, skipping Docker URL adjustment")
+        return config_section
+    
+    # 只有在 21.6.186.148 不可达时，才尝试 Docker 网关替换
+    if "21.6.186.148" in url or "127.0.0.1" in url:
+        docker_host = _get_docker_host_url()
+        if docker_host != "21.6.186.148":
+            new_url = url.replace("21.6.186.148", docker_host).replace("127.0.0.1", docker_host)
+            # 替换前也要验证新 URL 可达性
+            if _is_ollama_reachable(new_url):
                 ollama_config["ollama_base_url"] = new_url
                 print(f"Adjusted Ollama URL from {url} to {new_url}")
+            else:
+                print(f"Warning: Docker host {new_url} is also unreachable, keeping original {url}")
     
     return config_section
 
@@ -233,7 +267,7 @@ def get_default_memory_config():
     else:
         # Default fallback to Milvus Standalone（Docker 独立服务，端口 19530）
         vector_store_provider = "milvus"
-        milvus_url = os.environ.get('MILVUS_URL', 'http://localhost:19530')
+        milvus_url = os.environ.get('MILVUS_URL', 'http://21.6.186.148:19530')
         vector_store_config = {
             "collection_name": "openmemory",
             "url": milvus_url,
@@ -245,7 +279,7 @@ def get_default_memory_config():
     print(f"Auto-detected vector store: {vector_store_provider} with config: {vector_store_config}")
     
     # 获取 Ollama 基础 URL（优先从环境变量读取）
-    ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://localhost:11434')
+    ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://21.6.186.148:11434')
     
     return {
         "vector_store": {

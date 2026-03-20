@@ -7,7 +7,7 @@ echo "🚀 Starting OpenMemory installation..."
 # Set environment variables
 OPENAI_API_KEY="${OPENAI_API_KEY:-}"
 USER="${USER:-$(whoami)}"
-NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8765}"
+NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://21.6.186.148:8765}"
 
 if [ -z "$OPENAI_API_KEY" ]; then
   echo "❌ OPENAI_API_KEY not set. Please run with: curl -sL https://raw.githubusercontent.com/mem0ai/mem0/main/openmemory/run.sh | OPENAI_API_KEY=your_api_key bash"
@@ -382,12 +382,12 @@ docker run -d \
   -e NEXT_PUBLIC_USER_ID="$USER" \
   mem0/openmemory-ui:latest
 
-echo "✅ Backend:  http://localhost:8765"
-echo "✅ Frontend: http://localhost:$FRONTEND_PORT"
+echo "✅ Backend:  http://21.6.186.148:8765"
+echo "✅ Frontend: http://21.6.186.148:$FRONTEND_PORT"
 
 # Open the frontend URL in the default web browser
 echo "🌐 Opening frontend in the default browser..."
-URL="http://localhost:$FRONTEND_PORT"
+URL="http://21.6.186.148:$FRONTEND_PORT"
 
 if command -v xdg-open > /dev/null; then
   xdg-open "$URL"        # Linux

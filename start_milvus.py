@@ -70,7 +70,7 @@ def main():
         server.start()
 
         print(f"✅ Milvus 服务已启动，监听: {address}")
-        print(f"   连接 URL: http://localhost:{PORT}")
+        print(f"   连接 URL: http://21.6.186.148:{PORT}")
         print()
         print("按 Ctrl+C 停止服务...")
         print()

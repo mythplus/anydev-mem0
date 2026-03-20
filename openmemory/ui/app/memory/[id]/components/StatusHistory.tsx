@@ -26,7 +26,7 @@ export function StatusHistory({ memoryId }: StatusHistoryProps) {
   const { t } = useLanguage();
   const [histories, setHistories] = useState<StatusHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
+  const URL = process.env.NEXT_PUBLIC_API_URL || "http://21.6.186.148:8765";
 
   useEffect(() => {
     const loadHistory = async () => {

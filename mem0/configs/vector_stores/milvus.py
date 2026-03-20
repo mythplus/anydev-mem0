@@ -20,7 +20,7 @@ class MetricType(str, Enum):
 
 
 class MilvusDBConfig(BaseModel):
-    url: str = Field("http://localhost:19530", description="Full URL for Milvus/Zilliz server")
+    url: str = Field("http://21.6.186.148:19530", description="Full URL for Milvus/Zilliz server")
     token: str = Field(None, description="Token for Zilliz server / local setup defaults to None.")
     collection_name: str = Field("mem0", description="Name of the collection")
     embedding_model_dims: int = Field(1536, description="Dimensions of the embedding model")

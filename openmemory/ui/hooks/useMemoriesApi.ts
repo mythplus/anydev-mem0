@@ -108,7 +108,7 @@ export const useMemoriesApi = (): UseMemoriesApiReturn => {
   const memories = useSelector((state: RootState) => state.memories.memories);
   const selectedMemory = useSelector((state: RootState) => state.memories.selectedMemory);
 
-  const URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8765";
+  const URL = process.env.NEXT_PUBLIC_API_URL || "http://21.6.186.148:8765";
 
   /**
    * 刷新全局统计数据（记忆总数、应用总数等），用于记忆增删改后同步更新仪表盘和应用页面的数据
