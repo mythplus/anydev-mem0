@@ -413,10 +413,12 @@ async def get_memory(
     db: Session = Depends(get_db)
 ):
     memory = get_memory_or_404(db, memory_id)
+    # 数据库存储的是 UTC naive datetime，需要附加时区信息再转换
+    created_at_utc = memory.created_at.replace(tzinfo=timezone.utc) if memory.created_at.tzinfo is None else memory.created_at
     return {
         "id": memory.id,
         "text": memory.content,
-        "created_at": int(memory.created_at.timestamp()),
+        "created_at": int(created_at_utc.timestamp()),
         "state": memory.state.value,
         "app_id": memory.app_id,
         "app_name": memory.app.name if memory.app else None,

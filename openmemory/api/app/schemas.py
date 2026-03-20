@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 
@@ -54,6 +54,10 @@ class MemoryResponse(BaseModel):
     @validator('created_at', pre=True)
     def convert_to_epoch(cls, v):
         if isinstance(v, datetime):
+            # 数据库存储的是 UTC 时间但没有时区信息(naive datetime)
+            # 需要先附加 UTC 时区再转换为时间戳，否则 Python 会当作本地时间处理
+            if v.tzinfo is None:
+                v = v.replace(tzinfo=timezone.utc)
             return int(v.timestamp())
         return v
 
